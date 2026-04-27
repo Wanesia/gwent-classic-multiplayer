@@ -720,7 +720,7 @@ class CardContainer {
 	addCardElement(card, index){
 		if (this.elem){
 			if (index === this.cards.length)
-				thise.elem.appendChild(card.elem);
+				this.elem.appendChild(card.elem);
 			else
 				this.elem.insertBefore(card.elem, this.elem.children[index]);
 		}
@@ -1091,7 +1091,7 @@ class Row extends CardContainer {
 		while(this.special)
 			this.removeCard(this.special);
 		while(this.elem_special.firstChild)
-			this.elem_special.removeChild(this.elem_speical.firstChild);
+			this.elem_special.removeChild(this.elem_special.firstChild);
 		this.total = 0;
 		//["rain","fog","frost"].forEach( w => this.removeOverlay(w) );
 		this.effects = {weather:false, bond: {}, morale: 0, horn: 0, mardroeme: 0};
