@@ -99,6 +99,10 @@ var ability_dict = {
 		placed: async (card) => {
 			let i = card.name.indexOf('-');
 			let cardName = i === -1 ?  card.name : card.name.substring(0, i);
+			if (card['muster'])
+			{
+				cardName = card['muster'];
+			}
 			let pred = c => c.name.startsWith(cardName);
 			let units = card.holder.hand.getCards(pred).map(x => [card.holder.hand, x])
 			.concat(card.holder.deck.getCards(pred).map( x => [card.holder.deck, x] ) );
