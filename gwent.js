@@ -1494,6 +1494,10 @@ class Card {
 		this.abilities = (card_data.ability === "") ? [] : card_data.ability.split(" ");
 		this.row = (card_data.deck === "weather") ? card_data.deck : card_data.row;
 		this.filename = card_data.filename;
+		if (card_data.muster)
+		{
+			this.muster = card_data.muster;
+		}
 		this.placed = [];
 		this.removed = [];
 		this.activated = [];
