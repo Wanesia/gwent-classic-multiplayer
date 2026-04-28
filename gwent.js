@@ -1831,6 +1831,12 @@ class UI {
 	
 	// Sets up description window for a card
 	setDescription(card, desc){
+		if (!card)
+		{
+			desc.children[1].innerHTML = "NULL";
+			desc.children[2].innerHTML = "";
+			return;
+		}
 		if (card.hero || card.row === "agile" || card.abilities.length > 0 || card.faction === "faction") {
 			desc.classList.remove("hide");
 			let str = card.row === "agile" ? "agile" : "";
@@ -1887,6 +1893,8 @@ class UI {
 			if (player_op.controller instanceof ControllerAI)
 				for (let i=0; i<count; ++i){
 					let cards = container.cards.reduce((a,c,i) => !predicate || predicate(c) ? a.concat([i]) : a, []);
+					if (cards.length === 0)
+						break;
 					await action(container, cards[randomInt(cards.length)]);
 				}
 			return;
@@ -2087,6 +2095,10 @@ class Carousel {
 	// Updates the visuals of the current selection of cards
 	update(){
 		this.indices = this.container.cards.reduce((a,c,i)=> (!this.predicate || this.predicate(c)) ? a.concat([i]) : a, []);
+		if (this.indices.length <= 0)
+		{
+			return this.exit();
+		}
 		if (this.index >= this.indices.length)
 			this.index =  this.indices.length-1;
 		for (let i=0; i<this.previews.length; i++) {
