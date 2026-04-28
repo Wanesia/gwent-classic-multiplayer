@@ -923,7 +923,7 @@ class Row extends CardContainer {
 		this.elem_special = elem.getElementsByClassName("row-special")[0];
 		this.special = null;
 		this.total = 0;
-		this.effects = {weather:false, bond: {}, morale: 0, horn: 0, mardroeme: 0};
+		this.effects = {weather:false, halfWeather: false, bond: {}, morale: 0, horn: 0, mardroeme: 0};
 		this.elem.addEventListener("click", () => ui.selectRow(this), true);
 		this.elem_special.addEventListener("click", () => ui.selectRow(this), false, true);
 	}
@@ -1032,8 +1032,11 @@ class Row extends CardContainer {
 		let total = card.basePower;
 		if (card.hero)
 			return total;
-		if (this.effects.weather) 
-			total = Math.min(1, total);
+		if (this.effects.weather)
+		{
+			const weatherMin = this.effects.halfWeather ? Math.floor(total/2) : 1;
+			total = Math.min(weatherMin, total);
+		}
 		if (game.doubleSpyPower && card.abilities.includes("spy"))
 			total *= 2;
 		let bond = this.effects.bond[card.id()];

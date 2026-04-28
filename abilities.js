@@ -408,6 +408,6 @@ var ability_dict = {
 	},
 	king_bran: {
 		description: "Units only lose half their Strength in bad weather conditions.",
-		placed: card => board.row.filter((c,i) => card.holder === player_me ^ i<3).forEach(r => r.halfWeather = true)
+		placed: card => board.row.filter((c,i) => card.holder === player_me ^ i<3).forEach(r => r.effects.halfWeather = true)
 	}
 };
