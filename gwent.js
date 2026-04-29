@@ -2490,7 +2490,7 @@ class DeckMaker {
 				return false
 			}
 			if (![deck.faction, "neutral", "special", "weather"].includes(card.deck)) {
-				warning += "'" + card.name + "' cannot be used in a deck of faction type '" + deck.faciton +"'\n";
+				warning += "'" + card.name + "' cannot be used in a deck of faction type '" + deck.faction +"'\n";
 				return false;
 			}
 			if (card.count < c[1]) {
@@ -2647,7 +2647,7 @@ function smallURL(name, ext="jpg"){
 	return imgURL("sm/" + name, ext);
 }
 function imgURL(path, ext) {
-	return "url('img/" + path + "." + ext;
+	return "url('img/" + path + "." + ext + "')";
 }
 
 // Returns true if n is an Number
