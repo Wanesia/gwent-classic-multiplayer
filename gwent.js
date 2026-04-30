@@ -1940,8 +1940,8 @@ class UI {
 	}
 	
 	// Displays a custom confirmation menu 
-	async popup(yesName, yes, noName, no, title, description) {
-		let p = new Popup(yesName, yes, noName, no, title, description);
+	async popup(yesName, yes, noName, no, title, description, alpha = .95) {
+		let p = new Popup(yesName, yes, noName, no, title, description, alpha);
 		await sleepUntil( () => !Popup.curr) 
 	}
 	
@@ -2162,7 +2162,7 @@ class Carousel {
 
 // Custom confirmation windows
 class Popup {
-	constructor(yesName, yes, noName, no, header, description){
+	constructor(yesName, yes, noName, no, header, description, alpha = .95){
 		this.yes = yes ? yes : ()=>{};
 		this.no = no ? no : ()=>{};
 		
@@ -2172,6 +2172,9 @@ class Popup {
 		main.children[1].innerHTML = description ? description : "";
 		main.children[2].children[0].innerHTML = (yesName) ? yesName : "Yes";
 		main.children[2].children[1].innerHTML = (noName) ? noName : "No";
+
+		const bgColor = new RGBA(10, 10, 10, alpha);
+		this.elem.style.backgroundColor = bgColor.toString();
 		
 		this.elem.classList.remove("hide");
 		Popup.setCurrent(this);
