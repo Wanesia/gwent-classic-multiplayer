@@ -215,5 +215,6 @@ var card_dict = JSON.parse(
 + ', { "name": "King Bran", "id": "", "deck": "skellige", "row": "leader", "strength": "", "ability": "king_bran", "filename": "king_bran", "count": "0" }'
 + ', { "name": "Schirru", "id": "", "deck": "scoiatael", "row": "siege", "strength": "8", "ability": "scorch_s", "filename": "schirru", "count": "1" }'
 + ', { "name": "Roach", "id": "", "deck": "neutral", "row": "close", "strength": "3", "ability": "", "filename": "roach", "count": "1" }'
++ ', { "name": "Ballista", "id": "", "deck": "realms", "row": "siege", "strength": "6", "ability": "", "filename": "ballista_1", "count": "1" }'
 + ']'
 );
