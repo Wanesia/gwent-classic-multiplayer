@@ -209,7 +209,7 @@ var card_dict = JSON.parse(
 + ', { "name": "Transformed Vildkaarl", "id": "", "deck": "skellige", "row": "close", "strength": "14", "ability": "morale", "filename": "vildkaarl", "count": "0" }'
 + ', { "name": "Transformed Young Vildkaarl", "id": "", "deck": "skellige", "row": "ranged", "strength": "8", "ability": "bond", "filename": "young_vildkaarl", "count": "0" }'
 + ', { "name": "Udalryk", "id": "", "deck": "skellige", "row": "close", "strength": "4", "ability": "", "filename": "udalryk", "count": "1" }'
-+ ', { "name": "War Longship", "id": "", "deck": "skellige", "row": "siege", "strength": "6", "ability": "bond", "filename": "war_longship", "count": "2" }'
++ ', { "name": "War Longship", "id": "", "deck": "skellige", "row": "siege", "strength": "6", "ability": "bond", "filename": "war_longship", "count": "3" }'
 + ', { "name": "Young Berserker", "id": "", "deck": "skellige", "row": "ranged", "strength": "2", "ability": "berserker", "filename": "young_berserker", "count": "3" }'
 + ', { "name": "Crach an Craite", "id": "", "deck": "skellige", "row": "leader", "strength": "", "ability": "crach_an_craite", "filename": "crach_an_craite", "count": "0" }'
 + ', { "name": "King Bran", "id": "", "deck": "skellige", "row": "leader", "strength": "", "ability": "king_bran", "filename": "king_bran", "count": "0" }'
