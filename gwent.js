@@ -2516,6 +2516,36 @@ class DeckMaker {
 	}
 }
 
+class GameEvent
+{
+	constructor(id, signature)
+	{
+		this.id = id;
+		this.signature = signature;
+		if (!signature)
+		{
+			throw "Must pass in a signature as an array of param names";
+		}
+	}
+	bind(listenter)
+	{
+		window.addEventListener(this.id, listenter);
+	}
+	unbind(listenter)
+	{
+		window.removeEventListener(this.id, listenter);
+	}
+	dispatch(...params)
+	{
+		const detail = {};
+		for (let i = 0; i < params.length && i < this.signature.length; i++)
+		{
+			detail[this.signature[i]] = params[i];
+		}
+		window.dispatchEvent(new CustomEvent(this.id, {detail: detail}));
+	}
+}
+
 // Translates a card between two containers
 async function translateTo(card, container_source, container_dest){
 	if (!container_dest || !container_source)
