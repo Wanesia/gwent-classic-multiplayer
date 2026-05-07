@@ -939,8 +939,10 @@ class Row extends CardContainer {
 			this.resize();
 		}
 		this.updateState(card, true);
+		game.placedEffectsActive = true;
 		for (let x of card.placed) 
 			await x(card, this);
+		game.placedEffectsActive = false;
 		card.elem.classList.add("noclick");
 		await sleep(600);
 		this.updateScore();
@@ -1283,6 +1285,8 @@ class Game {
 		
 		this.randomRespawn = false;
 		this.doubleSpyPower = false;
+
+		this.placedEffectsActive = false; //TODO replace with propper game state
 		
 		weather.reset();
 		board.row.forEach(r => r.reset());
@@ -1775,6 +1779,10 @@ class UI {
 	
 	// Called when the player selects a selectable CardContainer
 	async selectRow(row){
+		if (game.placedEffectsActive)
+		{
+			return;
+		}
 		this.lastRow = row;
 		if (this.previewCard === null) {
 			await ui.viewCardsInContainer(row);
