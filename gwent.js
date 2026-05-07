@@ -1779,6 +1779,7 @@ class UI {
 	
 	// Called when the player selects a selectable CardContainer
 	async selectRow(row){
+		EventManager.rowSelected.dispatch(row, player_me);
 		if (game.placedEffectsActive)
 		{
 			return;
@@ -1808,6 +1809,7 @@ class UI {
 	// Called when the client cancels out of a card-preview
 	cancel(){
 		this.hidePreview();
+		EventManager.previewCancelled.dispatch();
 	}
 	
 	// Displays a card preview then enables and highlights potential card destinations
@@ -2554,6 +2556,18 @@ class GameEvent
 	}
 }
 
+class EventManager 
+{
+	static rowSelected;
+	static previewCancelled;
+
+	constructor()
+	{
+		EventManager.rowSelected = new GameEvent("row-selected", ['row', 'player'])
+		EventManager.previewCancelled = new GameEvent("preview-cancelled", []);
+	}
+}
+
 // Translates a card between two containers
 async function translateTo(card, container_source, container_dest){
 	if (!container_dest || !container_source)
@@ -2735,6 +2749,7 @@ var ui = new UI();
 var board = new Board();
 var weather = new Weather();
 var game = new Game();
+const eventManager = new EventManager(); 
 var player_me, player_op;
 
 ui.enablePlayer(false);
