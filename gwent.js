@@ -1813,10 +1813,19 @@ class UI {
 	}
 	
 	// Displays a card preview then enables and highlights potential card destinations
-	showPreview(card) {
+	showPreview(card, allowClose = true) {
 		this.showPreviewVisuals(card);
 		this.setSelectable(card, true);
-		document.getElementById("click-background").classList.remove("noclick");
+		if (allowClose)
+		{
+			document.getElementById("click-background").classList.remove("noclick");
+		}
+		else
+		{
+			document.getElementById('leader-me').classList.add("noclick");
+			document.getElementById('pass-button').classList.add("noclick");
+			player_me.hand.cards.forEach( c => c.elem.classList.add("noclick") );
+		}
 	}
 	
 	// Sets up the graphics and description for a card preview
@@ -1832,6 +1841,8 @@ class UI {
 	hidePreview(){
 		document.getElementById("click-background").classList.add("noclick");
 		player_me.hand.cards.forEach( c => c.elem.classList.remove("noclick") );
+		document.getElementById('leader-me').classList.remove("noclick");
+		document.getElementById('pass-button').classList.remove("noclick");
 		
 		this.preview.classList.add("hide");
 		this.setSelectable(null, false);
