@@ -1038,6 +1038,12 @@ class Row extends CardContainer {
 		card.setPower(total);
 		return total;
 	}
+
+	// Calculate total row score without updating
+	calcScore()
+	{
+		return this.cards.reduce((sum, card) => sum + this.calcCardScore(card), 0);
+	}
 	
 	// Calculates the current power of a card affected by row affects
 	calcCardScore(card) {

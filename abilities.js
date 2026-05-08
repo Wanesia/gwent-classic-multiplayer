@@ -414,22 +414,51 @@ var ability_dict = {
 			let close = board.getRow(card, "close");
 			let ranged =  board.getRow(card, "ranged");
 			let cards = ability_dict["francesca_hope"].helper(card);
-			await Promise.all(cards.map(async p => await board.moveTo(p.card, p.row === close ? ranged : close, p.row) ) );
 			
+			await Promise.all(cards.map(async p => await board.moveTo(p.card, p.row === close ? ranged : close, p.row) ) );
 		},
 		weight: card => {
 			let cards = ability_dict["francesca_hope"].helper(card);
 			return cards.reduce((a,c) => a + c.weight, 0);
 		},
 		helper: card => {
-			let close = board.getRow(card, "close");
-			let ranged =  board.getRow(card, "ranged");
-			return validCards(close).concat( validCards(ranged) );
-			function validCards(cont) {
-				return cont.findCards(c => c.row === "agile").filter(c => dif(c,cont) > 0).map(c => ({card:c, row:cont, weight:dif(c,cont)}))
-			}
-			function dif(card, source) {
-				return (source === close ? ranged : close).calcCardScore(card) - card.power;
+			const close = board.getRow(card, "close");
+			const ranged = board.getRow(card, "ranged");
+			const agileCards = close.cards.filter(c => c.row === "agile").concat(ranged.cards.filter(c => c.row === "agile"));
+			const notAgilePred = c => c.row !== "agile";
+			const closeNorm = close.getVirtualCopy(notAgilePred);
+			const rangedNorm = ranged.getVirtualCopy(notAgilePred);
+			const {score, pattern} = findBest(closeNorm, rangedNorm, agileCards);
+
+			// filter for only cards that need to change row and return
+			return agileCards.map((c)=> { return {card: c, row: close.cards.includes(c) ? close : ranged}; })
+				.filter((pair, i) => (pair.row === close) !== (pattern[i]===0));
+
+			function findBest(close, ranged, agile, depth = 0, pattern=null)
+			{
+				if (agile.length === 0)
+					return null;
+				else if (agile.length === depth)
+				{
+					const closeCopy = close.getVirtualCopy();
+					const rangedCopy = ranged.getVirtualCopy();
+					for (let i=0; i <agile.length; ++i)
+					{
+						const row = pattern[i] === 0 ? closeCopy : rangedCopy;
+						row.cards.push(agile[i]);
+						row.updateState(agile[i], true);
+					}
+					return {score: closeCopy.calcScore() + rangedCopy.calcScore(), pattern: pattern};
+				}
+				if (depth === 0)
+				{
+					pattern = Array(agile.length).fill(0);
+				}
+				const left = findBest(close, ranged, agile, depth + 1, pattern)
+				const modPattern = pattern.slice();
+				modPattern[depth] = 1;
+				const right = findBest(close, ranged, agile, depth + 1, modPattern);
+				return left.score >= right.score ? left : right;
 			}
 		}
 	},
