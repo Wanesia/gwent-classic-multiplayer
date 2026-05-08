@@ -134,16 +134,63 @@ var ability_dict = {
 				return;
 			let wrapper = {card : null};
 			if (game.randomRespawn) {
-				 wrapper.card = grave.findCardsRandom(c => c.isUnit())[0];
+				const cards = grave.findCardsRandom(c => c.isUnit());
+				if (cards.length > 0)
+					wrapper.card = cards[0];
 			} else if (card.holder.controller instanceof ControllerAI)
 				wrapper.card =  card.holder.controller.medic(card, grave);
 			else
 				await ui.queueCarousel(card.holder.grave, 1, (c, i) => wrapper.card=c.cards[i], c => c.isUnit(), true);
-			let res = wrapper.card;
-			grave.removeCard(res);
-			grave.addCard(res);
-			await res.animate("medic");
-			await res.autoplay(grave);
+			if (wrapper.card)
+			{
+				// move card visual to top of grave
+				const res = wrapper.card;
+				grave.removeCard(res);
+				grave.addCard(res);
+				let selectedRow = null;
+				const isAgile = wrapper.card.row === "agile";
+				if (isAgile)
+				{
+					if (card.holder.controller instanceof ControllerAI)
+					{
+						// TODO select optimal row
+						const rowName = Math.random() < 0.5 ? "close" : "ranged";
+						selectedRow = board.getRow(null, rowName, player_op);
+					}
+					else
+					{
+						ui.setSelectable(null, false);
+						ui.showPreview(wrapper.card, false);
+						ui.enablePlayer(true);
+						let bRowSelected = false;
+						const rowSelect = event => {
+							const {row, player} = event.detail;
+							bRowSelected = true;
+							selectedRow = row;
+						};
+						EventManager.rowSelected.bind(rowSelect);
+						EventManager.previewCancelled.bind(rowSelect);
+						await sleepUntil(() => bRowSelected === true);
+						EventManager.rowSelected.unbind(rowSelect);
+						EventManager.previewCancelled.unbind(rowSelect);
+						ui.hidePreview();
+						if (!selectedRow)
+						{
+							return;
+						}
+					}
+
+				}
+				await res.animate("medic");
+				if (isAgile)
+				{
+					await board.moveTo(res, selectedRow, grave);
+				}
+				else
+				{
+					await res.autoplay(grave);
+				}
+			}
 		}
 	},
 	morale: {
