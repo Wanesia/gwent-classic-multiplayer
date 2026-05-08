@@ -437,7 +437,7 @@ var ability_dict = {
 			function findBest(close, ranged, agile, depth = 0, pattern=null)
 			{
 				if (agile.length === 0)
-					return null;
+					return {score: -1, pattern: []};
 				else if (agile.length === depth)
 				{
 					const closeCopy = close.getVirtualCopy();
