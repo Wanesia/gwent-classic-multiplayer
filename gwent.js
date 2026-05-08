@@ -918,14 +918,26 @@ class Hand extends CardContainer {
 // Contains active cards and effects. Calculates the current score of each card and the row.
 class Row extends CardContainer {
 	constructor(elem) {
-		super(elem.getElementsByClassName("row-cards")[0]);
+		super(elem?.getElementsByClassName("row-cards")[0]);
 		this.elem_parent = elem;
-		this.elem_special = elem.getElementsByClassName("row-special")[0];
+		this.elem_special = elem?.getElementsByClassName("row-special")[0];
 		this.special = null;
 		this.total = 0;
 		this.effects = {weather:false, halfWeather: false, bond: {}, morale: 0, horn: 0, mardroeme: 0};
-		this.elem.addEventListener("click", () => ui.selectRow(this), true);
-		this.elem_special.addEventListener("click", () => ui.selectRow(this), false, true);
+		this.elem?.addEventListener("click", () => ui.selectRow(this), true);
+		this.elem_special?.addEventListener("click", () => ui.selectRow(this), false, true);
+	}
+	
+	// Returns a copy of the row
+	getVirtualCopy(predicate = c=>true)
+	{
+		const copy = new Row(null);
+		copy.effects = {...this.effects};
+		copy.effects.bond = {...this.effects.bond};
+		copy.cards = this.cards.filter(predicate);
+		// remove status of filtered out cards
+		this.cards.filter(c=>!predicate(c)).forEach(c=>copy.updateState(c, false));
+		return copy;
 	}
 	
 	// Override
