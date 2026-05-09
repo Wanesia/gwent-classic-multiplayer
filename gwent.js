@@ -2555,6 +2555,44 @@ class DeckMaker {
 	}
 }
 
+class ToggleOption
+{
+	constructor(key, enableByDefault = true, action = ()=>{})
+	{
+		this.key = key;
+		this.enabled = localStorage?.getItem(this.key) | enableByDefault;
+		this.action = action;
+	}
+	isEnabled() { return this.enabled; }
+	setEnabled(enable)
+	{
+		if (this.enabled === enable)
+		{
+			return;
+		}
+		this.enabled = enable;
+		if (localStorage)
+		{
+			localStorage.setItem(this.key, this.enabled);
+		}
+		this.action(this.enabled);
+	}
+	enable() { this.setEnabled(true); }
+	disable() { this.setEnabled(false); }
+	toggle() { this.setEnabled(!this.enabled); }
+}
+
+class Settings
+{
+	static music = new ToggleOption("music", true);
+	static notifications = new ToggleOption("notifications", true);
+	constructor()
+	{
+		setTimeout(this.initialize, 100);
+	}
+	
+}
+
 class GameEvent
 {
 	constructor(id, signature)
