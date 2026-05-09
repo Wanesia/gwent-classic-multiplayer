@@ -1340,7 +1340,8 @@ class Game {
 	
 	// Sets initializes player abilities, player hands and redraw
 	async startGame() {
-		ui.toggleMusic_elem.classList.remove("music-customization");
+		ui.toggleMusic_elem.classList.remove("deck-menu");
+		ui.toggleNotifications_elem.classList.remove("deck-menu");
 		this.initPlayers(player_me, player_op);
 		await Promise.all([...Array(10).keys()].map( async () => {
 			await player_me.deck.draw(player_me.hand);
@@ -1484,7 +1485,8 @@ class Game {
 		this.reset();
 		player_me.reset();
 		player_op.reset();
-		ui.toggleMusic_elem.classList.add("music-customization");
+		ui.toggleMusic_elem.classList.add("deck-menu");
+		ui.toggleNotifications_elem.classList.add("deck-menu");
 		this.endScreen.classList.add("hide");
 		document.getElementById("deck-customization").classList.remove("hide");
 	}
@@ -1723,6 +1725,10 @@ class UI {
 		this.toggleMusic_elem = document.getElementById("toggle-music");
 		this.toggleMusic_elem.classList.add("fade");
 		this.toggleMusic_elem.addEventListener("click", () => this.toggleMusic(), false);
+		this.toggleNotifications_elem = document.getElementById("toggle-notifications");
+		this.toggleNotifications_elem.addEventListener("click", () => this.toggleNotifications(), false);
+		if (!Settings.notifications.isEnabled())
+			this.toggleNotifications_elem.classList.add("fade");
 	}
 	
 	// Enables or disables client interration
@@ -1763,6 +1769,19 @@ class UI {
 		} else {
 			this.youtube.pauseVideo();
 			this.toggleMusic_elem.classList.add("fade");
+		}
+	}
+
+	toggleNotifications() {
+		Settings.notifications.toggle();
+		const useNotificaitons = Settings.notifications.isEnabled();
+		if (useNotificaitons)
+		{
+			this.toggleNotifications_elem.classList.remove("fade");
+		}
+		else
+		{
+			this.toggleNotifications_elem.classList.add("fade");
 		}
 	}
 	
@@ -1900,6 +1919,8 @@ class UI {
 	
 	// Displayed a timed notification to the client
 	async notification(name, duration){
+		if (!Settings.notifications.isEnabled())
+			return;
 		if (!duration)
 			duration = 1200;
 		duration = Math.max(400, duration);

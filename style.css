@@ -77,7 +77,7 @@ html {
 
 #hand-op .card { position : absolute; }
 
-/* ----------- media player ------------------ */
+/* ----------- settings & media player ------------------ */
 
 #youtube {
 	position: fixed;
@@ -87,20 +87,44 @@ html {
 	z-index: -100;
 }
 
-#toggle-music {
+.text-button {
 	position: absolute;
-    top: 45.6vw;
-    left: 26vw;
-    width: 2vw;
-    height: 3vw;
-    font-size: 3vw;
 	color: goldenrod;
     text-shadow: 0 0 2vw black;
 	z-index: 86;
 }
-.music-customization { 
+.text-button:hover {
+	text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5);
+}
+
+#toggle-music {
+    top: 44vw;
+    left: 26vw;
+    width: 2vw;
+    height: 3vw;
+    font-size: 3vw;
+}
+#toggle-music.deck-menu { 
+	top: 45.6vw !important;
 	transform: translate(22.5vw, -0.5vw);
-}	
+}
+
+#toggle-notifications {
+    top: 48vw;
+    left: 26vw;
+    width: 2vw;
+    height: 2.5vw;
+    font-size: 2.5vw;
+}
+#toggle-notifications.deck-menu {
+	display: none !important;
+}
+
+#pass-button[data-title]:hover::after
+{
+	bottom: -2em;
+}
+
 
 /* ----------- notification bar ------------------ */
 
@@ -810,6 +834,9 @@ main { background-image: url('img/boardtest8.png'); }
 	border-radius: .5vw;
 	background-color: rgba(20,20,20,.9);
 }
+#pass-button:hover {
+	text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5);
+}
 
 /* ------------- middle pannel ------------------ */
 
@@ -1320,8 +1347,10 @@ main { background-image: url('img/boardtest8.png'); }
 
 .visible { display: visible; }
 .hide {display: none; }
-.fade {opacity: 0.2; filter: alpha(opacity=20); }
+.fade:not(.text-button) {opacity: 0.2; filter: alpha(opacity=20); }
+.text-button.fade { color: #daa52040 !important; }
 
 .noclick {
 	pointer-events: none;
 }
+
