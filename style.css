@@ -490,7 +490,7 @@ html {
     background-color: #4c390a66;
     border: .2vw solid #1d180b;
     border-radius: 1vw;
-    box-shadow: 0 0 2vw #6d5210;
+    box-shadow: 0 0 1vw #6d5210;
 }
 
 #end-screen button ::hover {
