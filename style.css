@@ -585,6 +585,11 @@ main { background-image: url('img/boardtest8.png'); }
 	justify-content:center;
 }
 
+.leader-box > .leader-container:hover {
+	box-shadow: 0 0 1vw goldenrod;
+	box-sizing: border-box;
+}
+
 .leader-box > div > .card {
 	position:absolute;
 	height: 98%;
@@ -995,6 +1000,11 @@ main { background-image: url('img/boardtest8.png'); }
 	left: 51%
 }
 
+.grave:not(:empty):hover {
+	box-shadow: 0 0 .75vw goldenrod;
+	box-sizing: border-box;
+}
+
 .deck-card {
 	position: relative;
 	display: inline-block;
@@ -1103,6 +1113,10 @@ main { background-image: url('img/boardtest8.png'); }
 	display: flex;
 	flex-wrap:wrap;
 	justify-content: space-between;
+}
+
+.card-array .card-lg:hover {
+	box-shadow: 0 0 1vw goldenrod;
 }
 
 #card-bank {
