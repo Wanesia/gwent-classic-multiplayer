@@ -2477,6 +2477,7 @@ class DeckMaker {
 			this.add(index, this.bank);
 			this.remove(index, this.deck);
 		}
+		Settings.getFactionSettings(this.faction).setCards(this.deck.filter(x => x.count > 0));
 		this.update();
 	}
 	
