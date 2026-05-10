@@ -2380,7 +2380,29 @@ class DeckMaker {
 				hero += x.count;
 		}
 		this.stats = {total: total, units: units, special: special, strength: strength, hero: hero};
+		this.updateFauxCard(this.bank_elem);
+		this.updateFauxCard(this.deck_elem);
 		this.updateStats();
+	}
+
+	// updates an empty card element to ensure correct alignment when count%3 == 2
+	updateFauxCard(container)
+	{
+		let fauxCard = container.getElementsByClassName('empty')[0];
+		if (!fauxCard)
+		{
+			fauxCard = document.createElement('div');
+			fauxCard.classList.add('card-lg');
+			fauxCard.classList.add('empty');
+		}
+		else
+		{
+			container.removeChild(fauxCard);
+		}
+		if (container.querySelectorAll(".card-lg:not(.hide)").length % 3 === 2)
+		{
+			container.appendChild(fauxCard);
+		}
 	}
 	
 	// Updates and displays the statistics describing the cards currently in the deck

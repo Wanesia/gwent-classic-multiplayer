@@ -1119,6 +1119,11 @@ main { background-image: url('img/boardtest8.png'); }
 	box-shadow: 0 0 1vw goldenrod;
 }
 
+.card-array .card-lg.empty
+{
+	visibility: hidden;
+}
+
 #card-bank {
 	top: 22.5%;
 	left: 8.275%;
