@@ -2262,13 +2262,7 @@ class DeckMaker {
 		this.leader_elem = document.getElementById("card-leader");
 		this.leader_elem.children[1].addEventListener("click", () => this.selectLeader(), false);
 		
-		this.faction = "realms";
-		this.setFaction(this.faction, true);
-		
-		let start_deck = JSON.parse(premade_deck[0]);
-		start_deck.cards = start_deck.cards.map(c => ({index: c[0], count: c[1]}) );
-		this.setLeader(start_deck.leader);
-		this.makeBank(this.faction, start_deck.cards);
+		this.loadFactionDeck(Settings.lastFaction.get(), true);
 		
 		this.change_elem = document.getElementById("change-faction");
 		this.change_elem.addEventListener("click", () => this.selectFaction(), false);
@@ -2276,15 +2270,36 @@ class DeckMaker {
 		document.getElementById("download-deck").addEventListener("click", () => this.downloadDeck(), false);
 		document.getElementById("add-file").addEventListener("change", () => this.uploadDeck(), false);
 		document.getElementById("start-game").addEventListener("click", () => this.startNewGame(), false);
-		
+	}
+
+	loadFactionDeck(faction, force = false)
+	{
+		if (!this.isValidFaction(faction))
+			return;
+		if (!this.setFaction(faction, true))
+			return;
+		const faction_deck = this.getPlayerDeckByFaction(this.faction);
+		this.setLeader(faction_deck.leader);
+		this.makeBank(this.faction, faction_deck.cards);
 		this.update();
+	}
+
+	isValidFaction(factionName)
+	{
+		switch(factionName) 
+		{
+		case "realms": case "nilfgaard": case "monsters": case "scoiatael": case "skellige":
+			return true;
+		default:
+			return false;
+		}
 	}
 	
 	// Called when client selects a deck faction. Clears previous cards and makes valid cards available.
-	setFaction(faction_name, silent){
-		if (!silent && this.faction === faction_name)
-			return false;
-		if (!silent && !confirm("Changing factions will clear the current deck. Continue? "))
+	setFaction(faction_name, force){
+		if (!faction_name)
+			return;
+		if (!force && this.faction === faction_name)
 			return false;
 		this.elem.getElementsByTagName("h1")[0].innerHTML = factions[faction_name].name;
 		this.elem.getElementsByTagName("h1")[0].style.backgroundImage = iconURL("deck_shield_" + faction_name);
@@ -2298,6 +2313,7 @@ class DeckMaker {
 			this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
 		}
 		this.faction = faction_name;
+		Settings.lastFaction.set(faction_name);
 		return true;
 	}
 	
@@ -2305,6 +2321,23 @@ class DeckMaker {
 	setLeader(index){
 		this.leader = this.leaders.filter( l => l.index == index)[0];
 		this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
+	}
+
+	getPlayerDeckByFaction(factionName)
+	{
+		switch(factionName) {
+			case "realms":
+				return Settings.realmsDeck.get();
+			case "nilfgaard":
+				return Settings.nilfgaardDeck.get();
+			case "monsters":
+				return Settings.monstersDeck.get();
+			case "scoiatael":
+				return Settings.scoiataelDeck.get();
+			case "skellige":
+				return Settings.skelligesDeck.get();
+		}
+		return null;
 	}
 	
 	// Constructs a bank of cards that can be used by the faction's deck.
@@ -2445,11 +2478,7 @@ class DeckMaker {
 		});
 		let index = container.cards.reduce((a,c,i) => c.filename === this.faction ? i : a, 0);
 		ui.queueCarousel(container, 1, (c,i) => {
-			let change = this.setFaction(c.cards[i].filename);
-			if (!change)
-				return;
-			this.makeBank(c.cards[i].filename);
-			this.update();
+			this.loadFactionDeck(c.cards[i].filename);
 		}, () => true, false, true);
 		Carousel.curr.index = index;
 		Carousel.curr.update();
@@ -2568,14 +2597,22 @@ class DeckMaker {
 			alert("Uploaded deck is not parsable!");
 			return;
 		}
+		this.loadDeck(deck, false);
+	}
+
+	loadDeck(deck, silent = true)
+	{
+		if (!deck)
+			return;
 		let warning = "";
+		// verify that leader card is actually a leader and that it's faction matches the deck faction
 		if (card_dict[deck.leader].row !== "leader")
 			warning += "'" + card_dict[deck.leader].name + "' is cannot be used as a leader\n";
 		if (deck.faction != card_dict[deck.leader].deck)
 			warning += "Leader '" + card_dict[deck.leader].name + "' doesn't match deck faction '" + deck.faction + "'.\n";
-		
-		let cards = deck.cards.filter( c => {
-			let card = card_dict[c[0]];
+		// check if cards exist and have correct faction & count
+		const cards = deck.cards.filter( c => {
+			const card = card_dict[c[0]];
 			if (!card) {
 				warning += "ID " + c[0] + " does not correspond to a card.\n";
 				return false
@@ -2586,14 +2623,16 @@ class DeckMaker {
 			}
 			if (card.count < c[1]) {
 				warning += "Deck contains " + c[1] + "/" + card.count + " available " + card_dict[c.index].name + " cards\n";
-				return false;
+				c[1] = card.count;
+				return true;
 			}
 			return true;
 		})
 		.map(c => ({index:c[0], count:Math.min(c[1], card_dict[c[0]].count)}) );
-		
-		if (warning && !confirm(warning + "\n\n\Continue importing deck?"))
+		// prompt warnign if necessary
+		if (warning && !(silent || confirm(warning + "\n\n\Continue importing deck?")))
 			return;
+		// Use deck to update current faction and cards
 		this.setFaction(deck.faction, true);
 		if (card_dict[deck.leader].row === "leader" && deck.faction === card_dict[deck.leader].deck){
 			this.leader = this.leaders.filter(c => c.index === deck.leader)[0];
