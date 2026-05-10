@@ -2632,15 +2632,90 @@ class ToggleOption
 	toggle() { this.setEnabled(!this.enabled); }
 }
 
+class SavedObject
+{
+	constructor(key, defaultValue = {}, action = ()=>{})
+	{
+		this.key = key;
+		const saved = localStorage?.getItem(this.key);
+		if (typeof defaultValue === "string" || defaultValue instanceof String)
+			defaultValue = JSON.parse(defaultValue);
+		this.obj = (saved !== null && saved !== undefined) ? JSON.parse(saved) : defaultValue;
+		this.action = action;
+	}
+	get()
+	{
+		return this.obj;
+	}
+	set(newObj)
+	{
+		if (!this.key)
+		{
+			return;
+		}
+		if (newObj === null || newObj === undefined)
+		{
+			newObj = {};
+		}
+		localStorage?.setItem(this.key, JSON.stringify(newObj));
+		if (this.action)
+			this.action(this.obj);
+	}
+}
+
+class SavedDeck extends SavedObject
+{
+	constructor(key, defaultValue = {}, action = ()=>{})
+	{
+		super(key, defaultValue, action);
+	}
+	get()
+	{
+		const temp_deck = {...super.get()};
+		temp_deck.cards = temp_deck.cards.map(c => ({index: c[0], count: c[1]}) );
+		return temp_deck;
+	}
+	set(newObj)
+	{
+		const temp_deck = {...newObj};
+		temp_deck.cards = newObj.cards.map(c => [c.index, c.count]);
+		super.set(temp_deck);
+	}
+}
+
+class SavedString
+{
+	constructor(key, defaultValue = "", action = ()=>{})
+	{
+		this.key = key;
+		let saved = localStorage?.getItem(this.key);
+		if (saved === null || saved === undefined)
+			saved = defaultValue;
+		this.value = saved;
+		this.action = action;
+	}
+	get() { return this.value; }
+	set(newValue)
+	{
+		if (this.value === newValue)
+			return;
+		this.value = newValue;
+		localStorage?.setItem(this.key, newValue);
+		if (this.action)
+			this.action(this.value);
+	}
+}
+
 class Settings
 {
 	static music = new ToggleOption("gc-music", true);
 	static notifications = new ToggleOption("gc-notifications", true);
-	constructor()
-	{
-		setTimeout(this.initialize, 100);
-	}
-	
+	static lastFaction = new SavedString("gc-last-faction", "realms"); 
+	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0]);
+	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2]);
+	static monstersDeck = new SavedDeck("gc-deck-monsters", premade_deck[4]);
+	static scoiataelDeck = new SavedDeck("gc-deck-scoiatael", premade_deck[6]);
+	static skelligesDeck = new SavedDeck("gc-deck-skellige", premade_deck[8]);
 }
 
 class GameEvent
