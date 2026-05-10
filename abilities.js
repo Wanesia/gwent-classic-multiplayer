@@ -153,8 +153,21 @@ var ability_dict = {
 				{
 					if (card.holder.controller instanceof ControllerAI)
 					{
-						// TODO select optimal row
-						const rowName = Math.random() < 0.5 ? "close" : "ranged";
+						const close = board.getRow(res, "close", player_op);
+						const ranged = board.getRow(res, "ranged", player_op);
+						const closeVirtual = close.getVirtualCopy();
+						const rangedVirtual = ranged.getVirtualCopy();
+
+						closeVirtual.cards.push(res);
+						closeVirtual.updateState(res, true);
+						rangedVirtual.cards.push(res);
+						rangedVirtual.updateState(res, true);
+
+						const closeDif = closeVirtual.calcScore() - close.calcScore();
+						const rangedDif = rangedVirtual.calcScore() - ranged.calcScore();
+						const rowName = closeDif > rangedDif ? "close" 
+							: closeDif < rangedDif ? "ranged"
+							: Math.random() < 0.5 ? "close" : "ranged";
 						selectedRow = board.getRow(res, rowName, player_op);
 					}
 					else
