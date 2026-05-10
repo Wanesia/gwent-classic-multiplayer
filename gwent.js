@@ -1756,6 +1756,10 @@ class UI {
 				else {
 					clearInterval(timer);
 					ui.toggleMusic_elem.classList.remove("fade");
+					if (!Settings.music.isEnabled())
+					{
+						setTimeout(()=>ui.toggleMusic(), 10);
+					}
 				}
 			}, 500);
 		}
@@ -1763,13 +1767,15 @@ class UI {
 	
 	// Called when client toggles the music
 	toggleMusic(){
-		if (this.youtube.getPlayerState() !== YT.PlayerState.PLAYING) {
-			this.youtube.playVideo();
-			this.toggleMusic_elem.classList.remove("fade");
-		} else {
-			this.youtube.pauseVideo();
+		const isPlaying = this.youtube?.getPlayerState() === YT.PlayerState.PLAYING;
+		if (isPlaying) {
+			this.youtube?.pauseVideo();
 			this.toggleMusic_elem.classList.add("fade");
+		} else {
+			this.youtube?.playVideo();
+			this.toggleMusic_elem.classList.remove("fade");
 		}
+		Settings.music.setEnabled(!isPlaying);
 	}
 
 	toggleNotifications() {
