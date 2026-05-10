@@ -2581,7 +2581,8 @@ class ToggleOption
 	constructor(key, enableByDefault = true, action = ()=>{})
 	{
 		this.key = key;
-		this.enabled = localStorage?.getItem(this.key) | enableByDefault;
+		const saved = localStorage?.getItem(this.key);
+		this.enabled = (saved !== null && saved !== undefined) ? saved==="true" : enableByDefault;
 		this.action = action;
 	}
 	isEnabled() { return this.enabled; }
@@ -2605,8 +2606,8 @@ class ToggleOption
 
 class Settings
 {
-	static music = new ToggleOption("music", true);
-	static notifications = new ToggleOption("notifications", true);
+	static music = new ToggleOption("gc-music", true);
+	static notifications = new ToggleOption("gc-notifications", true);
 	constructor()
 	{
 		setTimeout(this.initialize, 100);
