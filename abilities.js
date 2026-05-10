@@ -155,7 +155,7 @@ var ability_dict = {
 					{
 						// TODO select optimal row
 						const rowName = Math.random() < 0.5 ? "close" : "ranged";
-						selectedRow = board.getRow(null, rowName, player_op);
+						selectedRow = board.getRow(res, rowName, player_op);
 					}
 					else
 					{
