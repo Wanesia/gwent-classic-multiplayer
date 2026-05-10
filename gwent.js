@@ -2278,7 +2278,7 @@ class DeckMaker {
 			return;
 		if (!this.setFaction(faction, true))
 			return;
-		const faction_deck = this.getPlayerDeckByFaction(this.faction);
+		const faction_deck = Settings.getFactionSettings(this.faction).get();
 		this.setLeader(faction_deck.leader);
 		this.makeBank(this.faction, faction_deck.cards);
 		this.update();
@@ -2317,27 +2317,10 @@ class DeckMaker {
 		return true;
 	}
 	
-	// Called when client selects a leader for their deck
+	// Sets current leader and updates UI
 	setLeader(index){
 		this.leader = this.leaders.filter( l => l.index == index)[0];
 		this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
-	}
-
-	getPlayerDeckByFaction(factionName)
-	{
-		switch(factionName) {
-			case "realms":
-				return Settings.realmsDeck.get();
-			case "nilfgaard":
-				return Settings.nilfgaardDeck.get();
-			case "monsters":
-				return Settings.monstersDeck.get();
-			case "scoiatael":
-				return Settings.scoiataelDeck.get();
-			case "skellige":
-				return Settings.skelligesDeck.get();
-		}
-		return null;
 	}
 	
 	// Constructs a bank of cards that can be used by the faction's deck.
@@ -2465,6 +2448,7 @@ class DeckMaker {
 			let data = c.cards[i].data;
 			this.leader = data;
 			this.leader_elem.children[1].style.backgroundImage = largeURL(data.card.deck + "_" + data.card.filename);
+			Settings.getFactionSettings(this.leader.card.deck).setLeader(this.leader);
 		}, () => true, false, true);
 		Carousel.curr.index = index;
 		Carousel.curr.update();
@@ -2720,6 +2704,18 @@ class SavedDeck extends SavedObject
 		temp_deck.cards = newObj.cards.map(c => [c.index, c.count]);
 		super.set(temp_deck);
 	}
+	setCards(cards)
+	{
+		const deck = super.get();
+		deck.cards = cards.map(c => [c.index, c.count]);
+		super.set(deck);
+	}
+	setLeader(leader)
+	{
+		const deck = super.get();
+		deck.leader = leader.index;
+		super.set(deck);
+	}
 }
 
 class SavedString
@@ -2755,6 +2751,23 @@ class Settings
 	static monstersDeck = new SavedDeck("gc-deck-monsters", premade_deck[4]);
 	static scoiataelDeck = new SavedDeck("gc-deck-scoiatael", premade_deck[6]);
 	static skelligesDeck = new SavedDeck("gc-deck-skellige", premade_deck[8]);
+	
+	static getFactionSettings(factionName)
+	{
+		switch(factionName) {
+			case "realms":
+				return Settings.realmsDeck;
+			case "nilfgaard":
+				return Settings.nilfgaardDeck;
+			case "monsters":
+				return Settings.monstersDeck;
+			case "scoiatael":
+				return Settings.scoiataelDeck;
+			case "skellige":
+				return Settings.skelligesDeck;
+		}
+		return null;
+	}
 }
 
 class GameEvent
