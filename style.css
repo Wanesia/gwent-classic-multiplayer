@@ -1091,6 +1091,9 @@ main { background-image: url('img/boardtest8.png'); }
 	color: white;
 	top: 15%;
 }
+.deck-options:hover {
+	text-decoration: underline;
+}
 
 #download-deck {
 	left: 55%;
@@ -1180,6 +1183,9 @@ main { background-image: url('img/boardtest8.png'); }
 	background-size: contain;
 	border-radius: .5vw;
 }
+#card-leader > div:hover {
+	box-shadow: 0 0 .75vw goldenrod;
+}
 
 #deck-stats {
 	position: absolute;
@@ -1226,6 +1232,9 @@ main { background-image: url('img/boardtest8.png'); }
 	color: white;
 	background-color: rgb(20,20,20);
 	border: 0.1vw ridge rgb(30,30,30);
+}
+#start-game:hover {
+	box-shadow: 0 0 0.75vw white;
 }
 
 .card-contianer-title {
