@@ -308,20 +308,38 @@ html {
 	display:flex;
 	align-items: flex-start;
 	justify-content: space-between;
+	
+	translate: var(--magnitude);
+
+	transition: translate 0.1s;
+}
 }
 
-#carousel > :nth-child(1)  > :nth-child(3){
+#carousel > :nth-child(1) > :not(:nth-child(3)):hover {
+	box-shadow: 0 0 1vw goldenrod;
+}
+
+#carousel > :nth-child(1) > .card-lg {
+	translate: var(--magnitude);
+	transition: translate 0.25s, box-shadow 0.2s;
+}
+
+#carousel > :nth-child(1) > :nth-child(3){
 	border: .3vw solid goldenrod;
 	box-shadow: 0 0 4vw goldenrod;
 	background-origin: border-box;
+	transition: box-shadow 0.1s;
+}
+#carousel > :nth-child(1) > :nth-child(3):hover {
+	box-shadow: 0 0 2vw goldenrod;
 }
 
-#carousel > :nth-child(1)  > :nth-child(2n) {
+#carousel > :nth-child(1) > :nth-child(2n) {
 	width: 13.75vw;
 	height: 25.9vw;
 }
 
-#carousel > :nth-child(1)  > :nth-child(4n - 3) {
+#carousel > :nth-child(1) > :nth-child(4n - 3) {
 	width: 11.3vw;
 	height: 21.3vw;
 	margin: 0 2.75%;

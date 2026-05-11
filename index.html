@@ -161,11 +161,11 @@
 	
 	<section id="carousel" class="hide">
 		<div>
-			<div class="card-lg" onclick="Carousel.curr.shift(event,-2)"></div>
-			<div class="card-lg" onclick="Carousel.curr.shift(event,-1)"></div>
-			<div class="card-lg" onclick="Carousel.curr.select(event)"></div>
-			<div class="card-lg" onclick="Carousel.curr.shift(event,1)"></div>
-			<div class="card-lg" onclick="Carousel.curr.shift(event,2)"></div>
+			<div class="card-lg" onclick="Carousel.curr.shift(event,-2)" onmouseover="Carousel.curr?.nudge(-2)"></div>
+			<div class="card-lg" onclick="Carousel.curr.shift(event,-1)" onmouseover="Carousel.curr?.nudge(-1)"></div>
+			<div class="card-lg" onclick="Carousel.curr.select(event)"   onmouseover="Carousel.curr?.nudge( 0)"></div>
+			<div class="card-lg" onclick="Carousel.curr.shift(event, 1)" onmouseover="Carousel.curr?.nudge( 1)"></div>
+			<div class="card-lg" onclick="Carousel.curr.shift(event, 2)" onmouseover="Carousel.curr?.nudge( 2)"></div>
 		</div>
 		<div class="card-description">
 			<div></div>
