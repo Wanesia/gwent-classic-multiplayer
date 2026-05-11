@@ -2100,6 +2100,7 @@ class Carousel {
 		this.previews = this.elem.getElementsByClassName("card-lg");
 		this.desc = this.elem.getElementsByClassName("card-description")[0];
 		this.title_elem = this.elem.children[2];
+		[...this.elem.children[0].children].forEach(e => e.addEventListener("mouseout", evt=>Carousel.curr?.nudge(0)));
 	}
 	
 	// Initializes the current Carousel
@@ -2131,6 +2132,22 @@ class Carousel {
 		(event || window.event).stopPropagation();
 		this.index = Math.max(0, Math.min(this.indices.length-1, this.index+n));
 		this.update();
+	}
+
+	// called when mousing over/out of one of the carousel cards
+	nudge(offset = 0)
+	{
+		const parentClasslist = this.elem.children[0].classList;
+		parentClasslist.remove('left');
+		parentClasslist.remove('right');
+		this.elem.children[0].style.setProperty('--magnitude', (-offset * 0.4) + "vw");
+		if (offset < 0)
+		{
+			parentClasslist.add('left');
+		} else if (offset > 0)
+		{
+			parentClasslist.add('right')
+		}
 	}
 	
 	// Called by client to perform action on the middle card in focus
