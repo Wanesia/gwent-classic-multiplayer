@@ -591,6 +591,7 @@ class Player {
 		this.elem_leader.children[0].classList.add("fade");
 		this.elem_leader.children[1].classList.add("hide");
 		this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
+		this.elem_leader.children[0].setAttribute('data-title', "View leader");
 	}
 	
 	// Enable access to leader ability and toggles leader visuals to on state
@@ -606,6 +607,7 @@ class Player {
 			this.elem_leader.addEventListener("click", 
 				async () => await ui.viewCard(this.leader, async () => await this.activateLeader()),
 				false);
+			this.elem_leader.children[0].setAttribute('data-title', "Play leader");
 		} else {
 			this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
 		}
@@ -1660,6 +1662,7 @@ class Card {
 		let elem = document.createElement("div");
 		elem.style.backgroundImage = smallURL(card.faction + "_" + card.filename);
 		elem.classList.add("card");
+		elem.setAttribute('data-title', card.name);
 		elem.addEventListener("click", () => ui.selectCard(card), false);
 		
 		if (card.row === "leader")

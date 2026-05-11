@@ -25,7 +25,7 @@
 	<section id="panel-left" class="panel">
 	
 		<div id="leader-op" class="leader-box">
-			<div class="leader-container center"> 
+			<div class="leader-container center" data-title="View leader"> 
 			</div>
 			<div class="leader-active">
 				<div></div>
@@ -77,13 +77,13 @@
 		</section>
 		
 		<div id="leader-me" class="leader-box">
-			<div class="leader-container center"></div>
+			<div class="leader-container center" data-title="Play leader"></div>
 			<div class="leader-active">
 				<div></div>
 			</div>
 		</div>
 		
-		<div id="pass-button" class="center">Pass</div>
+		<div id="pass-button" class="center" data-title="Pass round">Pass</div>
 		
 	</section>
 	
@@ -137,12 +137,12 @@
 	</section>
 	
 	<section id="panel-right" class="panel">
-		<div id="grave-op" class="grave cardpile">
+		<div id="grave-op" class="grave cardpile" data-title="View discards">
 		</div>
 		<div id="deck-op" class="cardpile">
 		
 		</div>
-		<div id="grave-me" class="grave cardpile">
+		<div id="grave-me" class="grave cardpile" data-title="View discards">
 		</div>
 		<div id="deck-me" class="cardpile">
 		</div>
@@ -275,8 +275,8 @@
 	<button id="start-game">Start game</button>
 </section>
 
-<div id="toggle-music" class="center deck-menu text-button">♫</div>
-<div id="toggle-notifications" class="center deck-menu text-button">🔔</div>
+<div id="toggle-music" class="center deck-menu text-button" data-title="Toggle music">♫</div>
+<div id="toggle-notifications" class="center deck-menu text-button" data-title="Toggle game messages">🔔</div>
 
 <script type="text/javascript" src="common.js"></script>
 <script type="text/javascript" src="cards.js"></script>

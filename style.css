@@ -91,7 +91,6 @@ html {
 	position: absolute;
 	color: goldenrod;
     text-shadow: 0 0 2vw black;
-	z-index: 86;
 }
 .text-button:hover {
 	text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5);
@@ -107,6 +106,7 @@ html {
 #toggle-music.deck-menu { 
 	top: 45.6vw !important;
 	transform: translate(22.5vw, -0.5vw);
+	z-index: 86;
 }
 
 #toggle-notifications {
@@ -122,7 +122,8 @@ html {
 
 #pass-button[data-title]:hover::after
 {
-	bottom: -2em;
+	bottom: -2.2vw;
+	left: -0.45vw
 }
 
 
@@ -615,9 +616,17 @@ main { background-image: url('img/boardtest8.png'); }
 #leader-op {
 	top: 7.55%;
 }
+#leader-op .leader-container::after {
+	left: unset;
+	bottom: -2.2vw;;
+}
 
 #leader-me {
 	top: 77.5%;
+}
+#leader-me .leader-container::after {
+	left: unset;
+	bottom: -2.2vw;;
 }
 
 .stats {
@@ -1004,6 +1013,12 @@ main { background-image: url('img/boardtest8.png'); }
 	box-shadow: 0 0 .75vw goldenrod;
 	box-sizing: border-box;
 }
+.grave:not(:empty)::after{
+	left: -0.4vw;
+}
+.grave:empty::after {
+	visibility: hidden;
+}
 
 .deck-card {
 	position: relative;
@@ -1360,6 +1375,27 @@ main { background-image: url('img/boardtest8.png'); }
 	/*margin: 0 calc((100% - (4.45vw * 14)) / 26);*/
 }
 
+/* ---------- tooltip -------------  */
+
+*[data-title]:hover::after{
+	content: attr(data-title);
+	background-color: rgba(10,10,10,.95);
+	color: goldenrod;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 1.2vw;
+	position: absolute;
+	padding: 1px 5px 2px 5px;
+	bottom: -2vw;
+	left: 0;
+	white-space: nowrap;
+	box-shadow: 1px 1px 4px #242424;
+	text-shadow: none;
+	border: 1px solid #1b1b1b;
+	z-index: 9999999;
+	pointer-events: none;
+}
+
+
 /* ----------- misc ----------------  */
 
 .center {
@@ -1381,4 +1417,3 @@ main { background-image: url('img/boardtest8.png'); }
 .noclick {
 	pointer-events: none;
 }
-
