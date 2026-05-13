@@ -348,8 +348,15 @@ html {
 #carousel > :nth-child(1) > :nth-child(4n - 3) {
 	width: 11.3vw;
 	height: 21.3vw;
-	margin: 0 2.75%;
 	transition: box-shadow 0.1s, translate calc(var(--carousel-trans-time) + .2s);
+}
+
+#carousel > :nth-child(1) > :nth-child(1) {
+	margin-left: 5%
+}
+
+#carousel > :nth-child(1) > :nth-child(5) {
+	margin-right: 5%;
 }
 
 #carousel .card-lg {
