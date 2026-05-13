@@ -309,10 +309,11 @@ html {
 	align-items: flex-start;
 	justify-content: space-between;
 	
-	translate: var(--magnitude);
-
-	transition: translate 0.1s;
-}
+	--carousel-trans-time: 0s;
+	--magnitude: 0;
+	translate: calc(var(--magnitude) * 1vw);
+	transition: translate calc(var(--carousel-trans-time) - 0.1s);
+	transition-timing-function: ease-in;
 }
 
 #carousel > :nth-child(1) > :not(:nth-child(3)):hover {
@@ -320,29 +321,35 @@ html {
 }
 
 #carousel > :nth-child(1) > .card-lg {
-	translate: var(--magnitude);
-	transition: translate 0.25s, box-shadow 0.2s;
+	translate: calc(var(--magnitude) * 1vw);
+	transition: translate var(--carousel-trans-time), box-shadow 0.1s;
+	transition-timing-function: ease-in;
 }
 
+/*  middle  (3)  */
 #carousel > :nth-child(1) > :nth-child(3){
 	border: .3vw solid goldenrod;
 	box-shadow: 0 0 4vw goldenrod;
 	background-origin: border-box;
-	transition: box-shadow 0.1s;
+	transition: box-shadow 0.1s, translate calc(var(--carousel-trans-time) - 0.05s);
 }
 #carousel > :nth-child(1) > :nth-child(3):hover {
 	box-shadow: 0 0 2vw goldenrod;
 }
 
+/*  adjacent (2, 4)  */
 #carousel > :nth-child(1) > :nth-child(2n) {
 	width: 13.75vw;
 	height: 25.9vw;
+	transition: box-shadow 0.1s, translate calc(var(--carousel-trans-time) + 0.05s);
 }
 
+/* outer most (1, 5) */
 #carousel > :nth-child(1) > :nth-child(4n - 3) {
 	width: 11.3vw;
 	height: 21.3vw;
 	margin: 0 2.75%;
+	transition: box-shadow 0.1s, translate calc(var(--carousel-trans-time) + .2s);
 }
 
 #carousel .card-lg {

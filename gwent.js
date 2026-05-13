@@ -2101,6 +2101,7 @@ class Carousel {
 		this.desc = this.elem.getElementsByClassName("card-description")[0];
 		this.title_elem = this.elem.children[2];
 		[...this.elem.children[0].children].forEach(e => e.addEventListener("mouseout", evt=>Carousel.curr?.nudge(0)));
+		this.elem.children[0].style.setProperty('--carousel-trans-time', "0.25s");
 	}
 	
 	// Initializes the current Carousel
@@ -2140,7 +2141,8 @@ class Carousel {
 		const parentClasslist = this.elem.children[0].classList;
 		parentClasslist.remove('left');
 		parentClasslist.remove('right');
-		this.elem.children[0].style.setProperty('--magnitude', (-offset * 0.4) + "vw");
+		const magnitude = (offset === 2) ? -1 * Math.sign(offset) : -0.6 * offset;
+		this.elem.children[0].style.setProperty('--magnitude', magnitude);
 		if (offset < 0)
 		{
 			parentClasslist.add('left');
