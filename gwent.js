@@ -2650,6 +2650,74 @@ class DeckMaker {
 	}
 }
 
+class AudioManager
+{
+	static source = {};
+
+	static init()
+	{
+		[
+			'turn_me', 'turn_op', "ui_card",
+			'clear', 'fog', 'frost', 'rain', 
+			'horn', 'spy', 'medic', 'morale', 'scorch', 'bond',
+			'hero', 'common_close', 'common_ranged', 'common_siege'
+		].forEach(s => AudioManager.source.push(getAudio(s)));
+	}
+
+	static async play(key)
+	{
+		if (AudioManager.source[key])
+		{
+			const audio = AudioManager.source[key];
+			if (audio instanceof Audio)
+			{
+				audio.pause();
+				audio.currentTime = 0;
+			}
+			return await audio.play();
+		}
+		else
+		{
+			return await playAudio(key)
+		}
+	}
+
+	static async playSFX(key)
+	{
+		if (Settings.soundEffects.isEnabled())
+		{
+			return await AudioManager.play(key);
+		}
+	}
+}
+
+class AudioCycle
+{
+	constructor(...paths)
+	{
+		this.sources = [];
+		this.index = 0;
+		for (let i = 0; i < paths.length; ++i)
+		{
+			this.sources.push(audioURL(paths[i]));
+		}
+	}
+
+	play()
+	{
+		this.sources[this.index].play().then(a => {
+			a.pause();
+			a.currentTime = 0;
+		});
+		this.index = (this.index + 1) % this.sources.length;
+	}
+
+	pause()
+	{
+		this.sources.forEach(a => a.pause());
+	}
+}
+
 class ToggleOption
 {
 	constructor(key, enableByDefault = true, action = ()=>{})
@@ -2970,6 +3038,47 @@ function smallURL(name, ext="jpg"){
 }
 function imgURL(path, ext) {
 	return "url('img/" + path + "." + ext + "')";
+}
+
+// get sound effect path
+function audioURL(name, ext = "mp3") {
+	if (typeof name === "string" || name instanceof String)
+	{
+		if (name.includes('.'))
+		{
+			return "sfx/" + name; 
+		}
+	}
+	else if (name['name'])
+	{
+		if (name['ext'])
+		{
+			ext = name['ext'];
+		}
+		name = name['name'];
+	}
+	return "sfx/" + name + "." + ext;
+}
+
+// Get audio instance
+function getAudio(name, ext = "mp3")
+{
+	return new Audio(audioURL(name, ext));
+}
+// Play sound effect
+async function playAudio(name, ext = "mp3")
+{
+	return await asyncAudio(getAudio(name, ext));
+}
+
+function asyncAudio(audio)
+{
+	if (!audio)
+		return
+	return new Promise(r => {
+		audio.play();
+		audio.onended = r;
+	});
 }
 
 // Returns true if n is an Number
