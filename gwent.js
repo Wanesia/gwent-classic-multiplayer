@@ -4,6 +4,13 @@ class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 
 const DURATION_CARD_PLACEMENT = 1000;
 
+const CLICK_EVENT_SFX = () => AudioManager.playSFX('ui_card');
+
+const addMouseEnterSFXBySelector = selector => {
+	[...document.querySelectorAll(selector)].forEach(e =>
+	e.addEventListener('mouseenter', CLICK_EVENT_SFX));
+};
+
 class Controller {}
 
 // Makes decisions for the AI opponent player
@@ -445,7 +452,7 @@ class Player {
 		this.leader = new Card(deck.leader, this);
 		this.elem_leader = document.getElementById("leader-" + this.tag);
 		this.elem_leader.children[0].appendChild( this.leader.elem );
-		
+
 		this.reset();
 		
 		this.name = name;
@@ -596,6 +603,7 @@ class Player {
 		this.elem_leader.children[0].classList.add("fade");
 		this.elem_leader.children[1].classList.add("hide");
 		this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
+		this.elem_leader.addEventListener('mouseenter', CLICK_EVENT_SFX);
 		this.elem_leader.children[0].setAttribute('data-title', "View leader");
 	}
 	
@@ -610,12 +618,15 @@ class Player {
 		
 		if (this.id === 0 && this.leader.activated.length > 0){
 			this.elem_leader.addEventListener("click", 
-				async () => await ui.viewCard(this.leader, async () => await this.activateLeader()),
-				false);
+				async () => await ui.viewCard(this.leader, async () => {
+					AudioManager.playSFX('open');
+					await this.activateLeader();
+		}	), false);
 			this.elem_leader.children[0].setAttribute('data-title', "Play leader");
 		} else {
 			this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
 		}
+		this.elem_leader.addEventListener('mouseenter', CLICK_EVENT_SFX);
 		
 		// TODO set crown color
 	}
@@ -783,12 +794,20 @@ class Grave extends CardContainer {
 	// Override
 	addCard(card){
 		this.setCardOffset(card, this.cards.length);
+		if (card && this.cards.length === 0)
+		{
+			this.elem.addEventListener('mouseenter', CLICK_EVENT_SFX);
+		}
 		super.addCard(card, this.cards.length);
 	}
 	
 	// Override
 	removeCard(card){
 		let n = isNumber(card) ? card : this.cards.indexOf(card);
+		if (n > -1 && this.cards.length === 1)
+		{
+			this.elem.removeEventListener('mouseenter', CLICK_EVENT_SFX);
+		}
 		return super.removeCard(card, n);
 	}
 	
@@ -1181,6 +1200,7 @@ class Weather extends CardContainer {
 	// Adds a card if unique and clears all weather if 'clear weather' card added
 	async addCard(card) {
 		super.addCard(card);
+		AudioManager.playSFX(card.audio);
 		card.elem.classList.add("noclick");
 		if (card.name === "Clear Weather"){
 			// TODO Sunlight animation
@@ -1406,6 +1426,7 @@ class Game {
 	async startGame() {
 		EventManager.gameOpened.dispatch();
 		this.initPlayers(player_me, player_op);
+		AudioManager.playSFX('game_opening');
 		await Promise.all([...Array(10).keys()].map( async () => {
 			await player_me.deck.draw(player_me.hand);
 			await player_op.deck.draw(player_op.hand);
@@ -1414,6 +1435,7 @@ class Game {
 		await this.runEffects(this.gameStart);
 		if (!this.firstPlayer)
 			this.firstPlayer = await this.coinToss();
+		AudioManager.playSFX("game_start");
 		this.setState(GameState.PLAYING);
 		this.initialRedraw();
 	}
@@ -1429,7 +1451,10 @@ class Game {
 	async initialRedraw(){
 		for (let i=0; i< 2; i++)
 			player_op.controller.redraw();
-		await ui.queueCarousel(player_me.hand, 2, async (c, i) => await player_me.deck.swap(c, c.removeCard(i)), c => true, true, true, "Choose up to 2 cards to redraw.");
+		await ui.queueCarousel(player_me.hand, 2, async (c, i) => { 
+			AudioManager.playSFX('redraw');
+			await player_me.deck.swap(c, c.removeCard(i));
+		}, c => true, true, true, "Choose up to 2 cards to redraw.");
 		ui.enablePlayer(false);
 		game.startRound();
 	}
@@ -1437,6 +1462,8 @@ class Game {
 	// Initiates a new round of the game
 	async startRound(){
 		this.roundCount++;
+		if (this.roundCount === 1)
+			AudioManager.playSFX("round1_start");
 		this.currPlayer = (this.roundCount%2 === 0) ? this.firstPlayer : this.firstPlayer.opponent();
 		await this.runEffects(this.roundStart);
 		
@@ -1453,8 +1480,10 @@ class Game {
 		
 		await ui.notification("round-start", 1200);
 		if (this.currPlayer.opponent().passed)
+		{
+			AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
 			await ui.notification(this.currPlayer.tag + "-turn", 1200);
-		
+		}
 		this.startTurn();
 	}
 	
@@ -1502,12 +1531,20 @@ class Game {
 		player_op.endRound( dif < 0);
 		
 		if (dif > 0)
+		{
+			AudioManager.playSFX("round_win");
 			await ui.notification("win-round", 1200);
+		}	
 		else if (dif < 0)
+		{
+			AudioManager.playSFX("round_lose");
 			await ui.notification("lose-round", 1200);
+		}
 		else
+		{
+			AudioManager.playSFX("round_lose");
 			await ui.notification("draw-round", 1200);
-		
+		}
 		if (player_me.health === 0 || player_op.health === 0)
 			this.endGame();
 		else
@@ -1533,10 +1570,13 @@ class Game {
 		endScreen.children[0].className = "";
 		if (player_op.health <= 0 && player_me.health <= 0) {
 			endScreen.getElementsByTagName("p")[0].classList.remove("hide");
+			AudioManager.playSFX("game_lose");
 			endScreen.children[0].classList.add("end-draw");
 		} else if (player_op.health === 0){
+			AudioManager.playSFX("game_win");
 			endScreen.children[0].classList.add("end-win");
 		} else {
+			AudioManager.playSFX("game_lose");
 			endScreen.children[0].classList.add("end-lose");
 		}
 		
@@ -1553,6 +1593,7 @@ class Game {
 		EventManager.customizationOpened.dispatch();
 		this.endScreen.classList.add("hide");
 		document.getElementById("deck-customization").classList.remove("hide");
+		AudioManager.playSFX('menu_opening');
 		this.setState(GameState.CUSTOMIZE);
 	}
 	
@@ -1723,7 +1764,7 @@ class Card {
 		
 		function factionRank(c){ return c.faction === "special" ? -2 : (c.faction === "weather") ? -1 : 0; }
 	}
-	
+
 	// Creates an HTML element based on the card's properties
 	createCardElem(card){
 		let elem = document.createElement("div");
@@ -1776,6 +1817,7 @@ class Card {
 			abi.style.backgroundImage = iconURL("card_ability_" + "agile");
 		
 		elem.appendChild( document.createElement("div") ); // animation overlay
+		elem.addEventListener('mouseenter', CLICK_EVENT_SFX);
 		return elem;
 	}
 }
@@ -1799,6 +1841,12 @@ class UI {
 		this.toggleNotifications_elem.addEventListener("click", () => this.toggleNotifications(), false);
 		if (!Settings.notifications.isEnabled())
 			this.toggleNotifications_elem.classList.add("fade");
+
+		[	'.text-button',
+			'.deck-options',
+			'#pass-button',
+			'#end-screen>button'
+		].forEach(addMouseEnterSFXBySelector);
 	}
 	
 	// Enables or disables client interration
@@ -1929,6 +1977,7 @@ class UI {
 	showPreview(card, allowClose = true) {
 		this.showPreviewVisuals(card);
 		this.setSelectable(card, true);
+		AudioManager.playSFX('open');
 		if (allowClose)
 		{
 			document.getElementById("click-background").classList.remove("noclick");
@@ -2190,7 +2239,7 @@ class Carousel {
 		} else {
 			this.title_elem.classList.add("hide");
 		}
-		
+		AudioManager.playSFX('open');
 		this.elem.classList.remove("hide");
 		ui.enablePlayer(true);
 	}
@@ -2199,6 +2248,7 @@ class Carousel {
 	shift(event, n){
 		(event || window.event).stopPropagation();
 		this.index = Math.max(0, Math.min(this.indices.length-1, this.index+n));
+		AudioManager.playSFX('ui_card');
 		this.update();
 	}
 
@@ -2237,6 +2287,7 @@ class Carousel {
 	cancel(){
 		if (this.bExit){
 			this.cancelled = true;
+			AudioManager.playSFX('discard');
 			this.exit();
 		}
 		ui.enablePlayer(true);
@@ -2350,6 +2401,7 @@ class DeckMaker {
 		this.deck_elem = document.getElementById("card-deck");
 		this.leader_elem = document.getElementById("card-leader");
 		this.leader_elem.children[1].addEventListener("click", () => this.selectLeader(), false);
+		this.leader_elem.children[1].addEventListener('mouseenter', CLICK_EVENT_SFX);
 		
 		this.loadFactionDeck(Settings.lastFaction.get(), true);
 		
@@ -2359,6 +2411,7 @@ class DeckMaker {
 		document.getElementById("download-deck").addEventListener("click", () => this.downloadDeck(), false);
 		document.getElementById("add-file").addEventListener("change", () => this.uploadDeck(), false);
 		document.getElementById("start-game").addEventListener("click", () => this.startNewGame(), false);
+		document.getElementById("start-game").addEventListener("mouseenter", CLICK_EVENT_SFX, false);
 	}
 
 	loadFactionDeck(faction, force = false)
@@ -2455,7 +2508,6 @@ class DeckMaker {
 		cards.push(bankID);
 		let cardIndex = cards.length-1;
 		elem.addEventListener("click", () => this.select(cardIndex, isBank), false);
-
 		return bankID;
 	}
 	
@@ -2538,6 +2590,7 @@ class DeckMaker {
 			this.leader = data;
 			this.leader_elem.children[1].style.backgroundImage = largeURL(data.card.deck + "_" + data.card.filename);
 			Settings.getFactionSettings(this.leader.card.deck).setLeader(this.leader);
+			AudioManager.playSFX('ui_card_bank');
 		}, () => true, false, true);
 		Carousel.curr.index = index;
 		Carousel.curr.update();
@@ -2559,12 +2612,14 @@ class DeckMaker {
 	
 	// Called when client selects s a preview card. Moves it from bank to deck or vice-versa then updates;
 	select(index, isBank){
-		if (isBank) {
 			this.add(index, this.deck);
 			this.remove(index, this.bank);
 		} else {
+		else
+		{
 			this.add(index, this.bank);
 			this.remove(index, this.deck);
+			AudioManager.playSFX('discard');
 		}
 		Settings.getFactionSettings(this.faction).setCards(this.deck.filter(x => x.count > 0));
 		this.update();
@@ -2601,7 +2656,10 @@ class DeckMaker {
 		if (this.stats.special > 10)
 			warning += "Your deck must have no more than 10 special cards. \n";
 		if (warning != "")
+		{
 			return alert(warning);
+		}
+			
 		
 		let me_deck = { 
 			faction: this.faction,
@@ -2668,6 +2726,7 @@ class DeckMaker {
 		try {
 			deck = JSON.parse(json);
 		} catch (e) {
+			AudioManager.playSFX('warning');
 			alert("Uploaded deck is not parsable!");
 			return;
 		}
@@ -2703,9 +2762,19 @@ class DeckMaker {
 			return true;
 		})
 		.map(c => ({index:c[0], count:Math.min(c[1], card_dict[c[0]].count)}) );
-		// prompt warnign if necessary
-		if (warning && !(silent || confirm(warning + "\n\n\Continue importing deck?")))
-			return;
+		// prompt warning if necessary
+		if (warning)
+		{
+			if (silent)
+			{
+				return;
+			}
+			AudioManager.playSFX('warning');
+			if (confirm(warning + "\n\n\Continue importing deck?"))
+			{
+				return;
+			}
+		}
 		// Use deck to update current faction and cards
 		this.setFaction(deck.faction, true);
 		if (card_dict[deck.leader].row === "leader" && deck.faction === card_dict[deck.leader].deck){
@@ -2754,7 +2823,6 @@ class AudioManager
 					return await sleep(waitTime);
 				}
 			}
-			return await audio.play();
 		}
 		else
 		{
@@ -2916,6 +2984,7 @@ class Settings
 {
 	static music = new ToggleOption("gc-music", true);
 	static notifications = new ToggleOption("gc-notifications", true);
+	static soundEffects = new ToggleOption("gc-sound-effects", true);
 	static lastFaction = new SavedString("gc-last-faction", "realms"); 
 	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0]);
 	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2]);
