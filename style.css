@@ -92,42 +92,43 @@ html {
 	color: goldenrod;
     text-shadow: 0 0 2vw black;
 }
+.text-button.fade { opacity: 0.2; }
 .text-button:hover {
 	text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5);
+	filter:drop-shadow(0px 0px 3px rgba(255, 255, 255, 0.5));
 }
 
 #toggle-music {
-    top: 44vw;
-    left: 26vw;
-    width: 2vw;
-    height: 3vw;
-    font-size: 3vw;
+    top: 48.9vw;
+    left: 14vw;
+	width: 2.5vw;
+	height: 2.5vw;
 }
 #toggle-music.deck-menu { 
-	top: 45.6vw !important;
-	transform: translate(22.5vw, -0.5vw);
+	top: 45.3vw;
+	left: 46.7vw;
+	z-index: 86;
+}
+
+#toggle-sfx {
+	top: 48.9vw;
+    left: 17.2vw;
+	width: 2.5vw;
+	height: 2.5vw;
+}
+#toggle-sfx.deck-menu {
+	top: 45.3vw;
+	left: 50.1vw;
 	z-index: 86;
 }
 
 #toggle-notifications {
-    top: 48vw;
-    left: 26vw;
-    width: 2vw;
-    height: 2.5vw;
-    font-size: 2.5vw;
+	top: 48.9vw;
+    left: 20vw;
+	width: 2.5vw;
+	height: 2.5vw;
 }
 #toggle-notifications.deck-menu {
-	display: none !important;
-}
-
-#toggle-sfx {
-	top: 52vw;
-    left: 26vw;
-    width: 2vw;
-    height: 2.5vw;
-    font-size: 2.5vw;
-}
-#toggle-sfx.deck-menu {
 	display: none !important;
 }
 
@@ -1460,7 +1461,6 @@ main { background-image: url('img/boardtest8.png'); }
 .visible { display: visible; }
 .hide {display: none; }
 .fade:not(.text-button) {opacity: 0.2; filter: alpha(opacity=20); }
-.text-button.fade { color: #daa52040 !important; }
 
 .noclick {
 	pointer-events: none;
