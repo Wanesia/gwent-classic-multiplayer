@@ -526,8 +526,8 @@ html {
     box-shadow: 0 0 1vw #6d5210;
 }
 
-#end-screen button ::hover {
-	box-shadow: 0 0 3vw #6d5210;
+#end-screen button:hover {
+	box-shadow: 0 0 2vw #6d5210;
 }
 
 #end-screen button:nth-of-type(1) { left: 35%; }
