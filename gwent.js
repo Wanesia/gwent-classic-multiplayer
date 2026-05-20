@@ -1858,7 +1858,7 @@ class UI {
 		EventManager.gameOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.remove('deck-menu')));
 		EventManager.customizationOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.add('deck-menu')));
 
-		[	'.text-button',
+		[	'.settings-button',
 			'.deck-options',
 			'#pass-button',
 			'#end-screen>button'
