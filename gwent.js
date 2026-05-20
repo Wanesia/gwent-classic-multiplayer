@@ -1427,14 +1427,13 @@ class Game {
 		EventManager.gameOpened.dispatch();
 		this.initPlayers(player_me, player_op);
 		AudioManager.playSFX('game_opening');
+		await this.runEffects(this.gameStart);
+		await this.coinToss();
+		AudioManager.playSFX('redraw');
 		await Promise.all([...Array(10).keys()].map( async () => {
 			await player_me.deck.draw(player_me.hand);
 			await player_op.deck.draw(player_op.hand);
 		}));
-		
-		await this.runEffects(this.gameStart);
-		if (!this.firstPlayer)
-			this.firstPlayer = await this.coinToss();
 		AudioManager.playSFX("game_start");
 		this.setState(GameState.PLAYING);
 		this.initialRedraw();
@@ -1442,9 +1441,10 @@ class Game {
 	
 	// Simulated coin toss to determine who starts game
 	async coinToss(){
+		if (this.firstPlayer)
+			return;
 		this.firstPlayer = (Math.random() < 0.5) ? player_me : player_op;
 		await ui.notification(this.firstPlayer.tag + "-coin", 1200);
-		return this.firstPlayer;
 	}
 	
 	// Allows the player to swap out up to two cards from their iniitial hand
