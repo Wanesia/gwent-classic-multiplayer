@@ -225,7 +225,10 @@ var ability_dict = {
 		description: "When this card is removed from the battlefield, it summons a powerful new Unit Card to take its place. ",
 		removed: async (card) => {
 			let bdf = new Card(card_dict[21], card.holder);
-			bdf.removed.push( () => setTimeout( () => bdf.holder.grave.removeCard(bdf), 1001) );
+			bdf.removed.push( () => setTimeout( () => {
+				if (game.isPlaying())
+					bdf.holder.grave.removeCard(bdf);
+			}, 1001) );
 			await board.addCardToRow(bdf, "close", card.holder);
 		},
 		weight: () => 50
@@ -235,7 +238,10 @@ var ability_dict = {
 		description: "When this card is removed from the battlefield, it summons a powerful new Unit Card to take its place. ",
 		removed: async card => {
 			let bdf = new Card(card_dict[196], card.holder);
-			bdf.removed.push( () => setTimeout( () => bdf.holder.grave.removeCard(bdf), 1001) );
+			bdf.removed.push( () => setTimeout( () => {
+				if (game.isPlaying())
+					bdf.holder.grave.removeCard(bdf); 
+			}, 1001) );
 			await board.addCardToRow(bdf, "close", card.holder);
 		},
 		weight: () => 50
