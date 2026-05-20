@@ -2508,6 +2508,7 @@ class DeckMaker {
 		cards.push(bankID);
 		let cardIndex = cards.length-1;
 		elem.addEventListener("click", () => this.select(cardIndex, isBank), false);
+		elem.addEventListener("mouseenter", CLICK_EVENT_SFX, false);
 		return bankID;
 	}
 	
@@ -2612,9 +2613,12 @@ class DeckMaker {
 	
 	// Called when client selects s a preview card. Moves it from bank to deck or vice-versa then updates;
 	select(index, isBank){
+		if (isBank)
+		{
 			this.add(index, this.deck);
 			this.remove(index, this.bank);
-		} else {
+			AudioManager.playSFX('ui_card_bank');
+		}
 		else
 		{
 			this.add(index, this.bank);
@@ -2657,6 +2661,7 @@ class DeckMaker {
 			warning += "Your deck must have no more than 10 special cards. \n";
 		if (warning != "")
 		{
+			AudioManager.playSFX("warning");
 			return alert(warning);
 		}
 			
