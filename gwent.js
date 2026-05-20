@@ -516,6 +516,7 @@ class Player {
 	// Passes the round and ends the turn
 	passRound(){
 		this.setPassed(true);
+		EventManager.roundPassed.dispatch(this, game.roundCount);
 		this.endTurn();
 	}
 	
@@ -921,6 +922,7 @@ class Hand extends CardContainer {
 class Row extends CardContainer {
 	constructor(elem) {
 		super(elem?.getElementsByClassName("row-cards")[0]);
+		this.type = elem?.getAttribute('data-row');
 		this.elem_parent = elem;
 		this.elem_special = elem?.getElementsByClassName("row-special")[0];
 		this.special = null;
@@ -1342,8 +1344,7 @@ class Game {
 	
 	// Sets initializes player abilities, player hands and redraw
 	async startGame() {
-		ui.toggleMusic_elem.classList.remove("deck-menu");
-		ui.toggleNotifications_elem.classList.remove("deck-menu");
+		EventManager.gameOpened.dispatch();
 		this.initPlayers(player_me, player_op);
 		await Promise.all([...Array(10).keys()].map( async () => {
 			await player_me.deck.draw(player_me.hand);
@@ -1487,8 +1488,7 @@ class Game {
 		this.reset();
 		player_me.reset();
 		player_op.reset();
-		ui.toggleMusic_elem.classList.add("deck-menu");
-		ui.toggleNotifications_elem.classList.add("deck-menu");
+		EventManager.customizationOpened.dispatch();
 		this.endScreen.classList.add("hide");
 		document.getElementById("deck-customization").classList.remove("hide");
 	}
@@ -2900,6 +2900,9 @@ class EventManager
 	{
 		EventManager.rowSelected = new GameEvent("row-selected", ['row', 'player'])
 		EventManager.previewCancelled = new GameEvent("preview-cancelled", []);
+		EventManager.gameOpened = new GameEvent("game-opened", []);
+		EventManager.customizationOpened = new GameEvent('customize-opened', []);
+		EventManager.roundPassed = new GameEvent('round-passed', ['player', 'round']);
 	}
 }
 
@@ -3121,12 +3124,13 @@ function onYouTubeIframeAPIReady() {
 
 /*----------------------------------------------------*/
 
+
+const eventManager = new EventManager(); 
 let userInteracted = false;
 var ui = new UI();
 var board = new Board();
 var weather = new Weather();
 var game = new Game();
-const eventManager = new EventManager(); 
 var player_me, player_op;
 
 ui.enablePlayer(false);
