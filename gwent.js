@@ -1,5 +1,7 @@
 "use strict"
 
+class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
+
 class Controller {}
 
 // Makes decisions for the AI opponent player
@@ -1281,6 +1283,14 @@ class Board {
 	}
 }
 
+
+class GameStateEnum extends Enum {};
+const GameState = Object.freeze({
+	CUSTOMIZE: new GameStateEnum(0),
+	PLAYING: new GameStateEnum(10),
+	END_SCREEN: new GameStateEnum(100)
+});
+
 class Game {
 	constructor() {
 		this.endScreen = document.getElementById("end-screen");
@@ -1289,11 +1299,12 @@ class Game {
 		this.replay_elem = buttons[1];
 		this.customize_elem.addEventListener("click", () => this.returnToCustomization(), false);
 		this.replay_elem.addEventListener("click", () => this.restartGame(), false);
+		this.state = GameState.CUSTOMIZE;
 		this.reset();
 	}
 	
 	reset() {
-		this.firstPlayer;
+		this.firstPlayer = null;
 		this.currPlayer = null;
 		
 		this.gameStart = [];
@@ -1341,6 +1352,20 @@ class Game {
 				factions[player.deck.faction].factionAbility(player);
 		}
 	}
+
+	isPlaying()
+	{
+		return this.state === GameState.END_SCREEN;
+	}
+
+	setState(newState)
+	{
+		if (!(newState instanceof GameStateEnum) || this.state === newState)
+			return;
+		const oldState = this.state;
+		this.state = newState;
+		EventManager.gameStateChanged.dispatch(oldState, newState);
+	}
 	
 	// Sets initializes player abilities, player hands and redraw
 	async startGame() {
@@ -1354,6 +1379,7 @@ class Game {
 		await this.runEffects(this.gameStart);
 		if (!this.firstPlayer)
 			this.firstPlayer = await this.coinToss();
+		this.setState(GameState.PLAYING);
 		this.initialRedraw();
 	}
 	
@@ -1481,6 +1507,7 @@ class Game {
 		
 		fadeIn(endScreen, 300);
 		ui.enablePlayer(true);
+		this.setState(GameState.END_SCREEN);
 	}
 	
 	// Returns the client to the deck customization screen
@@ -1491,6 +1518,7 @@ class Game {
 		EventManager.customizationOpened.dispatch();
 		this.endScreen.classList.add("hide");
 		document.getElementById("deck-customization").classList.remove("hide");
+		this.setState(GameState.CUSTOMIZE);
 	}
 	
 	// Restarts the last game with the dame decks
@@ -1643,6 +1671,8 @@ class Card {
 	isSpecial() {
 		return this.name === "Commander's Horn" || this.name === "Mardroeme";
 	}
+
+	isHero() { return this.hero; }
 
 	// Compares by type then power then name
 	static compare(a, b){
@@ -2903,6 +2933,7 @@ class EventManager
 		EventManager.gameOpened = new GameEvent("game-opened", []);
 		EventManager.customizationOpened = new GameEvent('customize-opened', []);
 		EventManager.roundPassed = new GameEvent('round-passed', ['player', 'round']);
+		EventManager.gameStateChanged = new GameEvent('game-state-changed', ['oldState', 'newState']);
 	}
 }
 
