@@ -2,6 +2,8 @@
 
 class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 
+const DURATION_CARD_PLACEMENT = 1000;
+
 class Controller {}
 
 // Makes decisions for the AI opponent player
@@ -938,6 +940,7 @@ class Row extends CardContainer {
 	getVirtualCopy(predicate = c=>true)
 	{
 		const copy = new Row(null);
+		copy.type = this.type;
 		copy.effects = {...this.effects};
 		copy.effects.bond = {...this.effects.bond};
 		copy.cards = this.cards.filter(predicate);
@@ -955,6 +958,7 @@ class Row extends CardContainer {
 			let index = this.addCardSorted(card);
 			this.addCardElement(card, index);
 			this.resize();
+			await this.playPlacementAudio(card);
 		}
 		this.updateState(card, true);
 		game.placedEffectsActive = true;
@@ -964,6 +968,37 @@ class Row extends CardContainer {
 		card.elem.classList.add("noclick");
 		await sleep(600);
 		this.updateScore();
+	}
+
+	async playPlacementAudio(card)
+	{
+		let key;
+		if (card.abilities.includes('decoy'))
+			key = 'decoy';
+		else if (card.abilities.includes('spy'))
+			return;
+		else if (card.isHero())
+		{
+			key = "hero";
+		}
+		else
+		{
+			switch(this.type)
+			{
+				case "siege":
+					key = "common_siege"; break;
+				case "ranged":
+					key = "common_ranged"; break;
+				case "close":
+					key = "common_close"; break;
+				default:
+					return;
+			}
+		}
+		if (key)
+		{
+			return await AudioManager.playSFX(key, DURATION_CARD_PLACEMENT, true);
+		}
 	}
 	
 	// Override
@@ -1161,7 +1196,7 @@ class Weather extends CardContainer {
 				}
 			}
 		}
-		await sleep(750);
+		await sleep(1000);
 	}
 	
 	// Override
@@ -1562,6 +1597,7 @@ class Card {
 		
 		this.hero = false;
 		if (this.abilities.length > 0) {
+			this.audio = this.abilities[this.abilities.length-1];
 			if (this.abilities[0] === "hero") {
 				this.hero = true;
 				this.abilities.splice(0, 1);
@@ -1624,6 +1660,7 @@ class Card {
 	
 	// Animates an ability effect
 	async animate(name, bFade = true, bExpand = true) {
+		AudioManager.playSFX(name);
 		if (name === "scorch") {
 			return await this.scorch(name);
 		}
