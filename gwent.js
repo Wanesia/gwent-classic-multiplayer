@@ -3073,7 +3073,7 @@ async function playAudio(name, ext = "mp3")
 
 function asyncAudio(audio)
 {
-	if (!audio)
+	if (!userInteracted || !audio)
 		return
 	return new Promise(r => {
 		audio.play();
@@ -3121,6 +3121,7 @@ function onYouTubeIframeAPIReady() {
 
 /*----------------------------------------------------*/
 
+let userInteracted = false;
 var ui = new UI();
 var board = new Board();
 var weather = new Weather();
@@ -3130,3 +3131,6 @@ var player_me, player_op;
 
 ui.enablePlayer(false);
 let dm = new DeckMaker();
+
+
+document.addEventListener('click', () => userInteracted = true, { once: true });
