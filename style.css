@@ -120,6 +120,17 @@ html {
 	display: none !important;
 }
 
+#toggle-sfx {
+	top: 52vw;
+    left: 26vw;
+    width: 2vw;
+    height: 2.5vw;
+    font-size: 2.5vw;
+}
+#toggle-sfx.deck-menu {
+	display: none !important;
+}
+
 #pass-button[data-title]:hover::after
 {
 	bottom: -2.2vw;
