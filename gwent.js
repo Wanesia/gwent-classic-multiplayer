@@ -1462,9 +1462,10 @@ class Game {
 	// Initiates a new round of the game
 	async startRound(){
 		this.roundCount++;
+		this.currPlayer = (this.roundCount%2 === 0) ? this.firstPlayer : this.firstPlayer.opponent();
+		EventManager.roundStarted.dispatch(this.roundCount, this.currPlayer);
 		if (this.roundCount === 1)
 			AudioManager.playSFX("round1_start");
-		this.currPlayer = (this.roundCount%2 === 0) ? this.firstPlayer : this.firstPlayer.opponent();
 		await this.runEffects(this.roundStart);
 		
 		if ( !player_me.canPlay() )
@@ -1545,6 +1546,7 @@ class Game {
 			AudioManager.playSFX("round_lose");
 			await ui.notification("draw-round", 1200);
 		}
+		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
 		if (player_me.health === 0 || player_op.health === 0)
 			this.endGame();
 		else
@@ -3084,6 +3086,8 @@ class EventManager
 		EventManager.gameOpened = new GameEvent("game-opened", []);
 		EventManager.customizationOpened = new GameEvent('customize-opened', []);
 		EventManager.roundPassed = new GameEvent('round-passed', ['player', 'round']);
+		EventManager.roundStarted = new GameEvent('round-started', ['round', 'starting-player']);
+		EventManager.roundEnded = new GameEvent('round-started', ['round', 'points-me', 'points-op']);
 		EventManager.gameStateChanged = new GameEvent('game-state-changed', ['oldState', 'newState']);
 	}
 }
