@@ -1830,17 +1830,31 @@ class UI {
 		this.preview = document.getElementsByClassName("card-preview")[0];
 		this.previewCard = null;
 		this.lastRow = null;
-		document.getElementById("pass-button").addEventListener("click", () => player_me.passRound(), false);
+		this.toggleSettings = [];
+		document.getElementById("pass-button").addEventListener("click", () => {
+			player_me.passRound();
+			AudioManager.playSFX('pass');
+		}, false);
 		document.getElementById("click-background").addEventListener("click", () => ui.cancel(), false);
 		this.youtube;
 		this.ytActive;
 		this.toggleMusic_elem = document.getElementById("toggle-music");
+		this.toggleSettings.push(this.toggleMusic_elem);
 		this.toggleMusic_elem.classList.add("fade");
 		this.toggleMusic_elem.addEventListener("click", () => this.toggleMusic(), false);
 		this.toggleNotifications_elem = document.getElementById("toggle-notifications");
+		this.toggleSettings.push(this.toggleNotifications_elem);
 		this.toggleNotifications_elem.addEventListener("click", () => this.toggleNotifications(), false);
 		if (!Settings.notifications.isEnabled())
 			this.toggleNotifications_elem.classList.add("fade");
+		this.toggleSFX_elem = document.getElementById("toggle-sfx");
+		this.toggleSettings.push(this.toggleSFX_elem);
+		this.toggleSFX_elem.addEventListener('click', () => this.toggleSFX())
+		if (!Settings.soundEffects.isEnabled())
+			this.toggleSFX_elem.classList.add("fade");
+
+		EventManager.gameOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.remove('deck-menu')));
+		EventManager.customizationOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.add('deck-menu')));
 
 		[	'.text-button',
 			'.deck-options',
@@ -1906,6 +1920,19 @@ class UI {
 		else
 		{
 			this.toggleNotifications_elem.classList.add("fade");
+		}
+	}
+
+	toggleSFX() {
+		Settings.soundEffects.toggle();
+		const useSFX = Settings.soundEffects.isEnabled();
+		if (useSFX)
+		{
+			this.toggleSFX_elem.classList.remove("fade");
+		}
+		else
+		{
+			this.toggleSFX_elem.classList.add("fade");
 		}
 	}
 	
