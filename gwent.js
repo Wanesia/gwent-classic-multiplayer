@@ -2687,22 +2687,35 @@ class AudioManager
 	static init()
 	{
 		[
-			'turn_me', 'turn_op', "ui_card",
+			'turn_me', 'turn_op', "ui_card", 'ui_card_bank', 'open', 'draw',
 			'clear', 'fog', 'frost', 'rain', 
-			'horn', 'spy', 'medic', 'morale', 'scorch', 'bond',
+			'horn', 'spy', 'medic', 'morale', 'scorch', 'bond', 'decoy',
 			'hero', 'common_close', 'common_ranged', 'common_siege'
-		].forEach(s => AudioManager.source.push(getAudio(s)));
+		].forEach(s => AudioManager.source[s] = getAudio(s));
 	}
 
-	static async play(key)
+	static async play(key, waitTime = -1, forceWait = false)
 	{
 		if (AudioManager.source[key])
 		{
 			const audio = AudioManager.source[key];
+			if (!audio)
+				return;
 			if (audio instanceof Audio)
 			{
-				audio.pause();
-				audio.currentTime = 0;
+				const isPlaying = audio.currentTime > 0 && !audio.paused && !audio.ended 
+				if (isPlaying)
+				{
+					audio.pause();
+					audio.currentTime = 0;
+				}
+				if (waitTime === -1 || (!forceWait && waitTime >= audio.duration * 1000))
+					return await asyncAudio(audio);
+				else
+				{
+					audio.play();
+					return await sleep(waitTime);
+				}
 			}
 			return await audio.play();
 		}
@@ -2712,11 +2725,11 @@ class AudioManager
 		}
 	}
 
-	static async playSFX(key)
+	static async playSFX(key, waitTime = -1, forceWait = false)
 	{
 		if (Settings.soundEffects.isEnabled())
 		{
-			return await AudioManager.play(key);
+			return await AudioManager.play(key, waitTime, forceWait);
 		}
 	}
 }
@@ -3163,6 +3176,7 @@ var board = new Board();
 var weather = new Weather();
 var game = new Game();
 var player_me, player_op;
+AudioManager.init();
 
 ui.enablePlayer(false);
 let dm = new DeckMaker();
