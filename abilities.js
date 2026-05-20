@@ -3,23 +3,28 @@
 var ability_dict = {
 	clear: {
 		name: "Clear Weather",
-		description: "Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects. "
+		description: "Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects. ",
+		audio: "clear"
 	},
 	frost: {
 		name: "Biting Frost",
-		description: "Sets the strength of all Close Combat cards to 1 for both players. "
+		description: "Sets the strength of all Close Combat cards to 1 for both players. ",
+		audio: "cold"
 	},
 	fog: {
 		name: "Impenetrable Fog",
-		description: "Sets the strength of all Ranged Combat cards to 1 for both players. "
+		description: "Sets the strength of all Ranged Combat cards to 1 for both players. ",
+		audio: "fog"
 	},
 	rain: {
 		name: "Torrential Rain",
-		description: "Sets the strength of all Siege Combat cards to 1 for both players. "
+		description: "Sets the strength of all Siege Combat cards to 1 for both players. ",
+		audio: "rain"
 	},
 	storm: {
 		name: "Skellige Storm",
-		description: "Reduces the Strength of all Range and Siege Units to 1. "
+		description: "Reduces the Strength of all Range and Siege Units to 1. ",
+		audio: "rain"
 	},
 	hero: {
 		name: "hero",
@@ -27,12 +32,16 @@ var ability_dict = {
 	},
 	decoy: {
 		name: "Decoy",
+		audio: "decoy",
 		description: "Swap with a card on the battlefield to return it to your hand. "
 	},
 	horn: {
 		name: "Commander's Horn",
 		description: "Doubles the strength of all unit cards in that row. Limited to 1 per row. ",
-		placed: async card => await card.animate("horn")
+		audio: "horn",
+		placed: async card => {
+			await card.animate("horn");
+		}
 	},
 	mardroeme: {
 		name: "Mardroeme",
@@ -70,8 +79,11 @@ var ability_dict = {
 			let scorched = maxUnits.filter( p => p[1][0].power === maxPower);
 			let cards = scorched.reduce( (a,p) => a.concat( p[1].map(u => [p[0], u])), []);
 			
-			await Promise.all(cards.map( async u => await u[1].animate("scorch", true, false)) );
-			await Promise.all(cards.map( async u => await board.toGrave(u[1], u[0])) );
+			if (cards.length)
+			{
+				await Promise.all(cards.map( async u => await u[1].animate("scorch", true, false)) );
+				await Promise.all(cards.map( async u => await board.toGrave(u[1], u[0])) );
+			}
 		}
 	},
 	scorch_c: {
@@ -115,6 +127,7 @@ var ability_dict = {
 	spy: {
 		name: "spy",
 		description: "Place on your opponent's battlefield (counts towards your opponent's total) and draw 2 cards from your deck. ",
+		audio: "spy",
 		placed: async (card) => {
 			await card.animate("spy");
 			for (let i=0;i<2;i++) {
@@ -122,11 +135,13 @@ var ability_dict = {
 					await card.holder.deck.draw(card.holder.hand);
 			}
 			card.holder = card.holder.opponent();
+			AudioManager.playSFX('draw');
 		}
 	},
 	medic: {
 		name: "medic",
 		description: "Choose one card from your discard pile and play it instantly (no Heroes or Special Cards). ",
+		audio: "medic",
 		placed: async (card) => {
 			let grave = board.getRow(card, "grave", card.holder);
 			let units = card.holder.grave.findCards(c => c.isUnit());
@@ -209,11 +224,15 @@ var ability_dict = {
 	morale: {
 		name: "Morale",
 		description: "Adds +1 to all units in the row (excluding itself). ",
-		placed: async card => await card.animate("morale")
+		audio: "morale",
+		placed: async card => {
+			await card.animate("morale");
+		}
 	},
 	bond: {
 		name: "Tight Bond",
 		description: "Place next to a card with the same name to double the strength of both cards. ",
+		audio: "bond",
 		placed: async card => {
 			let bonds = board.getRow(card, card.row, card.holder).findCards(c => c.name === card.name);
 			if (bonds.length > 1)
@@ -484,6 +503,7 @@ var ability_dict = {
 	crach_an_craite: {
 		description: "Shuffle all cards from each player's graveyard back into their decks.",
 		activated: async card => {
+			AudioManager.playSFX('redraw');
 			Promise.all(card.holder.grave.cards.map(c => board.toDeck(c, card.holder.grave)));
 			await Promise.all(card.holder.opponent().grave.cards.map(c => board.toDeck(c, card.holder.opponent().grave)));
 		},
