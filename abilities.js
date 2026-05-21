@@ -187,21 +187,7 @@ var ability_dict = {
 					}
 					else
 					{
-						ui.setSelectable(null, false);
-						ui.showPreview(wrapper.card, false);
-						ui.enablePlayer(true);
-						let bRowSelected = false;
-						const rowSelect = event => {
-							const {row, player} = event.detail;
-							bRowSelected = true;
-							selectedRow = row;
-						};
-						EventManager.rowSelected.bind(rowSelect);
-						EventManager.previewCancelled.bind(rowSelect);
-						await sleepUntil(() => bRowSelected === true);
-						EventManager.rowSelected.unbind(rowSelect);
-						EventManager.previewCancelled.unbind(rowSelect);
-						ui.hidePreview();
+						selectedRow = await ui.waitForRowSelection(wrapper.card);
 						if (!selectedRow)
 						{
 							return;

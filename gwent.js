@@ -2222,7 +2222,30 @@ class UI {
 				row.elem.classList.add("noclick");
 			}
 		}
-	
+	}
+
+	// used to handle row selection when resetoring agile units via medics
+	async waitForRowSelection(card)
+	{
+		game.placedEffectsActive = true;
+		ui.setSelectable(null, false);
+		ui.showPreview(card, false);
+		ui.enablePlayer(true);
+		let selectedRow = null;
+		let bRowSelected = false;
+		const rowSelect = event => {
+			const {row, player} = event.detail;
+			bRowSelected = true;
+			selectedRow = row;
+		};
+		EventManager.rowSelected.bind(rowSelect);
+		EventManager.previewCancelled.bind(rowSelect);
+		await sleepUntil(() => bRowSelected === true);
+		EventManager.rowSelected.unbind(rowSelect);
+		EventManager.previewCancelled.unbind(rowSelect);
+		ui.hidePreview();
+		game.placedEffectsActive = false;
+		return selectedRow;
 	}
 }
 
