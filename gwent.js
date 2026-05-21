@@ -1066,14 +1066,17 @@ class Row extends CardContainer {
 	// Activates weather effect and visuals
 	addOverlay(overlay){
 		this.effects.weather = true;
-		this.elem_parent.getElementsByClassName("row-weather")[0].classList.add(overlay);
+		const elem = this.elem_parent.getElementsByClassName("row-weather")[0];
+		elem.classList.add(overlay);
+		fadeIn(elem, 500);
 		this.updateScore();
 	}
 	
 	// Deactivates weather effect and visuals
 	removeOverlay(overlay){
 		this.effects.weather = false;
-		this.elem_parent.getElementsByClassName("row-weather")[0].classList.remove(overlay);
+		const elem = this.elem_parent.getElementsByClassName("row-weather")[0];
+		fadeOut(elem, 500).then(() => elem.classList.remove(overlay));	
 		this.updateScore();
 	}
 	

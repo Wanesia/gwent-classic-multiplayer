@@ -980,6 +980,7 @@ main { background-image: url('img/boardtest8.png'); }
 	background-size: cover;
 	background-position: bottom;
 	background-repeat: no-repeat;
+	opacity: 0;
 }
 .frost { background-image: url('img/icons/overlay_frost.png'); }
 .rain  { background-image: url('img/icons/overlay_rain.png');  }
