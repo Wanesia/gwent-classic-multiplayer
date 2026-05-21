@@ -4,6 +4,8 @@ class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 
 const DURATION_CARD_PLACEMENT = 1000;
 
+const DUR_FADE_STEP = 10;
+
 const CLICK_EVENT_SFX = () => AudioManager.playSFX('ui_card');
 
 const addMouseEnterSFXBySelector = selector => {
@@ -2077,12 +2079,12 @@ class UI {
 			return;
 		if (!duration)
 			duration = 1200;
-		duration = Math.max(400, duration);
 		const fadeSpeed = 150;
+		duration = Math.max(400, duration - 2*fadeSpeed);
 		this.notif_elem.children[0].id = "notif-" + name;
-		fadeIn(this.notif_elem, fadeSpeed);
-		fadeOut(this.notif_elem, fadeSpeed, duration - fadeSpeed);
+		await fadeIn(this.notif_elem, fadeSpeed);
 		await sleep(duration);
+		await fadeOut(this.notif_elem, fadeSpeed);
 	}
 	
 	// Displays a cancellable Carousel for a single card 
@@ -3180,39 +3182,39 @@ async function translate(elem, x, y){
 }
 
 // Fades out an element until hidden over the duration
-async function fadeOut(elem, duration, delay) {
-	await fade(false, elem, duration, delay);
+async function fadeOut(elem, duration) {
+	await fade(false, elem, duration);
 }
 
 // Fades in an element until opaque over the duration
-async function fadeIn(elem, duration, delay){
-	await fade(true, elem, duration, delay);
+async function fadeIn(elem, duration){
+	await fade(true, elem, duration);
 }
 
 // Fades an element over a duration 
-async function fade(fadeIn, elem, dur, delay){
-	if (delay)
-		await sleep(delay)
-	let op = fadeIn ?  0.1 : 1;
-	elem.style.opacity = op;
-	elem.style.filter = "alpha(opacity=" + (op * 100) + ")";
-	if (fadeIn)
-		elem.classList.remove("hide");
-	let timer = setInterval( async function() {
-		op += op * (fadeIn ? 0.1 : -0.1);
-		if (op >= 1) {
-			clearInterval(timer);
-			return;
-		} else if (op <= 0.1) {
-			elem.classList.add("hide");
-			elem.style.opacity = "";
-			elem.style.filter = "";
-			clearInterval(timer);
-			return;
-		}
-		elem.style.opacity = op;
-		elem.style.filter = "alpha(opacity=" + (op * 100) + ")";
-	}, dur/24);
+async function fade(fadeIn, elem, dur){
+	if (!elem)
+		return;
+	return new Promise(res => {
+		const startingOpacity = toInteger(elem.style.opacity);
+		const endOpacity = fadeIn ? 1 : 0;
+		const startTime = Date.now();
+		const endTime = startTime + dur;
+		if (fadeIn)
+			elem.classList.remove('hide');
+		const timer = setInterval(() => {
+			const currTime = Date.now();
+			const op = clamp(startingOpacity, endOpacity, map(startTime, endTime, startingOpacity, endOpacity, currTime));
+			elem.style.opacity = op;
+			if (op === endOpacity)
+			{
+				clearInterval(timer);
+				if (!fadeIn)
+					elem.classList.add('hide');
+				res();
+			}
+		}, DUR_FADE_STEP);
+	});
 }
 
 //      Get Image paths   
@@ -3268,21 +3270,6 @@ function asyncAudio(audio)
 		audio.play();
 		audio.onended = r;
 	});
-}
-
-// Returns true if n is an Number
-function isNumber(n) { 
-	return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-// Returns true if s is a String
-function isString(s){
-	return typeof(s) === 'string' || s instanceof String;
-}
-
-// Returns a random integer in the range [0,n)
-function randomInt(n)  {
-	return Math.floor(Math.random() * n);
 }
 
 // Pauses execution until the passed number of milliseconds as expired

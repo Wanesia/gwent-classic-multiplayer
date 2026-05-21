@@ -152,6 +152,7 @@ html {
 	height: 14%;
 	top: 43%;
 	background-color: rgba(10,10,10,0.95);
+	opacity: 0;
 	z-index: 100;
 }
 
