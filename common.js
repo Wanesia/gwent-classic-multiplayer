@@ -23,3 +23,24 @@ class RGBA
 	}
 }
 
+function clamp(min, max, val)
+{
+	if (min > max)
+		return clamp(max, min, val);
+	return Math.min(max, Math.max(min, val));
+}
+
+function lerp(a, b, t)
+{
+	return (1-t)*a + t*b;
+}
+
+function inverseLerp(a, b, t)
+{
+	return (t - a) / (b - a);
+}
+
+function map(a, b, y, z, t)
+{
+	return lerp(y, z, inverseLerp(a, b, t));
+}
