@@ -334,10 +334,10 @@ var ability_dict = {
 				return;
 			}
 			Carousel.curr.cancel();
-			await ui.queueCarousel(grave, 1, (c,i) => {
+			await ui.queueCarousel(grave, 1, async (c,i) => {
 				let newCard = c.cards[i];
 				newCard.holder = card.holder;
-				board.toHand(newCard, grave);
+				await board.toHand(newCard, grave);
 			}, c => c.isUnit(), true);
 		},
 		weight: (card, ai, max, data) => ai.weightMedic(data, 0, card.holder.opponent())
