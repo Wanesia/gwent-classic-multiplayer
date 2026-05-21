@@ -204,7 +204,7 @@ var card_dict = JSON.parse(
 + ', { "name": "Madman Lugos", "id": "", "deck": "skellige", "row": "close", "strength": "6", "ability": "", "filename": "madmad_lugos", "count": "1" }'
 + ', { "name": "Mardroeme", "id": "", "deck": "special", "row": "", "strength": "", "ability": "mardroeme", "filename": "mardroeme", "count": "3" }'
 + ', { "name": "Olaf", "id": "", "deck": "skellige", "row": "agile", "strength": "12", "ability": "morale", "filename": "olaf", "count": "1" }'
-+ ', { "name": "Skellige Storm", "id": "", "deck": "weather", "row": "", "strength": "", "ability": "rain fog", "filename": "storm", "count": "3" }'
++ ', { "name": "Skellige Storm", "id": "", "deck": "weather", "row": "", "strength": "", "ability": "storm rain fog", "filename": "storm", "count": "3" }'
 + ', { "name": "Svanrige", "id": "", "deck": "skellige", "row": "close", "strength": "4", "ability": "", "filename": "svanrige", "count": "1" }'
 + ', { "name": "Transformed Vildkaarl", "id": "", "deck": "skellige", "row": "close", "strength": "14", "ability": "morale", "filename": "vildkaarl", "count": "0" }'
 + ', { "name": "Transformed Young Vildkaarl", "id": "", "deck": "skellige", "row": "ranged", "strength": "8", "ability": "bond", "filename": "young_vildkaarl", "count": "0" }'
