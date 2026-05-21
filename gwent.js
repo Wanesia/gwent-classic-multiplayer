@@ -1428,6 +1428,7 @@ class Game {
 	async startGame() {
 		EventManager.gameOpened.dispatch();
 		this.initPlayers(player_me, player_op);
+		this.setState(GameState.PLAYING);
 		AudioManager.playSFX('game_opening');
 		await this.runEffects(this.gameStart);
 		await this.coinToss();
@@ -1437,8 +1438,9 @@ class Game {
 			await player_op.deck.draw(player_op.hand);
 		}));
 		AudioManager.playSFX("game_start");
-		this.setState(GameState.PLAYING);
-		this.initialRedraw();
+		await this.initialRedraw();
+		this.currPlayer = this.firstPlayer;
+		this.startRound();
 	}
 	
 	// Simulated coin toss to determine who starts game
@@ -1458,13 +1460,12 @@ class Game {
 			await player_me.deck.swap(c, c.removeCard(i));
 		}, c => true, true, true, "Choose up to 2 cards to redraw.");
 		ui.enablePlayer(false);
-		game.startRound();
 	}
 	
 	// Initiates a new round of the game
 	async startRound(){
+		this.firstPlayer = this.currPlayer;
 		this.roundCount++;
-		this.currPlayer = (this.roundCount%2 === 0) ? this.firstPlayer : this.firstPlayer.opponent();
 		EventManager.roundStarted.dispatch(this.roundCount, this.currPlayer);
 		if (this.roundCount === 1)
 			AudioManager.playSFX("round1_start");
@@ -1482,21 +1483,14 @@ class Game {
 			this.currPlayer = this.currPlayer.opponent();
 		
 		await ui.notification("round-start", 1200);
-		if (this.currPlayer.opponent().passed)
-		{
-			AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
-			await ui.notification(this.currPlayer.tag + "-turn", 1200);
-		}
+		AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
+		await ui.notification(this.currPlayer.tag + "-turn", 1200);
 		this.startTurn();
 	}
 	
 	// Starts a new turn. Enables client interraction in client's turn.
 	async startTurn() {
 		await this.runEffects(this.turnStart);
-		if (!this.currPlayer.opponent().passed){
-			this.currPlayer = this.currPlayer.opponent();
-			await ui.notification(this.currPlayer.tag + "-turn", 1200);
-		}
 		ui.enablePlayer(this.currPlayer === player_me);
 		this.currPlayer.startTurn();
 	}
@@ -1511,7 +1505,15 @@ class Game {
 		if (player_op.passed && player_me.passed)
 			this.endRound();
 		else
-			this.startTurn();
+		{
+			if (!this.currPlayer.opponent().passed)
+			{
+				this.currPlayer = this.currPlayer.opponent();
+				AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
+				await ui.notification(this.currPlayer.tag + "-turn", 1200);
+			}
+			await this.startTurn();
+		}
 	}
 	
 	// Ends the round and may end the game. Determines final scores and the round winner.
@@ -1552,7 +1554,10 @@ class Game {
 		if (player_me.health === 0 || player_op.health === 0)
 			this.endGame();
 		else
+		{
+			this.currPlayer = dif < 0 ? player_op : dif > 0 ? player_me : this.firstPlayer;
 			this.startRound();
+		}
 	}
 	
 	// Sets up and displays the end-game screen
