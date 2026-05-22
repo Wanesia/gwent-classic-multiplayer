@@ -2877,7 +2877,7 @@ class AudioManager
 		[
 			'turn_me', 'turn_op', "ui_card", 'ui_card_bank', 'open', 'draw',
 			'clear', 'fog', 'frost', 'rain', 
-			'horn', 'spy', 'medic', 'morale', 'scorch', 'bond', 'decoy',
+			'horn', 'spy', 'medic', 'morale', 'scorch', 'bond', 'decoy', "mardroeme",
 			'hero', 'common_close', 'common_ranged', 'common_siege'
 		].forEach(s => AudioManager.source[s] = getAudio(s));
 	}

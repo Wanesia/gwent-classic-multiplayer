@@ -67,7 +67,7 @@ var ability_dict = {
 			if (card.abilities.includes('vildkarrl'))
 			{
 				card.abilities.remove('vildkarrl');
-				await AudioManager.playSFX("mardoreme", 1000);
+				await AudioManager.playSFX("mardroeme", 1000);
 				setTimeout(()=>card.placed.remove(ability_dict['vildkarrl'].placed), 5000);
 			}
 		}
