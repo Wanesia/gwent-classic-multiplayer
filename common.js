@@ -1,5 +1,12 @@
 "use strict"
 
+Array.prototype.remove = function(elem)
+{
+	const index = this.indexOf(elem);
+	if (index !== -1)
+		this.splice(index, 1);
+}
+
 class RGBA
 {
 	constructor(r, g, b, a = 1)
