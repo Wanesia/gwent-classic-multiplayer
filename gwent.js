@@ -994,10 +994,12 @@ class Row extends CardContainer {
 	async playPlacementAudio(card)
 	{
 		let key;
-		if (card.abilities.includes('decoy'))
-			key = 'decoy';
-		else if (card.abilities.includes('spy'))
+		if (card.abilities.includes('spy') || card.abilities.includes('vildkarrl'))
 			return;
+		else if (card.abilities.includes('berserker') && this.effects.mardroeme >= 1)
+			return;
+		else if (card.abilities.includes('decoy'))
+			key = 'decoy';
 		else if (card.isHero())
 		{
 			key = "hero";

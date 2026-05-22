@@ -47,7 +47,7 @@ var ability_dict = {
 		name: "Mardroeme",
 		description: "Triggers transformation of all Berserker cards on the same row. ",
 		placed: async (card, row) => {
-			let berserkers = row.findCards(c => c.abilities.includes("berserker"));
+			const berserkers = row.findCards(c => c.abilities.includes("berserker"));
 			await Promise.all(berserkers.map(async c => await ability_dict["berserker"].placed(c, row)));
 		}
 	},
@@ -58,8 +58,18 @@ var ability_dict = {
 			if (row.effects.mardroeme === 0)
 				return;
 			row.removeCard(card);
-			let cardId = card.name.indexOf("Young") === -1 ? 206 : 207;
+			const cardId = card.name.indexOf("Young") === -1 ? 206 : 207;
 			await row.addCard(new Card(card_dict[cardId], card.holder));
+		}
+	},
+	vildkarrl: {
+		placed: async (card, row) => {
+			if (card.abilities.includes('vildkarrl'))
+			{
+				card.abilities.remove('vildkarrl');
+				await AudioManager.playSFX("mardoreme", 1000);
+				setTimeout(()=>card.placed.remove(ability_dict['vildkarrl'].placed), 5000);
+			}
 		}
 	},
 	scorch: {
