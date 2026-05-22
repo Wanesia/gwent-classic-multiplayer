@@ -1152,10 +1152,11 @@ class Row extends CardContainer {
 	}
 	
 	// Removes all cards and effects from this row
-	clear() {
+	async clear() {
+		const toGrave  = this.cards.filter(c => !c.noRemove);
 		if (this.special != null)
-			board.toGrave(this.special, this);
-		this.cards.filter(c => !c.noRemove).forEach(c => board.toGrave(c, this) );
+			toGrave.push(this.special);
+		await Promise.all(toGrave.map(async c => await board.toGrave(c, this)));
 	}
 
 	// Returns all regular unit cards with the heighest power
@@ -1245,7 +1246,7 @@ class Weather extends CardContainer {
 	
 	// Removes all weather effects and cards
 	async clearWeather() {
-		await Promise.all(this.cards.map((c,i)=>this.cards[this.cards.length-i-1]).map(c => board.toGrave(c, this)));
+		await Promise.all(this.cards.map((c,i)=>this.cards[this.cards.length-i-1]).map(async c => await board.toGrave(c, this)));
 	}
 	
 	// Override
@@ -1340,6 +1341,14 @@ class Board {
 		let dif = player_me.total - player_op.total;
 		player_me.setWinning(dif > 0);
 		player_op.setWinning(dif < 0);
+	}
+
+	async clearRound()
+	{
+		await Promise.all([
+			await weather.clearWeather(),
+			...board.row.map(async row => await row.clear())
+		]);
 	}
 }
 
@@ -1532,12 +1541,10 @@ class Game {
 		
 		await this.runEffects(this.roundEnd);
 		
-		board.row.forEach( row => row.clear() );
-		weather.clearWeather();
-		
 		player_me.endRound( dif > 0);
 		player_op.endRound( dif < 0);
 		
+		let notificationKey = "";
 		if (dif > 0)
 		{
 			AudioManager.playSFX("round_win");
@@ -1553,6 +1560,12 @@ class Game {
 			AudioManager.playSFX("round_lose");
 			await ui.notification("draw-round", 1200);
 		}
+
+		await Promise.all([
+			await board.clearRound(),
+			await ui.notification(notificationKey, 1200)
+		]);
+
 		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
 		if (player_me.health === 0 || player_op.health === 0)
 			this.endGame();
