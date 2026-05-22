@@ -18,12 +18,12 @@ var factions = {
 	},
 	monsters: {
 		name: "Monsters",
-		factionAbility: player => game.roundEnd.push( () => {
-			let units = board.row.filter( (r,i) => player === player_me ^ i < 3)
+		factionAbility: player => game.roundEnd.push(() => {
+			const units = board.row.filter( (r,i) => player === player_me ^ i < 3)
 				.reduce((a,r) => r.cards.filter(c => c.isUnit()).concat(a), []);
 			if (units.length === 0)
 				return;
-			let card = units[randomInt(units.length)];
+			const card = units[randomInt(units.length)];
 			card.noRemove = true;
 			game.roundStart.push( async () => {
 				await ui.notification("monsters", 1200);
