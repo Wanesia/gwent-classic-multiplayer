@@ -1550,17 +1550,17 @@ class Game {
 		if (dif > 0)
 		{
 			AudioManager.playSFX("round_win");
-			await ui.notification("win-round", 1200);
+			notificationKey = "win-round";
 		}	
 		else if (dif < 0)
 		{
 			AudioManager.playSFX("round_lose");
-			await ui.notification("lose-round", 1200);
+			notificationKey = "lose-round";
 		}
 		else
 		{
 			AudioManager.playSFX("round_lose");
-			await ui.notification("draw-round", 1200);
+			notificationKey = "draw-round";
 		}
 
 		await Promise.all([
