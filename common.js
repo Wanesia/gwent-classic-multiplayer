@@ -7,6 +7,16 @@ Array.prototype.remove = function(elem)
 		this.splice(index, 1);
 }
 
+function isEmpty(obj)
+{
+	for (const property in obj)
+	{
+		if (Object.hasOwn(obj, property))
+			return false;
+	}
+	return true;
+}
+
 class RGBA
 {
 	constructor(r, g, b, a = 1)
