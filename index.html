@@ -273,6 +273,20 @@
 		<p>0</p>
 	</div>
 	<button id="start-game">Start game</button>
+	<div id="opponent-preview" class="center">
+		<div>
+			<p>Oponent's Deck</p>
+		</div>
+		<div class="center">
+			<button id="op-preview-open" data-title="View opponent"></button>
+			<div id="op-preview-faction" class="hide"></div>
+			<label id="op-preview-leader" for="add-opponent" data-title="Upload opponent">
+				<input type="file" id="add-opponent" style="display:none;"/>
+				<p>Random</p>
+			</label>
+			<button id="op-preview-clear" data-title="Clear opponent"></button>
+		</div>
+	</div>
 </section>
 
 <div data-title="Toggle music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>

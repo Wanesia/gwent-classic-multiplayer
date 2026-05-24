@@ -828,6 +828,7 @@ class Grave extends CardContainer {
 	setCardOffset(card, n){
 		card.elem.style.left =  -0.03 * n +"vw";
 	}
+
 }
 
 // Contains a randomized set of cards to be drawn from
@@ -844,15 +845,13 @@ class Deck extends CardContainer {
 	
 	// Creates duplicates of cards with a count of more than one, then initializes deck
 	initializeFromID(card_id_list, player){
-		this.initialize( card_id_list.reduce((a,c) => a.concat(clone(c.count, card_dict[c.index])), []), player);
-		function clone(n ,elem) { for (var  i=0, a=[]; i<n; ++i) a.push(elem); return a; }
+		this.initialize(Card.expandIDCounts(card_id_list), player);
 	}
 	
 	// Populates a this deck with a list of card data and associated those cards with the owner of this deck.
 	initialize(card_data_list, player){
 		for (let i=0; i<card_data_list.length; ++i) {
 			let card = new Card(card_data_list[i], player);
-			card.holder = player;
 			this.addCardRandom(card);
 			this.addCardElement();
 		}
@@ -1847,6 +1846,20 @@ class Card {
 		elem.addEventListener('mouseenter', CLICK_EVENT_SFX);
 		return elem;
 	}
+
+	
+	// Takes ID-Count object pairs and expands to a list of corresponding IDs
+	static expandIDCounts(card_id_list)
+	{
+		return card_id_list.reduce((a,c) => a.concat(clone(c.count, card_dict[c.index])), []);
+		function clone(n ,elem) { for (var  i=0, a=[]; i<n; ++i) a.push(elem); return a; }
+	}
+
+	// Takes ID-Count object pairs and returns a list of corresponding Cards
+	static getCardsFromIdCounts(card_id_list, player)
+	{
+		return Card.expandIDCounts(card_id_list).map(e => new Card(e, player));
+	}
 }
 
 // Handles notifications and client interration with menus
@@ -1886,7 +1899,9 @@ class UI {
 		[	'.settings-button',
 			'.deck-options',
 			'#pass-button',
-			'#end-screen>button'
+			'#end-screen>button',
+			'#op-preview-leader',
+			'#opponent-preview button'
 		].forEach(addMouseEnterSFXBySelector);
 	}
 	
@@ -2479,14 +2494,20 @@ class DeckMaker {
 		this.leader_elem = document.getElementById("card-leader");
 		this.leader_elem.children[1].addEventListener("click", () => this.selectLeader(), false);
 		this.leader_elem.children[1].addEventListener('mouseenter', CLICK_EVENT_SFX);
-		
 		this.loadFactionDeck(Settings.lastFaction.get(), true);
-		
+
+		this.opponentData = Settings.opponentDeckCustom.get();
+		this.updatedCustomOpponent();
+		document.getElementById('op-preview-clear').addEventListener('click', () => this.clearOpponentDeck());
+		document.getElementById('op-preview-open').addEventListener('click', ()=>this.viewOponentCards());
+		document.getElementById("add-opponent").addEventListener("change", () => this.uploadOpponentDeck(), false);
+
+
 		this.change_elem = document.getElementById("change-faction");
 		this.change_elem.addEventListener("click", () => this.selectFaction(), false);
 		
 		document.getElementById("download-deck").addEventListener("click", () => this.downloadDeck(), false);
-		document.getElementById("add-file").addEventListener("change", () => this.uploadDeck(), false);
+		document.getElementById("add-file").addEventListener("change", () => this.uploadPlayerDeck(), false);
 		document.getElementById("start-game").addEventListener("click", () => this.startNewGame(), false);
 		document.getElementById("start-game").addEventListener("mouseenter", CLICK_EVENT_SFX, false);
 	}
@@ -2743,21 +2764,31 @@ class DeckMaker {
 		}
 			
 		
-		let me_deck = { 
+		const me_deck = { 
 			faction: this.faction,
 			leader: card_dict[this.leader.index], 
 			cards: this.deck.filter(x => x.count > 0)
 		};
 		
-		let op_deck = JSON.parse( premade_deck[randomInt(Object.keys(premade_deck).length)] );
-		op_deck.cards = op_deck.cards.map(c => ({index:c[0], count:c[1]}) );
-		//op_deck.leader = card_dict[op_deck.leader];
-		
-		let leaders = card_dict.filter(c => c.row === "leader" && c.deck === op_deck.faction);
-		op_deck.leader = leaders[randomInt(leaders.length)];
+
+		let op_deck;
+		if (isEmpty(dm.opponentData))
+		{
+			op_deck = JSON.parse( premade_deck[randomInt(Object.keys(premade_deck).length)] );
+			op_deck.cards = op_deck.cards.map(c => ({index:c[0], count:c[1]}) );
+			const leaders = card_dict.filter(c => c.row === "leader" && c.deck === op_deck.faction);
+			op_deck.leader = leaders[randomInt(leaders.length)];
+		}
+		else
+		{
+			op_deck = {};
+			op_deck.cards = dm.opponentData.cards;
+			op_deck.leader = card_dict[dm.opponentData.leader];
+			op_deck.faction = op_deck.leader.deck;
+		}
 		//op_deck.leader = card_dict.filter(c => c.row === "leader")[12];
 		
-		player_me = new Player(0, "Player 1", me_deck );
+		player_me = new Player(0, "Player 1", me_deck);
 		player_op = new Player(1, "Player 2", op_deck);
 		
 		this.elem.classList.add("hide");
@@ -2783,22 +2814,38 @@ class DeckMaker {
 		hidden_elem.download = "GwentDeck.json";
 		hidden_elem.click();
 	}
-	
-	// Called by the client to upload a JSON file representing a new deck
-	uploadDeck() {
-		let files = document.getElementById("add-file").files;
+
+	uploadDeck(id, callback)
+	{
+		let files = document.getElementById(id).files;
 		if (files.length <= 0)
 			return false;
 		let fr = new FileReader();
 		fr.onload = e => {
 			try {
-				this.deckFromJSON(e.target.result);
+				const deck = this.deckFromJSON(e.target.result);
+				if (deck)
+					callback(deck);
+				
 			} catch (e) {
 				alert("Uploaded deck is not formatted correctly!");
 			}
+			finally
+			{
+				document.getElementById(id).value = "";
+			}
 		}
 		fr.readAsText(files.item(0));
-		document.getElementById("add-file").value = "";
+	}
+	
+	// Called by the client to upload a JSON file representing a new deck
+	uploadPlayerDeck() {
+		this.uploadDeck("add-file", deck => this.loadPlayerDeck(deck, false));
+	}
+
+	uploadOpponentDeck()
+	{
+		this.uploadDeck('add-opponent', deck => this.loadOpponentDeck(deck, false));
 	}
 	
 	// Creates a deck from a JSON file's contents and sets that as the current deck
@@ -2807,18 +2854,18 @@ class DeckMaker {
 		let deck;
 		try {
 			deck = JSON.parse(json);
+			return deck;
 		} catch (e) {
 			AudioManager.playSFX('warning');
 			alert("Uploaded deck is not parsable!");
 			return;
 		}
-		this.loadDeck(deck, false);
 	}
 
-	loadDeck(deck, silent = true)
+	loadDeck(deck, siilent = true)
 	{
 		if (!deck)
-			return;
+			return null;
 		let warning = "";
 		// verify that leader card is actually a leader and that it's faction matches the deck faction
 		if (card_dict[deck.leader].row !== "leader")
@@ -2849,22 +2896,78 @@ class DeckMaker {
 		{
 			if (silent)
 			{
-				return;
+				return null;
 			}
 			AudioManager.playSFX('warning');
 			if (confirm(warning + "\n\n\Continue importing deck?"))
 			{
-				return;
+				return null;
 			}
 		}
-		// Use deck to update current faction and cards
-		this.setFaction(deck.faction, true);
-		if (card_dict[deck.leader].row === "leader" && deck.faction === card_dict[deck.leader].deck){
-			this.leader = this.leaders.filter(c => c.index === deck.leader)[0];
+		return {faction: deck.faction, leader: deck.leader, cards: cards};
+	}
+
+	loadPlayerDeck(deck, silent = true)
+	{
+		const loadedDeck = this.loadDeck(deck, silent);
+		if (!loadedDeck)
+			return;
+		
+		// Use deck to update current player faction and cards in deck maker
+		this.setFaction(loadedDeck.faction, true);
+		if (card_dict[loadedDeck.leader].row === "leader" && loadedDeck.faction === card_dict[loadedDeck.leader].deck){
+			this.leader = this.leaders.filter(c => c.index === loadedDeck.leader)[0];
 			this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
 		}
 		this.makeBank(deck.faction, cards);
 		this.update();
+	}
+
+	loadOpponentDeck(deck, silent = true)
+	{
+		const loadedDeck = this.loadDeck(deck, silent);
+		if (!loadedDeck)
+			return;
+		this.opponentData = loadedDeck;
+		Settings.opponentDeckCustom.set(loadedDeck);
+		this.updatedCustomOpponent();
+	}
+
+	async clearOpponentDeck()
+	{
+		Settings.opponentDeckCustom.clear();
+		this.opponentData = Settings.opponentDeckCustom.get();
+		this.updatedCustomOpponent();
+	}
+
+	updatedCustomOpponent()
+	{
+		const factionElem = document.getElementById('op-preview-faction');
+		const leaderElem = document.getElementById('op-preview-leader');
+		const buttons = ['op-preview-clear', 'op-preview-open'].map(id=>document.getElementById(id));
+		if (isEmpty(this.opponentData))
+		{
+			leaderElem.children[1].innerHTML = "Random";
+			[factionElem, ...buttons].forEach(e=>e.classList.add('hide'));
+		}
+		else
+		{
+			factionElem.style.setProperty('background-image', iconURL('deck_shield_' + this.opponentData.faction));
+			leaderElem.children[1].innerHTML = card_dict[this.opponentData.leader].name;
+			[factionElem, ...buttons].forEach(e=>e.classList.remove('hide'));
+		}
+	}
+
+	viewOponentCards()
+	{
+		if (isEmpty(this.opponentData))
+			return;
+		// const leader = card_dict[this.opponentData.leader];
+		const leader = {index: this.opponentData.leader, count:1};
+		const container = new CardContainer();
+		//container.cards = [leader, ...Card.this.opponentData.cards];
+		container.cards = Card.getCardsFromIdCounts([leader, ...this.opponentData.cards]);
+		ui.queueCarousel(container, 1, ()=>{}, ()=>true, false, true, "Oponent's deck");
 	}
 }
 
@@ -3005,6 +3108,11 @@ class SavedObject
 		if (this.action)
 			this.action(this.obj);
 	}
+	clear()
+	{
+		this.obj = {};
+		localStorage?.removeItem(this.key);
+	}
 }
 
 class SavedDeck extends SavedObject
@@ -3016,7 +3124,10 @@ class SavedDeck extends SavedObject
 	get()
 	{
 		const temp_deck = {...super.get()};
-		temp_deck.cards = temp_deck.cards.map(c => ({index: c[0], count: c[1]}) );
+		if (temp_deck.cards)
+		{
+			temp_deck.cards = temp_deck.cards.map(c => ({index: c[0], count: c[1]}) );
+		}
 		return temp_deck;
 	}
 	set(newObj)
@@ -3073,6 +3184,7 @@ class Settings
 	static monstersDeck = new SavedDeck("gc-deck-monsters", premade_deck[4]);
 	static scoiataelDeck = new SavedDeck("gc-deck-scoiatael", premade_deck[6]);
 	static skelligesDeck = new SavedDeck("gc-deck-skellige", premade_deck[8]);
+	static opponentDeckCustom = new SavedDeck("gc-deck-opponent-custom");
 	
 	static getFactionSettings(factionName)
 	{
