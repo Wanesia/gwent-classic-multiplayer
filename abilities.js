@@ -453,7 +453,7 @@ var ability_dict = {
 		},
 		weight: card => {
 			let cards = ability_dict["francesca_hope"].helper(card);
-			return cards.reduce((a,c) => a + c.weight, 0);
+			return cards.reduce((a,e) => a + e.card.weight, 0);
 		},
 		helper: card => {
 			const close = board.getRow(card, "close");
