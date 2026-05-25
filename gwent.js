@@ -1646,7 +1646,12 @@ class Game {
 
 	exitGame()
 	{
-		this.returnToCustomization();
+		AudioManager.playSFX('warning');
+		ui.popup(
+			"Resume", ()=>{},
+			"Exit", ()=>this.returnToCustomization(),
+			"Quit curent game?" , "This will return you to the deck customization menu."
+		); 
 	}
 	
 	// Returns the client to the deck customization screen
