@@ -1397,9 +1397,11 @@ class Game {
 		this.endScreen = document.getElementById("end-screen");
 		let buttons = this.endScreen.getElementsByTagName("button");
 		this.customize_elem = buttons[0];
-		this.replay_elem = buttons[1];
+		this.rematch_elem = buttons[1];
+		this.newGame_elem = buttons[2];
 		this.customize_elem.addEventListener("click", () => this.returnToCustomization(), false);
-		this.replay_elem.addEventListener("click", () => this.restartGame(), false);
+		this.rematch_elem.addEventListener("click", () => this.rematchGame(), false);
+		this.newGame_elem.addEventListener("click", () => this.newOpponentGame(), false);
 		this.state = GameState.CUSTOMIZE;
 		this.reset();
 	}
@@ -1653,9 +1655,18 @@ class Game {
 		AudioManager.playSFX('menu_opening');
 		this.setState(GameState.CUSTOMIZE);
 	}
+
+	newOpponentGame()
+	{
+		this.reset();
+		player_me.reset();
+		player_op = new Player('op', 'Player 2', dm.constructOpponentDeck(false));
+		this.endScreen.classList.add("hide");
+		this.startGame();
+	}
 	
 	// Restarts the last game with the dame decks
-	restartGame(){
+	rematchGame(){
 		this.reset();
 		player_me.reset();
 		player_op.reset();
@@ -2793,17 +2804,25 @@ class DeckMaker {
 			AudioManager.playSFX("warning");
 			return alert(warning);
 		}
-			
 		
 		const me_deck = { 
 			faction: this.faction,
 			leader: card_dict[this.leader.index], 
 			cards: this.deck.filter(x => x.count > 0)
 		};
+		const op_deck = this.constructOpponentDeck(true);
 		
+		player_me = new Player(0, "Player 1", me_deck);
+		player_op = new Player(1, "Player 2", op_deck);
+		
+		this.elem.classList.add("hide");
+		game.startGame();
+	}
 
+	constructOpponentDeck(useCustom = true)
+	{
 		let op_deck;
-		if (isEmpty(dm.opponentData))
+		if (!useCustom || isEmpty(dm.opponentData))
 		{
 			op_deck = JSON.parse( premade_deck[randomInt(Object.keys(premade_deck).length)] );
 			op_deck.cards = op_deck.cards.map(c => ({index:c[0], count:c[1]}) );
@@ -2817,13 +2836,7 @@ class DeckMaker {
 			op_deck.leader = card_dict[dm.opponentData.leader];
 			op_deck.faction = op_deck.leader.deck;
 		}
-		//op_deck.leader = card_dict.filter(c => c.row === "leader")[12];
-		
-		player_me = new Player(0, "Player 1", me_deck);
-		player_op = new Player(1, "Player 2", op_deck);
-		
-		this.elem.classList.add("hide");
-		game.startGame();
+		return op_deck;
 	}
 	
 	// Converts the current deck to a JSON string
