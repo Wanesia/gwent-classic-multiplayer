@@ -252,7 +252,22 @@ class ControllerAI {
 	async scorch(card, max, data){
 		await this.player.playScorch(card);
 	}
-	
+
+	// Gets the row that would be best for the passed agile card
+	determineAgileRow(card)
+	{
+		const close = board.getRow(card, "close", card.holder);
+		const ranged = board.getRow(card, "ranged", card.holder);
+		const vClose = close.getVirtualCopy();
+		const vRanged = ranged.getVirtualCopy();
+		vClose.cards.push(card);
+		vClose.updateState(card, true);
+		vRanged.cards.push(card);
+		vRanged.updateState(card, true);
+		const dif = (vClose.calcScore() - close.calcScore()) - (vRanged.calcScore() - ranged.calcScore());
+		return dif > 0 ? close : dif < 0 ? ranged : Math.random() >0.5 ? close : ranged; 
+	}
+
 	// Assigns a weight for how likely the conroller is to Pass the round
 	weightPass(){
 		if (this.player.health === 1)
@@ -404,9 +419,14 @@ class ControllerAI {
 			return Math.max(0, this.weightWeather(card));
 		}
 		
-		let row = board.getRow(card, card.row === "agile" ? "close" : card.row, this.player);
+		let row;
+		if (card.row === 'agile')
+			row = this.determineAgileRow(card);
+		else
+			row = board.getRow(card, card.row === "agile" ? "close" : card.row, this.player);
 		let score = row.calcCardScore(card);
-		switch(card.abilities[card.abilities.length -1]) {
+		switch(card.abilities[card.abilities.length -1])
+		{
 			case "bond": 
 			case "morale":
 			case "horn":
@@ -1301,7 +1321,18 @@ class Board {
 	
 	// Sends and translates a card from the source to the Deck of the card's combat row
 	async toRow(card, source) {
-		let row = (card.row === "agile") ? "close" : card.row ? card.row : "close";
+		let row = card.row;
+		if (row === "agile")
+		{
+			if (card.holder.controller instanceof ControllerAI)
+			{
+				row = card.holder.controller.determineAgileRow(card).type;
+			}
+			else
+			{
+				row = "close";
+			}
+		}
 		await this.moveTo(card, row, source);
 	}
 	

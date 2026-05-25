@@ -483,7 +483,7 @@ var ability_dict = {
 						row.cards.push(agile[i]);
 						row.updateState(agile[i], true);
 					}
-					return {score: closeCopy.calcScore() + rangedCopy.calcScore() - card.holder.total, pattern: pattern};
+					return {score: closeCopy.calcScore() + rangedCopy.calcScore() - (close.calcScore() + ranged.calcScore()), pattern: pattern};
 				}
 				if (depth === 0)
 				{
