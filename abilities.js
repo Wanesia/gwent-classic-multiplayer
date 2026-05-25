@@ -445,15 +445,14 @@ var ability_dict = {
 	francesca_hope: {
 		description: "Move agile units to whichever valid row maximizes their strength (don't move units already in optimal row).",
 		activated: async card => {
-			let close = board.getRow(card, "close");
-			let ranged =  board.getRow(card, "ranged");
-			let cards = ability_dict["francesca_hope"].helper(card);
-			
-			await Promise.all(cards.map(async p => await board.moveTo(p.card, p.row === close ? ranged : close, p.row) ) );
+			const close = board.getRow(card, "close");
+			const ranged =  board.getRow(card, "ranged");
+			const solution = ability_dict["francesca_hope"].helper(card);
+			await Promise.all(solution.cards.map(async p => await board.moveTo(p.card, p.row === close ? ranged : close, p.row) ) );
 		},
 		weight: card => {
-			let cards = ability_dict["francesca_hope"].helper(card);
-			return cards.reduce((a,e) => a + e.card.weight, 0);
+			const {score, cards} = ability_dict["francesca_hope"].helper(card);
+			return score;
 		},
 		helper: card => {
 			const close = board.getRow(card, "close");
@@ -463,10 +462,12 @@ var ability_dict = {
 			const closeNorm = close.getVirtualCopy(notAgilePred);
 			const rangedNorm = ranged.getVirtualCopy(notAgilePred);
 			const {score, pattern} = findBest(closeNorm, rangedNorm, agileCards);
-
 			// filter for only cards that need to change row and return
-			return agileCards.map((c)=> { return {card: c, row: close.cards.includes(c) ? close : ranged}; })
-				.filter((pair, i) => (pair.row === close) !== (pattern[i]===0));
+			return {
+				score: score,
+				cards: agileCards.map((c)=> { return {card: c, row: close.cards.includes(c) ? close : ranged}; })
+				.filter((pair, i) => (pair.row === close) !== (pattern[i]===0))
+			};
 
 			function findBest(close, ranged, agile, depth = 0, pattern=null)
 			{
@@ -482,7 +483,7 @@ var ability_dict = {
 						row.cards.push(agile[i]);
 						row.updateState(agile[i], true);
 					}
-					return {score: closeCopy.calcScore() + rangedCopy.calcScore(), pattern: pattern};
+					return {score: closeCopy.calcScore() + rangedCopy.calcScore() - card.holder.total, pattern: pattern};
 				}
 				if (depth === 0)
 				{
