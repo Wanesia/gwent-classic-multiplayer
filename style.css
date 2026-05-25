@@ -87,9 +87,12 @@ html {
 	background-image: url("svg/exit.svg");
 	background-repeat: no-repeat;
 	background-size: contain;
+	opacity: 20%;
+	transition: opacity 0.3s;
 }
 #exit-game:hover {
 	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
+	opacity: 100%;
 }
 
 /* ----------- settings & media player ------------------ */
@@ -431,7 +434,7 @@ html {
 #popup > div {
     margin-top: -89px;
     width: 26.5%;
-    border: .2vw ridge rgb(40,40,40);
+    border: .2vw solid rgb(60,60,60);
     padding: 0 0.5vw;
     background-color: rgb(20,20,20);
 }
@@ -461,25 +464,33 @@ html {
     min-width: 10%;
     width: fit-content;
     margin: -1.4vw auto 0;
-    border: .2vw ridge rgb(25,25,25);
+    border: .2vw solid rgb(25,25,25);
     background-color: black;
     top: 1.3vw;
 }
 
 #popup button {
+
     display: inline-block;
     width: auto;
     height: 1.8vw;
-    border: .2vw ridge rgb(20,20,20);
+    border: .2vw solid rgb(40,40,40);
     background-color: rgb(20,20,20);
     font-size: 1vw;
     text-shadow: 1vw 1vw 1vw black;
 	text-transform: capitalize;
 	margin: 0 0.3vw;
+	transition: color 0.1s, border-color 0.1s;
+}
+#popup button:hover {
+	box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+	border-color: rgb(70, 70, 70);
 }
 
 #popup button:first-child { color: green; }
+#popup button:first-child:hover { color: lightgreen; }
 #popup button:last-child {color: darkred; }
+#popup button:last-child:hover {color: red; }
 
 /* --------------------- end screen ---------------------------  */
 
