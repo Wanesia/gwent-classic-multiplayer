@@ -77,6 +77,21 @@ html {
 
 #hand-op .card { position : absolute; }
 
+#exit-game
+{
+	top: 1.4vw;
+	left: 1vw;
+	position: absolute;
+	width: 2vw;
+	height: 2vw;
+	background-image: url("svg/exit.svg");
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+#exit-game:hover {
+	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
+}
+
 /* ----------- settings & media player ------------------ */
 
 #youtube {

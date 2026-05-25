@@ -1643,6 +1643,11 @@ class Game {
 		ui.enablePlayer(true);
 		this.setState(GameState.END_SCREEN);
 	}
+
+	exitGame()
+	{
+		this.returnToCustomization();
+	}
 	
 	// Returns the client to the deck customization screen
 	returnToCustomization(){
@@ -1909,6 +1914,7 @@ class UI {
 	constructor() {
 		this.carousels = [];
 		this.notif_elem = document.getElementById("notification-bar");
+		document.getElementById('exit-game').addEventListener('click', ()=>game.exitGame(), false);
 		this.preview = document.getElementsByClassName("card-preview")[0];
 		this.previewCard = null;
 		this.lastRow = null;
