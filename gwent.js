@@ -109,9 +109,9 @@ class ControllerAI {
 	
 	// Swaps a card from the hand with the deck if beneficial
 	redraw() {
-		let card = this.discardOrder({holder:this.player}).shift();
+		const card = this.discardOrder({holder:this.player})[0];
 		if (card && card.power < 15) {
-			this.player.deck.swap(this.player.hand, this.player.hand.removeCard(card))
+			this.player.deck.swap(this.player.hand, card);
 		}
 	}
 	
@@ -708,8 +708,11 @@ class CardContainer {
 	
 	// Adds a card to the container along with its associated HTML element.
 	addCard(card, index){
-		this.cards.push(card);
-		this.addCardElement(card, index?index:0);
+		if (!card)
+			return;
+		index = index ? clamp(0, this.cards.length, index) : 0;
+		this.cards.splice(index, 0, card);
+		this.addCardElement(card, index);
 		this.resize();
 	}
 	
@@ -893,10 +896,16 @@ class Deck extends CardContainer {
 			await board.toHand(this.cards[0], this);
 	}
 	
-	// Draws a card and sends it to the container before adding a card from the container back to the deck.
+	// Draws a card and sends it to the container before adding a card from the
+	// container back to the deck.
+	// NOTE: Used only in mulligan and adds card out of order
 	swap(container, card){
-		container.addCard(this.removeCard(0));
-		this.addCard(card);
+		if (!card)
+			return;
+		const index = container.cards.indexOf(card);
+		this.addCard(container.removeCard(card));
+		const drawnCard = this.removeCard(0);
+		container.addCard(drawnCard, index);
 	}
 	
 	// Override
@@ -949,9 +958,13 @@ class Hand extends CardContainer {
 	}
 	
 	// Override
-	addCard(card){
-		let i = this.addCardSorted(card);
-		this.addCardElement(card, i);
+	addCard(card, index){
+		const sortedIndex = this.getSortedIndex(card);
+		if (!index)
+			index = this.addCardSorted(card);
+		else
+			super.addCard(card, index);
+		this.addCardElement(card, sortedIndex);
 		this.resize();
 	}
 	
@@ -1503,8 +1516,8 @@ class Game {
 			player_op.controller.redraw();
 		await ui.queueCarousel(player_me.hand, 2, async (c, i) => { 
 			AudioManager.playSFX('redraw');
-			await player_me.deck.swap(c, c.removeCard(i));
-		}, c => true, true, true, "Choose up to 2 cards to redraw.");
+			await player_me.deck.swap(c, c.cards[i]);
+		}, c => true, false, true, "Choose up to 2 cards to redraw.");
 		ui.enablePlayer(false);
 	}
 	
