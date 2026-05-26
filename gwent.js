@@ -2974,7 +2974,7 @@ class DeckMaker {
 			this.leader = this.leaders.filter(c => c.index === loadedDeck.leader)[0];
 			this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
 		}
-		this.makeBank(deck.faction, cards);
+		this.makeBank(deck.faction, loadedDeck.cards);
 		this.update();
 	}
 
