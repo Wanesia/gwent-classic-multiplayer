@@ -1239,6 +1239,7 @@ class Weather extends CardContainer {
 	
 	// Adds a card if unique and clears all weather if 'clear weather' card added
 	async addCard(card) {
+		const isDuplicate = !!this.cards.find(c => c.name === card.name);
 		super.addCard(card);
 		AudioManager.playSFX(card.audio);
 		card.elem.classList.add("noclick");
@@ -1248,12 +1249,10 @@ class Weather extends CardContainer {
 			this.clearWeather();
 		} else {
 			this.changeWeather(card, x => ++this.types[x].count === 1, (r,t) => r.addOverlay(t.name));
-			for (let i=this.cards.length-2; i>=0; --i) {
-				if (card.name === this.cards[i].name) {
-					await sleep(750);
-					await board.toGrave(card, this);
-					break;
-				}
+			if (isDuplicate)
+			{
+				await sleep(750);
+				await board.toGrave(card, this);
 			}
 		}
 		await sleep(1000);
