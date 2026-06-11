@@ -888,12 +888,16 @@ class Deck extends CardContainer {
 		this.resize();
 	}
 	
-	// Sends the top card to the passed hand
+	// Sends the top card to the passed hand. The card is removed synchronously
+	// (before any animation) so that concurrent draws each take a unique card.
 	async draw(hand){
-		if (hand === player_op.hand)
-			hand.addCard(this.removeCard(0));
-		else
-			await board.toHand(this.cards[0], this);
+		const card = this.removeCard(0);
+		if (hand === player_op.hand) {
+			hand.addCard(card);
+		} else {
+			await translateTo(card, this, hand);
+			hand.addCard(card);
+		}
 	}
 	
 	// Draws a card and sends it to the container before adding a card from the
@@ -3369,7 +3373,7 @@ async function translateTo(card, container_source, container_dest){
 		if (source instanceof HandAI)
 			return source.hidden_elem;
 		if (source instanceof Deck)
-			return source.elem.children[source.elem.children.length-2];
+			return source.elem.children[Math.max(0, source.elem.children.length-2)];
 		return source.elem;
 	}
 
