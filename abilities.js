@@ -501,7 +501,7 @@ var ability_dict = {
 		description: "Shuffle all cards from each player's graveyard back into their decks.",
 		activated: async card => {
 			AudioManager.playSFX('redraw');
-			Promise.all(card.holder.grave.cards.map(c => board.toDeck(c, card.holder.grave)));
+			await Promise.all(card.holder.grave.cards.map(c => board.toDeck(c, card.holder.grave)));
 			await Promise.all(card.holder.opponent().grave.cards.map(c => board.toDeck(c, card.holder.opponent().grave)));
 		},
 		weight: (card, ai, max, data) => {
