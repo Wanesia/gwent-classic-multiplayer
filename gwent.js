@@ -2933,7 +2933,7 @@ class DeckMaker {
 		}
 	}
 
-	loadDeck(deck, siilent = true)
+	loadDeck(deck, silent = true)
 	{
 		if (!deck)
 			return null;
