@@ -132,10 +132,17 @@ html {
     top: 48.9vw;
     left: 14vw;
 }
-#toggle-music.deck-menu { 
+#toggle-music.deck-menu {
 	top: 45.3vw;
 	left: 46.7vw;
 	z-index: 86;
+}
+#toggle-music.lobby-menu {
+	position: fixed;
+	bottom: 2vh;
+	top: auto;
+	left: 1.5vw;
+	z-index: 95;
 }
 
 #toggle-sfx {
@@ -147,6 +154,13 @@ html {
 	left: 50.1vw;
 	z-index: 86;
 }
+#toggle-sfx.lobby-menu {
+	position: fixed;
+	bottom: 2vh;
+	top: auto;
+	left: 5vw;
+	z-index: 95;
+}
 
 #toggle-notifications {
 	top: 48.9vw;
@@ -154,6 +168,13 @@ html {
 }
 #toggle-notifications.deck-menu {
 	display: none !important;
+}
+#toggle-notifications.lobby-menu {
+	position: fixed;
+	bottom: 2vh;
+	top: auto;
+	left: 8.5vw;
+	z-index: 95;
 }
 
 #pass-button[data-title]:hover::after
@@ -1576,6 +1597,10 @@ main { background-image: url('img/boardtest8.png'); }
 	border: 1px solid #1b1b1b;
 	z-index: 9999999;
 	pointer-events: none;
+}
+
+.lobby-menu[data-title]:hover::after {
+	bottom: 3vw;
 }
 
 
