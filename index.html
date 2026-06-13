@@ -293,28 +293,60 @@
 
 <section id="lobby">
 	<h1 id="lobby-title">Gwent Classic</h1>
-	<div id="lobby-mode" class="lobby-view">
-		<button id="lobby-vs-computer" class="lobby-button">Vs Computer</button>
-		<button id="lobby-vs-player" class="lobby-button">Vs Player</button>
+	<div id="lobby-mode" class="lobby-view lobby-split">
+		<div class="split-title">Gwent Classic</div>
+		<div class="split-panel" id="split-computer">
+			<div class="split-image"></div>
+			<div class="split-vignette"></div>
+			<div class="split-label">
+				<span class="split-tag">Solo Challenge</span>
+				<h2 class="split-heading">vs Computer</h2>
+				<button class="split-play">Play Now</button>
+			</div>
+		</div>
+		<div class="split-divider">
+			<div class="split-badge">&#9876;</div>
+		</div>
+		<div class="split-panel" id="split-player">
+			<div class="split-image"></div>
+			<div class="split-vignette"></div>
+			<div class="split-label">
+				<span class="split-tag">Duel a Friend</span>
+				<h2 class="split-heading">vs Player</h2>
+				<button class="split-play">Play Now</button>
+			</div>
+		</div>
 	</div>
 	<div id="lobby-mp" class="lobby-view hide">
-		<button id="lobby-create-button" class="lobby-button">Create Game</button>
-		<button id="lobby-join-button" class="lobby-button">Join Game</button>
-		<button class="lobby-button lobby-back" data-target="lobby-mode">Back</button>
+		<div class="mp-subtitle">Online Multiplayer</div>
+		<div class="mp-options">
+			<button id="lobby-create-button" class="mp-option">
+				<span class="mp-option-tag">Host a Match</span>
+				<span class="mp-option-heading">Create Game</span>
+				<span class="mp-option-desc">Generate a room code</span>
+			</button>
+			<div class="mp-options-divider"></div>
+			<button id="lobby-join-button" class="mp-option">
+				<span class="mp-option-tag">Enter a Code</span>
+				<span class="mp-option-heading">Join Game</span>
+				<span class="mp-option-desc">Connect to a session</span>
+			</button>
+		</div>
+		<button class="mp-back lobby-back" data-target="lobby-mode"><span class="mp-back-icon"></span>Back to Menu</button>
 	</div>
 	<div id="lobby-create" class="lobby-view hide">
-		<p class="lobby-text">Share this code with your friend:</p>
+		<div class="mp-subtitle">Your room code</div>
 		<div id="room-code" data-title="Click to copy">·····</div>
 		<p id="copy-hint" class="lobby-hint"></p>
-		<p id="create-status" class="lobby-text"></p>
-		<button class="lobby-button lobby-back" data-target="lobby-mp">Cancel</button>
+		<p id="create-status" class="lobby-status"></p>
+		<button class="mp-back lobby-back" data-target="lobby-mp">Cancel</button>
 	</div>
 	<div id="lobby-join" class="lobby-view hide">
-		<p class="lobby-text">Enter your friend's game code:</p>
+		<div class="mp-subtitle" id="join-subtitle">Enter your friend's code</div>
 		<input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" />
-		<p id="join-error" class="lobby-text"></p>
-		<button id="join-button" class="lobby-button">Join</button>
-		<button class="lobby-button lobby-back" data-target="lobby-mp">Back</button>
+		<p id="join-error" class="lobby-hint lobby-hint-error"></p>
+		<button id="join-button" class="mp-action-button">Join Game</button>
+		<button class="mp-back lobby-back" data-target="lobby-mp">Back</button>
 	</div>
 </section>
 

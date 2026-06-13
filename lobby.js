@@ -19,6 +19,7 @@ class Lobby {
 		this.createStatus = document.getElementById("create-status");
 		this.joinError = document.getElementById("join-error");
 		this.joinInput = document.getElementById("join-code");
+		this.joinSubtitle = document.getElementById("join-subtitle");
 
 		this.inMultiplayer = false;
 		this.localReady = false;
@@ -27,8 +28,8 @@ class Lobby {
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
 
-		document.getElementById("lobby-vs-computer").addEventListener("click", () => this.startSinglePlayer());
-		document.getElementById("lobby-vs-player").addEventListener("click", () => this.showView("lobby-mp"));
+		document.getElementById("split-computer").addEventListener("click", () => this.startSinglePlayer());
+		document.getElementById("split-player").addEventListener("click", () => this.showView("lobby-mp"));
 		document.getElementById("lobby-create-button").addEventListener("click", () => this.createGame());
 		document.getElementById("lobby-join-button").addEventListener("click", () => this.showJoin());
 		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
@@ -38,9 +39,14 @@ class Lobby {
 			if (e.key === "Enter")
 				this.joinGame();
 		});
+		this.joinInput.addEventListener("input", () => {
+			if (this.joinInput.value.trim().length === 5)
+				this.joinGame();
+		});
 		[...this.elem.getElementsByClassName("lobby-back")].forEach(b =>
 			b.addEventListener("click", () => this.goBack(b.getAttribute("data-target"))));
-		addMouseEnterSFXBySelector(".lobby-button");
+		addMouseEnterSFXBySelector(".mp-option");
+		addMouseEnterSFXBySelector(".split-panel");
 
 		Net.onPeerJoined = () => this.enterDeckSetup();
 		Net.onPeerLeft = () => this.handlePeerLeft();
@@ -65,6 +71,8 @@ class Lobby {
 
 	startSinglePlayer() {
 		AudioManager.playSFX("menu_opening");
+		this.statusText.textContent = "vs Computer";
+		this.statusElem.classList.remove("hide");
 		this.elem.classList.add("hide");
 	}
 
@@ -74,6 +82,7 @@ class Lobby {
 			Net.leave();
 			this.exitMultiplayer();
 		} else {
+			this.statusElem.classList.add("hide");
 			this.showMenu();
 		}
 	}
@@ -83,28 +92,39 @@ class Lobby {
 		this.joinInput.value = "";
 		this.showView("lobby-join");
 		this.joinInput.focus();
+		this._joinReady = false;
+		requestAnimationFrame(() => this._joinReady = true);
 	}
 
 	async createGame() {
 		this.showView("lobby-create");
 		this.codeElem.textContent = "·····";
 		this.copyHint.textContent = "";
-		this.createStatus.textContent = "Connecting to server...";
+		this.createStatus.textContent = "Connecting to server";
+		this.createStatus.classList.remove("is-waiting");
 		try {
 			await Net.connect();
 			const code = await Net.createRoom();
 			this.codeElem.textContent = code;
 			this.copyHint.textContent = "Click the code to copy it";
-			this.createStatus.textContent = "Waiting for opponent...";
+			this.createStatus.textContent = "Waiting for opponent";
+			this.createStatus.classList.add("is-waiting");
 		} catch (e) {
 			this.createStatus.textContent = this.errorText(e.message);
+			this.createStatus.classList.remove("is-waiting");
 		}
 	}
 
 	async joinGame() {
 		const code = this.joinInput.value.trim().toUpperCase();
-		if (code.length === 0)
+		if (code.length === 0) {
+			if (this._joinReady) {
+				this.joinSubtitle.classList.remove("shake");
+				void this.joinSubtitle.offsetWidth;
+				this.joinSubtitle.classList.add("shake");
+			}
 			return;
+		}
 		this.joinError.textContent = "";
 		try {
 			await Net.connect();
@@ -280,6 +300,7 @@ class Lobby {
 		} else if (!this.elem.classList.contains("hide")) {
 			// connection or room died while waiting in the create view
 			this.createStatus.textContent = this.errorText("unreachable");
+			this.createStatus.classList.remove("is-waiting");
 		}
 	}
 
