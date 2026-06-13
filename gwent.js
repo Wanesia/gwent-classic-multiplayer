@@ -640,9 +640,11 @@ class Player {
 		this.elem_leader.children[1].classList.remove("hide");
 		
 		if (this.id === 0 && this.leader.activated.length > 0){
-			this.elem_leader.addEventListener("click", 
+			this.elem_leader.addEventListener("click",
 				async () => await ui.viewCard(this.leader, async () => {
 					AudioManager.playSFX('open');
+					if (mp.active && game.currPlayer === player_me)
+						mp.send({t: "leader"});
 					await this.activateLeader();
 		}	), false);
 			this.elem_leader.children[0].setAttribute('data-title', "Play leader");
@@ -1949,6 +1951,8 @@ class UI {
 		this.lastRow = null;
 		this.toggleSettings = [];
 		document.getElementById("pass-button").addEventListener("click", () => {
+			if (mp.active && game.currPlayer === player_me)
+				mp.send({t: "pass"});
 			player_me.passRound();
 			AudioManager.playSFX('pass');
 		}, false);
@@ -2076,6 +2080,8 @@ class UI {
 			this.setSelectable(null, false);
 			this.showPreview(card);
 		} else if (pCard.name === "Decoy") {
+			if (mp.active && game.currPlayer === player_me)
+				mp.send({t: "decoy", i: pCard.holder.hand.cards.indexOf(pCard), d: mp.destToWire(row), j: row.cards.indexOf(card)});
 			this.hidePreview(card);
 			this.enablePlayer(false);
 			board.toHand(card, row);
@@ -2103,11 +2109,15 @@ class UI {
 		this.hidePreview();
 		this.enablePlayer(false);
 		if (card.name === "Scorch"){
+			if (mp.active && game.currPlayer === player_me)
+				mp.send({t: "scorch", i: holder.hand.cards.indexOf(card)});
 			this.hidePreview();
 			await ability_dict["scorch"].activated(card);
 		} else if (card.name === "Decoy") {
 			return;
 		} else {
+			if (mp.active && game.currPlayer === player_me)
+				mp.send({t: "play", i: holder.hand.cards.indexOf(card), d: mp.destToWire(row)});
 			await board.moveTo(card, row, card.holder.hand);
 		}
 		holder.endTurn();
