@@ -1604,6 +1604,19 @@ class Game {
 		if (this.currPlayer === player_me)
 			ui.enablePlayer(false);
 		await this.runEffects(this.turnEnd);
+		// Desync safety net: the player who just acted sends a state checksum,
+		// the other client verifies it against its own simulation
+		if (mp.active) {
+			if (this.currPlayer === player_me) {
+				mp.send({t: "sum", h: mp.checksum()});
+			} else {
+				const m = await mp.next("sum");
+				if (!mp.active)
+					return;
+				if (m.h !== mp.checksum())
+					return mp.desync();
+			}
+		}
 		if (this.currPlayer.passed)
 			await ui.notification(this.currPlayer.tag + "-pass", 1200);
 		if (player_op.passed && player_me.passed)
