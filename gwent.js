@@ -1540,14 +1540,29 @@ class Game {
 		await ui.notification(this.firstPlayer.tag + "-coin", 1200);
 	}
 	
-	// Allows the player to swap out up to two cards from their iniitial hand
+	// Allows the player to swap out up to two cards from their iniitial hand.
+	// Online, both players redraw simultaneously and the round only starts
+	// once the local carousel is closed AND the remote picks have all arrived.
 	async initialRedraw(){
-		for (let i=0; i< 2; i++)
-			player_op.controller.redraw();
-		await ui.queueCarousel(player_me.hand, 2, async (c, i) => { 
-			AudioManager.playSFX('redraw');
-			await player_me.deck.swap(c, c.cards[i]);
-		}, c => true, false, true, "Choose up to 2 cards to redraw.");
+		if (mp.active) {
+			await Promise.all([
+				ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
+					AudioManager.playSFX('redraw');
+					await player_me.deck.swap(c, c.cards[i]);
+				}, c => true, false, true, "Choose up to 2 cards to redraw.")
+					.then(() => ui.enablePlayer(false)), // no acting while the opponent finishes
+				ui.queueSyncedCarousel(player_op, player_op.hand, 2, async (c, i) => {
+					await player_op.deck.swap(c, c.cards[i]);
+				}, c => true, false, true)
+			]);
+		} else {
+			for (let i=0; i< 2; i++)
+				player_op.controller.redraw();
+			await ui.queueCarousel(player_me.hand, 2, async (c, i) => {
+				AudioManager.playSFX('redraw');
+				await player_me.deck.swap(c, c.cards[i]);
+			}, c => true, false, true, "Choose up to 2 cards to redraw.");
+		}
 		ui.enablePlayer(false);
 	}
 	
@@ -2275,7 +2290,33 @@ class UI {
 			this.carousels.shift().start();
 		}
 	}
-	
+
+	// Carousel whose selections are replicated between clients in online games.
+	// The chooser is the Player whose decision it is: if that player is the
+	// local human, each selection is sent over the wire as it happens; if it is
+	// the remote player, picks are consumed from the wire and applied directly
+	// without opening a carousel. In single-player this behaves exactly like
+	// queueCarousel.
+	async queueSyncedCarousel(chooser, container, count, action, predicate, bSort, bQuit, title){
+		if (mp.isRemote(chooser)) {
+			while (true) {
+				const m = await mp.next("pick", "pickEnd");
+				if (!mp.active || m.t === "pickEnd")
+					return;
+				await action(container, m.i);
+			}
+		}
+		if (chooser.controller instanceof ControllerAI)
+			return await this.queueCarousel(container, count, action, predicate, bSort, bQuit, title);
+		const wrapped = !mp.active ? action : async (c, i) => {
+			mp.send({t: "pick", i: i});
+			return await action(c, i);
+		};
+		await this.queueCarousel(container, count, wrapped, predicate, bSort, bQuit, title);
+		if (mp.active)
+			mp.send({t: "pickEnd"});
+	}
+
 	// Displays a custom confirmation menu 
 	async popup(yesName, yes, noName, no, title, description, alpha = .95) {
 		let p = new Popup(yesName, yes, noName, no, title, description, alpha);
@@ -2360,9 +2401,17 @@ class UI {
 		}
 	}
 
-	// used to handle row selection when resetoring agile units via medics
-	async waitForRowSelection(card)
+	// used to handle row selection when resetoring agile units via medics.
+	// The chooser is the Player whose decision it is; online, the choice is
+	// sent to / received from the other client.
+	async waitForRowSelection(card, chooser = player_me)
 	{
+		if (mp.isRemote(chooser)) {
+			const m = await mp.next("row");
+			if (!mp.active)
+				return null;
+			return m.d ? mp.destFromWire(m.d) : null;
+		}
 		game.placedEffectsActive = true;
 		ui.setSelectable(null, false);
 		ui.showPreview(card, false);
@@ -2381,6 +2430,8 @@ class UI {
 		EventManager.previewCancelled.unbind(rowSelect);
 		ui.hidePreview();
 		game.placedEffectsActive = false;
+		if (mp.active)
+			mp.send({t: "row", d: selectedRow ? mp.destToWire(selectedRow) : null});
 		return selectedRow;
 	}
 }
