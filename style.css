@@ -491,6 +491,7 @@ html {
 #popup button:first-child:hover { color: lightgreen; }
 #popup button:last-child {color: darkred; }
 #popup button:last-child:hover {color: red; }
+#popup button.hide { display: none; }
 
 /* --------------------- end screen ---------------------------  */
 
@@ -1205,6 +1206,18 @@ main { background-image: url('img/boardtest8.png'); }
 	left: 47%;
 }
 
+#lobby-return {
+	position: absolute;
+	top: 3vw;
+	left: 1vw;
+	font-size: 1vw;
+	color: white;
+	z-index: 90;
+}
+#lobby-return:hover {
+	text-decoration: underline;
+}
+
 .card-array {
 	position: absolute;
 	width: 34.4%;
@@ -1668,20 +1681,11 @@ main { background-image: url('img/boardtest8.png'); }
 
 #mp-status {
 	position: absolute;
-	top: 86.6%;
-	left: 54%;
-	font-size: .98vw;
-	color: tan;
-}
-
-#mp-status a {
-	margin-left: 1vw;
-	color: darkred;
-	cursor: pointer;
-}
-
-#mp-status a:hover {
-	color: red;
+	top: 1vw;
+	left: 1vw;
+	font-size: .9vw;
+	color: limegreen;
+	z-index: 90;
 }
 
 /* deck editing is locked while the local player is readied up */
