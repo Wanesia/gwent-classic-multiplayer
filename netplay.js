@@ -14,6 +14,7 @@
 //   {t:"play", i, d} {t:"scorch", i} {t:"pass"}        turn actions
 //   {t:"decoy", i, d, j} {t:"leader"}
 //   {t:"row", d}                                       mid-resolution row choice
+//   {t:"sum", h}                                       per-turn state checksum
 
 // Hand replica for the remote human player. Mirrors the local Hand's array
 // semantics exactly (sorted insert, or splice at an explicit index during
@@ -101,7 +102,12 @@ class MPSession {
 			Net.send(msg);
 	}
 
+	// Inbound game messages from Net while a match is active. Lobby messages
+	// (e.g. the opponent readying up again while we are still on the end
+	// screen) are forwarded so they are not swallowed by the game queue.
 	route(msg) {
+		if (msg && typeof msg.t === "string" && msg.t.startsWith("lobby-"))
+			return lobby.routeLobby(msg);
 		this.queue.push(msg);
 		const w = this.waiter;
 		if (w) {

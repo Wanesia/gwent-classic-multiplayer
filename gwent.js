@@ -1697,6 +1697,11 @@ class Game {
 			rows[2].children[i].style.color = round && round.winner === player_op ? "goldenrod" : "";
 		}
 		
+		// Online there is no rematch-with-same-decks or new-AI-opponent; both
+		// players return to the deck builder and can ready up again
+		this.rematch_elem.classList.toggle("hide", mp.active);
+		this.newGame_elem.classList.toggle("hide", mp.active);
+
 		endScreen.children[0].className = "";
 		if (player_op.health <= 0 && player_me.health <= 0) {
 			endScreen.getElementsByTagName("p")[0].classList.remove("hide");
@@ -2329,7 +2334,7 @@ class UI {
 		if (mp.active)
 			mp.send({t: "pickEnd"});
 	}
-
+	
 	// Displays a custom confirmation menu 
 	async popup(yesName, yes, noName, no, title, description, alpha = .95) {
 		let p = new Popup(yesName, yes, noName, no, title, description, alpha);
@@ -2616,6 +2621,8 @@ class Popup {
 		main.children[0].innerHTML = header ? header : "";
 		main.children[1].innerHTML = description ? description : "";
 		main.children[2].children[0].innerHTML = (yesName) ? yesName : "Yes";
+		// passing noName === null creates a single-button popup
+		main.children[2].children[1].classList.toggle("hide", noName === null);
 		main.children[2].children[1].innerHTML = (noName) ? noName : "No";
 
 		const bgColor = new RGBA(10, 10, 10, alpha);

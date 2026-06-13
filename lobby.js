@@ -43,6 +43,8 @@ class Lobby {
 		addMouseEnterSFXBySelector(".lobby-button");
 
 		Net.onPeerJoined = () => this.enterDeckSetup();
+		Net.onPeerLeft = () => this.handlePeerLeft();
+		EventManager.customizationOpened.bind(() => this.onCustomizationOpened());
 	}
 
 	showView(id) {
@@ -252,6 +254,45 @@ class Lobby {
 	leaveRoom() {
 		Net.leave();
 		this.exitMultiplayer();
+	}
+
+	// The local player returned to the deck builder while an online match was
+	// still live: either the match ended normally (END_SCREEN, stay connected
+	// for a rematch) or they quit mid-game (abandon the room)
+	onCustomizationOpened() {
+		if (!this.inMultiplayer || !mp.active)
+			return;
+		mp.deactivate();
+		Net.onMessage = m => this.routeLobby(m);
+		if (game.state === GameState.PLAYING) {
+			Net.leave();
+			this.exitMultiplayer();
+		}
+	}
+
+	handlePeerLeft() {
+		if (this.inMultiplayer) {
+			this.endMultiplayerGame("Opponent Disconnected", "Your opponent has left the game.");
+		} else if (!this.elem.classList.contains("hide")) {
+			// connection or room died while waiting in the create view
+			this.createStatus.textContent = this.errorText("unreachable");
+		}
+	}
+
+	// Ends an online session from any phase with a notice, then returns to the
+	// main menu. Used for disconnects and desyncs.
+	endMultiplayerGame(title, description) {
+		if (!this.inMultiplayer)
+			return;
+		this.inMultiplayer = false;
+		mp.deactivate();
+		Net.leave();
+		AudioManager.playSFX("warning");
+		ui.popup("Return to Menu", () => {
+			if (game.state !== GameState.CUSTOMIZE)
+				game.returnToCustomization();
+			this.exitMultiplayer();
+		}, null, null, title, description);
 	}
 
 	// The match could not start (e.g. the opponent's deck failed validation)
