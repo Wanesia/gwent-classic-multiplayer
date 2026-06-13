@@ -1,0 +1,4 @@
+server/node_modules/
+tests/node_modules/
+tests/package-lock.json
+server/package-lock.json
