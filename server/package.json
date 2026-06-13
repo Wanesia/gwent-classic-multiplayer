@@ -1,0 +1,11 @@
+{
+	"name": "gwent-relay",
+	"private": true,
+	"description": "WebSocket relay server for gwent-classic online multiplayer",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"ws": "^8.18.0"
+	}
+}
