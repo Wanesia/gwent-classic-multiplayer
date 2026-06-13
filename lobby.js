@@ -32,7 +32,7 @@ class Lobby {
 		document.getElementById("lobby-create-button").addEventListener("click", () => this.createGame());
 		document.getElementById("lobby-join-button").addEventListener("click", () => this.showJoin());
 		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
-		document.getElementById("mp-leave").addEventListener("click", () => this.leaveRoom());
+		document.getElementById("lobby-return").addEventListener("click", () => this.returnToMenu());
 		this.codeElem.addEventListener("click", () => this.copyCode());
 		this.joinInput.addEventListener("keydown", e => {
 			if (e.key === "Enter")
@@ -66,6 +66,16 @@ class Lobby {
 	startSinglePlayer() {
 		AudioManager.playSFX("menu_opening");
 		this.elem.classList.add("hide");
+	}
+
+	returnToMenu() {
+		AudioManager.playSFX("menu_opening");
+		if (this.inMultiplayer) {
+			Net.leave();
+			this.exitMultiplayer();
+		} else {
+			this.showMenu();
+		}
 	}
 
 	showJoin() {
@@ -248,12 +258,6 @@ class Lobby {
 			text = "Opponent: " + (this.remoteReady ? "ready" : "connected") +
 				(this.localReady && !this.remoteReady ? " — waiting for them to ready up" : "");
 		this.statusText.textContent = text;
-	}
-
-	// "Leave" clicked in the deck builder before a match started
-	leaveRoom() {
-		Net.leave();
-		this.exitMultiplayer();
 	}
 
 	// The local player returned to the deck builder while an online match was
