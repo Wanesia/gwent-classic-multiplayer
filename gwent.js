@@ -1722,12 +1722,14 @@ class Game {
 
 	exitGame()
 	{
+		if (Popup.curr) return;
 		AudioManager.playSFX('warning');
+		const isMyTurn = this.currPlayer === player_me;
 		ui.popup(
-			"Resume", ()=>{},
+			"Resume", ()=>{ ui.enablePlayer(isMyTurn); },
 			"Exit", ()=>this.returnToCustomization(),
-			"Quit curent game?" , "This will return you to the deck customization menu."
-		); 
+			"Quit current game?" , "This will return you to the deck customization menu."
+		);
 	}
 	
 	// Returns the client to the deck customization screen
