@@ -1568,3 +1568,127 @@ main { background-image: url('img/boardtest8.png'); }
 .noclick {
 	pointer-events: none;
 }
+
+/* --------------------- multiplayer lobby ---------------------  */
+
+#lobby {
+	position: absolute;
+	width: 100%;
+	height: calc(100vw * 1080 / 1920);
+	background-color: rgba(10,10,10,.97);
+	z-index: 90;
+	color: rgb(180,180,180);
+	text-align: center;
+}
+
+#lobby-title {
+	margin-top: 9vw;
+	font-size: 3.4vw;
+	font-weight: normal;
+	letter-spacing: .4vw;
+	text-transform: uppercase;
+	color: goldenrod;
+	text-shadow: 0 0 1.5vw #6d5210;
+}
+
+.lobby-view {
+	margin-top: 2.5vw;
+}
+
+.lobby-button {
+	display: block;
+	margin: 1vw auto;
+	height: 3vw;
+	width: 14vw;
+	font-family: Arial Narrow;
+	font-size: 1.5vw;
+	color: goldenrod;
+	background-color: #4c390a66;
+	border: .2vw solid #1d180b;
+	border-radius: 0.1vw;
+	box-shadow: 0 0 .5vw #6d5210;
+}
+
+.lobby-button:hover {
+	box-shadow: 0 0 2vw #6d5210;
+}
+
+.lobby-text {
+	font-size: 1.23vw;
+	color: tan;
+	margin: .6vw 0;
+	min-height: 1.4vw;
+}
+
+.lobby-hint {
+	font-size: .95vw;
+	color: grey;
+	margin: .3vw 0;
+	min-height: 1.1vw;
+}
+
+#join-error {
+	color: #c0392b;
+}
+
+#room-code {
+	display: inline-block;
+	margin: .5vw auto;
+	padding: .4vw 1vw .4vw 1.8vw;
+	font-size: 3.2vw;
+	letter-spacing: .8vw;
+	color: goldenrod;
+	background-color: black;
+	border: .2vw solid #1d180b;
+	box-shadow: 0 0 .5vw #6d5210;
+	cursor: pointer;
+}
+
+#room-code:hover {
+	box-shadow: 0 0 2vw #6d5210;
+}
+
+#join-code {
+	display: block;
+	margin: .5vw auto;
+	width: 12vw;
+	padding: .4vw 0 .4vw .8vw;
+	font-family: Arial Narrow;
+	font-size: 2.2vw;
+	letter-spacing: .8vw;
+	text-align: center;
+	text-transform: uppercase;
+	color: goldenrod;
+	background-color: black;
+	border: .2vw solid #1d180b;
+	outline: none;
+}
+
+/* ----- multiplayer status strip in the deck builder ----- */
+
+#mp-status {
+	position: absolute;
+	top: 86.6%;
+	left: 54%;
+	font-size: .98vw;
+	color: tan;
+}
+
+#mp-status a {
+	margin-left: 1vw;
+	color: darkred;
+	cursor: pointer;
+}
+
+#mp-status a:hover {
+	color: red;
+}
+
+/* deck editing is locked while the local player is readied up */
+.mp-locked #card-bank,
+.mp-locked #card-deck,
+.mp-locked #card-leader,
+.mp-locked .deck-options {
+	pointer-events: none;
+	opacity: .55;
+}
