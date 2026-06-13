@@ -1,0 +1,282 @@
+"use strict"
+
+// Pre-game menu and online lobby. Shows the mode choice (Vs Computer /
+// Vs Player) on startup, handles room create/join against the relay server,
+// and runs the ready-up phase in the deck builder before handing the match
+// off to the multiplayer session (mp in netplay.js).
+//
+// Match start is host-driven to avoid ready/unready races: when the host sees
+// both players ready it sends lobby-start with the RNG seed; the guest acks
+// and starts, and the host starts on the ack.
+class Lobby {
+	constructor() {
+		this.elem = document.getElementById("lobby");
+		this.statusElem = document.getElementById("mp-status");
+		this.statusText = document.getElementById("mp-opponent-state");
+		this.startButton = document.getElementById("start-game");
+		this.codeElem = document.getElementById("room-code");
+		this.copyHint = document.getElementById("copy-hint");
+		this.createStatus = document.getElementById("create-status");
+		this.joinError = document.getElementById("join-error");
+		this.joinInput = document.getElementById("join-code");
+
+		this.inMultiplayer = false;
+		this.localReady = false;
+		this.remoteReady = false;
+		this.starting = false;
+		this.remoteDeckRaw = null;
+		this.pendingSeed = null;
+
+		document.getElementById("lobby-vs-computer").addEventListener("click", () => this.startSinglePlayer());
+		document.getElementById("lobby-vs-player").addEventListener("click", () => this.showView("lobby-mp"));
+		document.getElementById("lobby-create-button").addEventListener("click", () => this.createGame());
+		document.getElementById("lobby-join-button").addEventListener("click", () => this.showJoin());
+		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
+		document.getElementById("mp-leave").addEventListener("click", () => this.leaveRoom());
+		this.codeElem.addEventListener("click", () => this.copyCode());
+		this.joinInput.addEventListener("keydown", e => {
+			if (e.key === "Enter")
+				this.joinGame();
+		});
+		[...this.elem.getElementsByClassName("lobby-back")].forEach(b =>
+			b.addEventListener("click", () => this.goBack(b.getAttribute("data-target"))));
+		addMouseEnterSFXBySelector(".lobby-button");
+
+		Net.onPeerJoined = () => this.enterDeckSetup();
+	}
+
+	showView(id) {
+		[...this.elem.getElementsByClassName("lobby-view")].forEach(v =>
+			v.classList.toggle("hide", v.id !== id));
+	}
+
+	showMenu() {
+		this.elem.classList.remove("hide");
+		this.showView("lobby-mode");
+	}
+
+	goBack(target) {
+		if (Net.code)
+			Net.leave(); // cancel a room we created and are waiting in
+		this.showView(target || "lobby-mode");
+	}
+
+	startSinglePlayer() {
+		AudioManager.playSFX("menu_opening");
+		this.elem.classList.add("hide");
+	}
+
+	showJoin() {
+		this.joinError.textContent = "";
+		this.joinInput.value = "";
+		this.showView("lobby-join");
+		this.joinInput.focus();
+	}
+
+	async createGame() {
+		this.showView("lobby-create");
+		this.codeElem.textContent = "·····";
+		this.copyHint.textContent = "";
+		this.createStatus.textContent = "Connecting to server...";
+		try {
+			await Net.connect();
+			const code = await Net.createRoom();
+			this.codeElem.textContent = code;
+			this.copyHint.textContent = "Click the code to copy it";
+			this.createStatus.textContent = "Waiting for opponent...";
+		} catch (e) {
+			this.createStatus.textContent = this.errorText(e.message);
+		}
+	}
+
+	async joinGame() {
+		const code = this.joinInput.value.trim().toUpperCase();
+		if (code.length === 0)
+			return;
+		this.joinError.textContent = "";
+		try {
+			await Net.connect();
+			await Net.joinRoom(code);
+			this.enterDeckSetup();
+		} catch (e) {
+			this.joinError.textContent = this.errorText(e.message);
+		}
+	}
+
+	errorText(code) {
+		switch (code) {
+			case "unreachable": return "Could not reach the game server.";
+			case "not-found": return "Game not found. Check the code and try again.";
+			case "full": return "That game already has two players.";
+			default: return "Something went wrong (" + code + ").";
+		}
+	}
+
+	copyCode() {
+		const code = this.codeElem.textContent;
+		if (!Net.code || code !== Net.code)
+			return;
+		const confirm = () => {
+			this.copyHint.textContent = "Copied!";
+			setTimeout(() => this.copyHint.textContent = "Click the code to copy it", 1500);
+		};
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(code).then(confirm).catch(() => this.copyCodeFallback(code, confirm));
+		} else {
+			this.copyCodeFallback(code, confirm);
+		}
+	}
+
+	copyCodeFallback(code, confirm) {
+		const area = document.createElement("textarea");
+		area.value = code;
+		document.body.appendChild(area);
+		area.select();
+		try {
+			if (document.execCommand("copy"))
+				confirm();
+		} finally {
+			document.body.removeChild(area);
+		}
+	}
+
+	// Both players are connected: drop into the deck builder in ready-up mode
+	enterDeckSetup() {
+		this.inMultiplayer = true;
+		this.localReady = false;
+		this.remoteReady = false;
+		this.starting = false;
+		this.remoteDeckRaw = null;
+		this.pendingSeed = null;
+		Net.onMessage = m => this.routeLobby(m);
+		this.elem.classList.add("hide");
+		this.statusElem.classList.remove("hide");
+		document.getElementById("opponent-preview").classList.add("hide");
+		this.startButton.textContent = "Ready";
+		this.updateStatus();
+		AudioManager.playSFX("menu_opening");
+	}
+
+	// Called by DeckMaker.startNewGame in multiplayer mode, after the local
+	// deck has passed validation
+	toggleReady() {
+		if (this.starting)
+			return;
+		if (!this.localReady) {
+			this.localReady = true;
+			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()) });
+			this.startButton.textContent = "Cancel";
+			dm.elem.classList.add("mp-locked");
+			this.checkStart();
+		} else {
+			this.localReady = false;
+			Net.send({ t: "lobby-unready" });
+			this.startButton.textContent = "Ready";
+			dm.elem.classList.remove("mp-locked");
+		}
+		this.updateStatus();
+	}
+
+	routeLobby(m) {
+		switch (m.t) {
+			case "lobby-ready":
+				this.remoteReady = true;
+				this.remoteDeckRaw = m.deck;
+				this.updateStatus();
+				this.checkStart();
+				break;
+			case "lobby-unready":
+				this.remoteReady = false;
+				this.remoteDeckRaw = null;
+				this.starting = false;
+				this.pendingSeed = null;
+				this.updateStatus();
+				break;
+			case "lobby-start":
+				if (Net.role !== "guest")
+					break;
+				if (!this.localReady) {
+					Net.send({ t: "lobby-unready" });
+					break;
+				}
+				Net.send({ t: "lobby-start-ack" });
+				this.beginMatch(m.seed);
+				break;
+			case "lobby-start-ack":
+				if (this.starting && this.pendingSeed !== null)
+					this.beginMatch(this.pendingSeed);
+				break;
+		}
+	}
+
+	checkStart() {
+		if (this.localReady && this.remoteReady && !this.starting)
+			this.initiateStart();
+	}
+
+	initiateStart() {
+		if (Net.role !== "host")
+			return; // the guest waits for the host's lobby-start
+		this.starting = true;
+		this.pendingSeed = GameRNG.randomSeed();
+		Net.send({ t: "lobby-start", seed: this.pendingSeed });
+		this.updateStatus("Starting game...");
+	}
+
+	beginMatch(seed) {
+		const localRaw = JSON.parse(dm.deckToJSON());
+		const remoteRaw = this.remoteDeckRaw;
+		this.resetReadyState();
+		mp.startMatch(seed, localRaw, remoteRaw);
+	}
+
+	resetReadyState() {
+		this.localReady = false;
+		this.remoteReady = false;
+		this.starting = false;
+		this.remoteDeckRaw = null;
+		this.pendingSeed = null;
+		this.startButton.textContent = "Ready";
+		dm.elem.classList.remove("mp-locked");
+		this.updateStatus();
+	}
+
+	updateStatus(text) {
+		if (text === undefined)
+			text = "Opponent: " + (this.remoteReady ? "ready" : "connected") +
+				(this.localReady && !this.remoteReady ? " — waiting for them to ready up" : "");
+		this.statusText.textContent = text;
+	}
+
+	// "Leave" clicked in the deck builder before a match started
+	leaveRoom() {
+		Net.leave();
+		this.exitMultiplayer();
+	}
+
+	// The match could not start (e.g. the opponent's deck failed validation)
+	matchFailed(description) {
+		Net.onMessage = m => this.routeLobby(m);
+		AudioManager.playSFX("warning");
+		ui.popup("OK", () => {}, null, null, "Could Not Start Game",
+			description + " If this keeps happening, your versions of the game may differ.");
+	}
+
+	// Restores the single-player deck builder UI and shows the main menu
+	exitMultiplayer() {
+		this.inMultiplayer = false;
+		this.localReady = false;
+		this.remoteReady = false;
+		this.starting = false;
+		this.remoteDeckRaw = null;
+		this.pendingSeed = null;
+		Net.onMessage = null;
+		this.statusElem.classList.add("hide");
+		document.getElementById("opponent-preview").classList.remove("hide");
+		this.startButton.textContent = "Start game";
+		dm.elem.classList.remove("mp-locked");
+		this.showMenu();
+	}
+}
+
+var lobby = new Lobby();

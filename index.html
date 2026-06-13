@@ -272,6 +272,10 @@
 		<p>0</p>
 	</div>
 	<button id="start-game">Start game</button>
+	<div id="mp-status" class="hide">
+		<span id="mp-opponent-state">Opponent: connected</span>
+		<a id="mp-leave">Leave</a>
+	</div>
 	<div id="opponent-preview" class="center">
 		<div>
 			<p>Oponent's Deck</p>
@@ -285,6 +289,33 @@
 			</label>
 			<button id="op-preview-clear" class="hide" data-title="Clear opponent"></button>
 		</div>
+	</div>
+</section>
+
+<section id="lobby">
+	<h1 id="lobby-title">Gwent Classic</h1>
+	<div id="lobby-mode" class="lobby-view">
+		<button id="lobby-vs-computer" class="lobby-button">Vs Computer</button>
+		<button id="lobby-vs-player" class="lobby-button">Vs Player</button>
+	</div>
+	<div id="lobby-mp" class="lobby-view hide">
+		<button id="lobby-create-button" class="lobby-button">Create Game</button>
+		<button id="lobby-join-button" class="lobby-button">Join Game</button>
+		<button class="lobby-button lobby-back" data-target="lobby-mode">Back</button>
+	</div>
+	<div id="lobby-create" class="lobby-view hide">
+		<p class="lobby-text">Share this code with your friend:</p>
+		<div id="room-code" data-title="Click to copy">·····</div>
+		<p id="copy-hint" class="lobby-hint"></p>
+		<p id="create-status" class="lobby-text"></p>
+		<button class="lobby-button lobby-back" data-target="lobby-mp">Cancel</button>
+	</div>
+	<div id="lobby-join" class="lobby-view hide">
+		<p class="lobby-text">Enter your friend's game code:</p>
+		<input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" />
+		<p id="join-error" class="lobby-text"></p>
+		<button id="join-button" class="lobby-button">Join</button>
+		<button class="lobby-button lobby-back" data-target="lobby-mp">Back</button>
 	</div>
 </section>
 
@@ -302,6 +333,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="text/javascript" src="gwent.js"></script>
 <script type="text/javascript" src="netplay.js"></script>
+<script type="text/javascript" src="lobby.js"></script>
 </body>
 
 </html>

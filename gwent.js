@@ -2933,6 +2933,11 @@ class DeckMaker {
 			return alert(warning);
 		}
 
+		// Online, this button is the ready-up toggle; the match itself starts
+		// from the lobby once both players are ready
+		if (typeof lobby !== "undefined" && lobby.inMultiplayer)
+			return lobby.toggleReady();
+
 		GameRNG.reset(GameRNG.randomSeed());
 
 		const me_deck = {
