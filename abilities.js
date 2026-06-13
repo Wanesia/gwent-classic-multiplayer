@@ -160,13 +160,13 @@ var ability_dict = {
 				return;
 			let wrapper = {card : null};
 			if (game.randomRespawn) {
-				const cards = grave.findCardsRandom(c => c.isUnit());
+				const cards = grave.findCardsRandom(c => c.isUnit(), 1, GameRNG.game);
 				if (cards.length > 0)
 					wrapper.card = cards[0];
 			} else if (card.holder.controller instanceof ControllerAI)
 				wrapper.card =  card.holder.controller.medic(card, grave);
 			else
-				await ui.queueCarousel(card.holder.grave, 1, (c, i) => wrapper.card=c.cards[i], c => c.isUnit(), true);
+				await ui.queueSyncedCarousel(card.holder, card.holder.grave, 1, (c, i) => wrapper.card=c.cards[i], c => c.isUnit(), true);
 			if (wrapper.card)
 			{
 				// move card visual to top of grave
@@ -198,7 +198,7 @@ var ability_dict = {
 					}
 					else
 					{
-						selectedRow = await ui.waitForRowSelection(wrapper.card);
+						selectedRow = await ui.waitForRowSelection(wrapper.card, card.holder);
 						if (!selectedRow)
 						{
 							return;
@@ -303,11 +303,12 @@ var ability_dict = {
 	emhyr_emperor: {
 		description: "Look at 3 random cards from your opponent's hand.",
 		activated: async card => {
-			if (card.holder.controller instanceof ControllerAI)
+			// the reveal is purely visual and only shown to the activating player. AI and remote activations have nothing to display
+			if (card.holder !== player_me)
 				return;
 			let container = new CardContainer();
 			container.cards = card.holder.opponent().hand.findCardsRandom(() => true, 3);
-			Carousel.curr.cancel();
+			Carousel.curr?.cancel();
 			await ui.viewCardsInContainer(container);
 		},
 		weight: card => {
@@ -330,8 +331,8 @@ var ability_dict = {
 				await board.toHand(newCard, grave);
 				return;
 			}
-			Carousel.curr.cancel();
-			await ui.queueCarousel(grave, 1, async (c,i) => {
+			Carousel.curr?.cancel();
+			await ui.queueSyncedCarousel(card.holder, grave, 1, async (c,i) => {
 				let newCard = c.cards[i];
 				newCard.holder = card.holder;
 				await board.toHand(newCard, grave);
@@ -356,8 +357,8 @@ var ability_dict = {
 			if (card.holder.controller instanceof ControllerAI) {
 				newCard = card.holder.controller.medic(card, card.holder.grave)
 			} else {
-				Carousel.curr.exit();
-				await ui.queueCarousel(card.holder.grave, 1, (c,i) => newCard = c.cards[i], c => c.isUnit(), false, false);
+				Carousel.curr?.exit();
+				await ui.queueSyncedCarousel(card.holder, card.holder.grave, 1, (c,i) => newCard = c.cards[i], c => c.isUnit(), false, false);
 			}
 			if (newCard)
 				await board.toHand(newCard, card.holder.grave);
@@ -375,9 +376,9 @@ var ability_dict = {
 				card.holder.deck.draw(card.holder.hand);
 				return;
 			} else
-				Carousel.curr.exit();
-			await ui.queueCarousel(hand, 2, (c,i) => board.toGrave(c.cards[i], c), () => true);
-			await ui.queueCarousel(deck, 1, (c,i) => board.toHand(c.cards[i], deck), () => true, true);
+				Carousel.curr?.exit();
+			await ui.queueSyncedCarousel(card.holder, hand, 2, (c,i) => board.toGrave(c.cards[i], c), () => true);
+			await ui.queueSyncedCarousel(card.holder, deck, 1, (c,i) => board.toHand(c.cards[i], deck), () => true, true);
 		},
 		weight: (card, ai) => {
 			let cards = ai.discardOrder(card).splice(0,2).filter(c => c.basePower < 7);
@@ -393,8 +394,8 @@ var ability_dict = {
 			if (card.holder.controller instanceof ControllerAI) {
 				await ability_dict["eredin_king"].helper(card).card.autoplay(card.holder.deck);
 			} else {
-				Carousel.curr.cancel();
-				await ui.queueCarousel(deck, 1, (c,i) => board.toWeather(c.cards[i], deck), c => c.faction === "weather", true);
+				Carousel.curr?.cancel();
+				await ui.queueSyncedCarousel(card.holder, deck, 1, (c,i) => board.toWeather(c.cards[i], deck), c => c.faction === "weather", true);
 			}
 		},
 		weight: (card, ai, max) => ability_dict["eredin_king"].helper(card).weight,
