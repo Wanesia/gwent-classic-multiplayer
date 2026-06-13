@@ -1398,11 +1398,23 @@ class Board {
 		player_op.setWinning(dif < 0);
 	}
 
+	// Returns the given player's rows in canonical [close, ranged, siege] order
+	playerRows(player) {
+		const indices = player === player_me ? [3, 4, 5] : [2, 1, 0];
+		return indices.map(i => this.row[i]);
+	}
+
+	// Returns all six rows in a perspective-independent order (host's rows
+	// first), so that iteration effects fill graves identically on both clients
+	orderedRows() {
+		return this.playerRows(mp.playerOf("host")).concat(this.playerRows(mp.playerOf("guest")));
+	}
+
 	async clearRound()
 	{
 		await Promise.all([
 			await weather.clearWeather(),
-			...board.row.map(async row => await row.clear())
+			...this.orderedRows().map(async row => await row.clear())
 		]);
 	}
 }
@@ -1453,6 +1465,13 @@ class Game {
 	
 	// Sets up player faction abilities and psasive leader abilities
 	initPlayers(p1, p2){
+		// Online, both clients must register game effects in the same order
+		// even though player_me/player_op identities are swapped between them
+		if (mp.active && p1 !== mp.playerOf("host")) {
+			const t = p1;
+			p1 = p2;
+			p2 = t;
+		}
 		let l1 = ability_dict[p1.leader.abilities[0]];
 		let l2 = ability_dict[p2.leader.abilities[0]];
 		if (l1 === ability_dict["emhyr_whiteflame"] || l2 === ability_dict["emhyr_whiteflame"]){

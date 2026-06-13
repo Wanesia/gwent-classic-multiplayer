@@ -82,7 +82,8 @@ var ability_dict = {
 		placed: async (card, row) => {
 			if (row !== undefined)
 				row.cards.splice( row.cards.indexOf(card), 1);
-			let maxUnits = board.row.map( r => [r,r.maxUnits()] ).filter( p => p[1].length > 0);
+			// rows iterated in perspective-independent order so that victims enter the graves in the same order on both clients
+			let maxUnits = board.orderedRows().map( r => [r,r.maxUnits()] ).filter( p => p[1].length > 0);
 			if (row !== undefined)
 				row.cards.push(card);
 			let maxPower = maxUnits.reduce( (a,p) => Math.max(a, p[1][0].power), 0 );

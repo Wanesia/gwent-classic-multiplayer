@@ -19,11 +19,12 @@ var factions = {
 	monsters: {
 		name: "Monsters",
 		factionAbility: player => game.roundEnd.push(() => {
-			const units = board.row.filter( (r,i) => player === player_me ^ i < 3)
-				.reduce((a,r) => r.cards.filter(c => c.isUnit()).concat(a), []);
+			// canonical row order + shared seeded stream so both clients keep the same unit in online games
+			const units = board.playerRows(player)
+				.reduce((a,r) => a.concat(r.cards.filter(c => c.isUnit())), []);
 			if (units.length === 0)
 				return;
-			const card = units[randomInt(units.length)];
+			const card = units[GameRNG.game.int(units.length)];
 			card.noRemove = true;
 			game.roundStart.push( async () => {
 				await ui.notification("monsters", 1200);
