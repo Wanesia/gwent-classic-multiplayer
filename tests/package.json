@@ -1,0 +1,16 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for the online multiplayer mode.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "e2e-multiplayer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "playwright-core": "^1.60.0",
+    "ws": "^8.21.0"
+  }
+}
