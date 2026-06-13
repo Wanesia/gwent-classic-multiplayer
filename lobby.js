@@ -61,6 +61,7 @@ class Lobby {
 	showMenu() {
 		this.elem.classList.remove("hide");
 		this.showView("lobby-mode");
+		ui.toggleSettings.forEach(e => e.classList.add('lobby-menu'));
 	}
 
 	goBack(target) {
@@ -74,6 +75,7 @@ class Lobby {
 		this.statusText.textContent = "vs Computer";
 		this.statusElem.classList.remove("hide");
 		this.elem.classList.add("hide");
+		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
 	}
 
 	returnToMenu() {
@@ -182,6 +184,7 @@ class Lobby {
 		this.pendingSeed = null;
 		Net.onMessage = m => this.routeLobby(m);
 		this.elem.classList.add("hide");
+		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
 		this.statusElem.classList.remove("hide");
 		document.getElementById("opponent-preview").classList.add("hide");
 		this.startButton.textContent = "Ready";
@@ -346,3 +349,4 @@ class Lobby {
 }
 
 var lobby = new Lobby();
+ui.toggleSettings.forEach(e => e.classList.add('lobby-menu'));
