@@ -41,8 +41,10 @@ var factions = {
 			let notif = "";
 			if (player === player_me) {
 				await ui.popup("Go First", () => game.firstPlayer = player, "Let Opponent Start", () => game.firstPlayer = player.opponent(), "Would you like to go first?", "The Scoia'tael faction perk allows you to decide who will get to go first.", 0.55);
+				if (mp.active)
+					mp.send({t: "first", who: mp.roleOf(game.firstPlayer)});
 				notif = game.firstPlayer.tag + "-first";
-			} else if (player.hand instanceof HandAI) {
+			} else if (player.controller instanceof ControllerAI) {
 				if (Math.random() < 0.5) {
 					game.firstPlayer = player;
 					notif = "scoiatael";
@@ -51,7 +53,12 @@ var factions = {
 					notif = game.firstPlayer.tag + "-first";
 				}
 			} else {
-				//sleepUntil(game.firstPlayer); //TODO online
+				// remote player's choice arrives over the wire
+				const m = await mp.next("first");
+				if (!mp.active)
+					return true;
+				game.firstPlayer = mp.playerOf(m.who);
+				notif = game.firstPlayer.tag + "-first";
 			}
 			await ui.notification(notif,1200);
 			return true;
@@ -79,13 +86,13 @@ var factions = {
 			return true;
 		}),
 		helper: async player => {
-			const units = player.grave.findCardsRandom(c => c.isUnit(), 1);
+			const units = player.grave.findCardsRandom(c => c.isUnit(), 1, GameRNG.game);
 			if (units.length === 0)
 				return;
 			const card = units[0];
 			if (card.row === 'agile')
 			{
-				const selectedRow = await ui.waitForRowSelection(card);
+				const selectedRow = await ui.waitForRowSelection(card, player);
 				if (selectedRow)
 				{
 					await board.moveTo(card, selectedRow, player.grave);
