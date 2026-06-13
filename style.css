@@ -89,6 +89,7 @@ html {
 	background-size: contain;
 	opacity: 20%;
 	transition: opacity 0.3s;
+	pointer-events: auto;
 }
 #exit-game:hover {
 	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
