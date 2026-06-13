@@ -1208,14 +1208,31 @@ main { background-image: url('img/boardtest8.png'); }
 
 #lobby-return {
 	position: absolute;
-	top: 3vw;
+	top: 1vw;
 	left: 1vw;
 	font-size: 1vw;
 	color: white;
 	z-index: 90;
+	display: flex;
+	align-items: center;
+	gap: 0.4vw;
+}
+#lobby-return::before {
+	content: "";
+	display: inline-block;
+	width: 0.85vw;
+	height: 0.85vw;
+	background-image: url("svg/exit.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	opacity: 0.6;
+	filter: brightness(0) invert(1);
 }
 #lobby-return:hover {
 	text-decoration: underline;
+}
+#lobby-return:hover::before {
+	opacity: 1;
 }
 
 .card-array {
@@ -1588,7 +1605,7 @@ main { background-image: url('img/boardtest8.png'); }
 	position: absolute;
 	width: 100%;
 	height: calc(100vw * 1080 / 1920);
-	background-color: rgba(10,10,10,.97);
+	background-color: rgba(10,10,10,.99);
 	z-index: 90;
 	color: rgb(180,180,180);
 	text-align: center;
@@ -1608,83 +1625,482 @@ main { background-image: url('img/boardtest8.png'); }
 	margin-top: 2.5vw;
 }
 
-.lobby-button {
+/* ---------- multiplayer sub-screen typography ---------- */
+
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	20%       { transform: translateX(-6px); }
+	40%       { transform: translateX(6px); }
+	60%       { transform: translateX(-4px); }
+	80%       { transform: translateX(4px); }
+}
+
+.shake {
+	animation: shake 0.35s ease;
+}
+
+.mp-subtitle {
+	font-family: sans-serif;
+	font-size: 13px;
+	letter-spacing: 5px;
+	text-transform: uppercase;
+	color: rgba(255,255,255,0.25);
+	margin: 0 0 2.2vw;
+}
+
+/* ---------- lobby-mp option tiles ---------- */
+
+.mp-options {
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	margin: 0 auto;
+	width: 38vw;
+}
+
+.mp-option {
+	flex: 1;
+	padding: 1.8vw 1.5vw 1.6vw;
+	background: transparent;
+	border: 1px solid rgba(255,200,80,0.1);
+	color: inherit;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.45vw;
+	transition: border-color .4s ease, background .4s ease, box-shadow .4s ease;
+}
+
+.mp-option:hover {
+	border-color: rgba(255,200,80,0.45);
+	background: rgba(255,160,40,0.04);
+	box-shadow: 0 0 2vw rgba(255,160,40,0.1);
+}
+
+.mp-option-tag {
 	display: block;
-	margin: 1vw auto;
-	height: 3vw;
-	width: 14vw;
-	font-family: Arial Narrow;
-	font-size: 1.5vw;
-	color: goldenrod;
-	background-color: #4c390a66;
-	border: .2vw solid #1d180b;
-	border-radius: 0.1vw;
-	box-shadow: 0 0 .5vw #6d5210;
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 4px;
+	text-transform: uppercase;
+	color: rgba(255,210,120,0.4);
+	transition: color .4s ease;
 }
 
-.lobby-button:hover {
-	box-shadow: 0 0 2vw #6d5210;
+.mp-option:hover .mp-option-tag {
+	color: rgba(255,210,120,0.85);
 }
 
-.lobby-text {
-	font-size: 1.23vw;
-	color: tan;
-	margin: .6vw 0;
-	min-height: 1.4vw;
+.mp-option-heading {
+	display: block;
+	font-family: Georgia, serif;
+	font-weight: 400;
+	font-size: 1.35vw;
+	letter-spacing: 2px;
+	color: rgba(255,255,255,0.4);
+	transition: color .4s ease, text-shadow .4s ease;
+}
+
+.mp-option:hover .mp-option-heading {
+	color: #fff;
+	text-shadow: 0 0 1.5vw rgba(255,160,40,0.6), 0 0 3vw rgba(255,120,20,0.25);
+}
+
+.mp-option-desc {
+	display: block;
+	font-family: sans-serif;
+	font-size: 14px;
+	letter-spacing: 1px;
+	color: rgba(255,255,255,0.18);
+	transition: color .4s ease;
+}
+
+.mp-option:hover .mp-option-desc {
+	color: rgba(255,255,255,0.45);
+}
+
+.mp-options-divider {
+	width: 1px;
+	align-self: stretch;
+	margin: 0 2vw;
+	background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+}
+
+/* ---------- back / cancel link ---------- */
+
+.mp-back {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6vw;
+	margin: 2vw auto 0;
+	padding: 0.8vw 1.5vw;
+	background: transparent;
+	border: none;
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	color: rgba(255,255,255,0.2);
+	transition: color .3s ease;
+}
+
+.mp-back-icon {
+	display: inline-block;
+	width: 0.75vw;
+	height: 0.75vw;
+	background-color: currentColor;
+	-webkit-mask-image: url("svg/exit.svg");
+	mask-image: url("svg/exit.svg");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	flex-shrink: 0;
+}
+
+.mp-back:hover {
+	color: rgba(255,210,120,0.7);
+}
+
+/* ---------- lobby-create/join ---------- */
+
+#lobby-create .mp-back {
+	margin-top: 0.3vw;
 }
 
 .lobby-hint {
-	font-size: .95vw;
-	color: grey;
-	margin: .3vw 0;
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 2px;
+	color: rgba(255,255,255,0.28);
+	margin: .5vw 0;
 	min-height: 1.1vw;
 }
 
-#join-error {
-	color: #c0392b;
+.lobby-hint-error {
+	letter-spacing: 1px;
+	color: rgba(192,57,43,0.85);
+}
+
+.lobby-status {
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	color: rgba(255,200,80,0.45);
+	margin: .6vw auto;
+	min-height: 1.2vw;
+	display: inline-block;
+	position: relative;
+}
+
+@keyframes waiting-dots {
+	0%   { content: ""; }
+	25%  { content: "."; }
+	50%  { content: ".."; }
+	75%  { content: "..."; }
+	100% { content: ""; }
+}
+
+.lobby-status.is-waiting::after {
+	content: "";
+	position: absolute;
+	left: 100%;
+	top: 0;
+	padding-left: 0.3em;
+	animation: waiting-dots 1.6s infinite;
 }
 
 #room-code {
 	display: inline-block;
 	margin: .5vw auto;
-	padding: .4vw 1vw .4vw 1.8vw;
+	padding: .5vw 1.2vw .5vw 2vw;
 	font-size: 3.2vw;
 	letter-spacing: .8vw;
 	color: goldenrod;
-	background-color: black;
-	border: .2vw solid #1d180b;
-	box-shadow: 0 0 .5vw #6d5210;
-	cursor: pointer;
+	background-color: transparent;
+	border: 1px solid rgba(255,200,80,0.25);
+	box-shadow: 0 0 1.5vw rgba(255,160,40,0.1);
+	transition: border-color .4s ease, box-shadow .4s ease;
 }
 
 #room-code:hover {
-	box-shadow: 0 0 2vw #6d5210;
+	border-color: rgba(255,200,80,0.55);
+	box-shadow: 0 0 2.5vw rgba(255,160,40,0.25);
 }
 
 #join-code {
 	display: block;
-	margin: .5vw auto;
+	margin: .6vw auto;
 	width: 12vw;
-	padding: .4vw 0 .4vw .8vw;
+	padding: .5vw 0 .5vw .8vw;
 	font-family: Arial Narrow;
 	font-size: 2.2vw;
 	letter-spacing: .8vw;
 	text-align: center;
 	text-transform: uppercase;
 	color: goldenrod;
-	background-color: black;
-	border: .2vw solid #1d180b;
+	background-color: transparent;
+	border: 1px solid rgba(255,200,80,0.2);
 	outline: none;
+	transition: border-color .3s ease, box-shadow .3s ease;
+}
+
+#join-code:focus {
+	border-color: rgba(255,200,80,0.5);
+	box-shadow: 0 0 1.5vw rgba(255,160,40,0.15);
+}
+
+.mp-action-button {
+	display: block;
+	margin: 1.2vw auto 0;
+	padding: .6vw 2.5vw;
+	background: transparent;
+	border: 1px solid rgba(255,200,80,0.25);
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 4px;
+	text-transform: uppercase;
+	color: rgba(255,210,120,0.6);
+	transition: border-color .4s ease, color .4s ease, box-shadow .4s ease;
+}
+
+.mp-action-button:hover {
+	border-color: rgba(255,200,80,0.55);
+	color: rgba(255,215,130,1);
+	box-shadow: 0 0 2vw rgba(255,160,40,0.15);
+}
+
+/* ----- main menu: split-screen hover reveal ----- */
+
+#lobby-mode.lobby-split:not(.hide) {
+	position: fixed;
+	inset: 0;
+	margin: 0;
+	display: flex;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	background-color: #000;
+}
+
+/* the split screen carries its own faint title; hide the large gold one,
+   which is left for the create/join sub-views */
+#lobby:has(#lobby-mode:not(.hide)) #lobby-title {
+	display: none;
+}
+
+/* faint watermark title across the very top */
+.split-title {
+	position: absolute;
+	top: 1.5rem;
+	left: 0;
+	right: 0;
+	z-index: 10;
+	text-align: center;
+	font-family: sans-serif;
+	font-size: 10px;
+	letter-spacing: 6px;
+	text-transform: uppercase;
+	color: rgba(255,255,255,0.2);
+	pointer-events: none;
+}
+
+.split-panel {
+	position: relative;
+	flex: 1;
+	height: 100%;
+	overflow: hidden;
+	cursor: pointer;
+	transition: flex .6s cubic-bezier(0.4,0,0.2,1);
+}
+
+.split-image {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	filter: grayscale(100%) brightness(.35);
+	transform: scale(1.02);
+	transition: filter .6s ease, transform .6s ease;
+}
+
+#split-computer .split-image {
+	background-image: url("img/multiplayer/bg-left.png");
+	background-position: 18% top;
+}
+
+#split-player .split-image {
+	background-image: url("img/multiplayer/bg-right.png");
+	background-position: center top;
+}
+
+.split-panel::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+	opacity: .06;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	background-size: 180px 180px;
+}
+
+.split-vignette {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background:
+		linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 12%, rgba(0,0,0,0) 45%),
+		linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 25%),
+		radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.5) 100%);
+	transition: opacity .6s ease;
+}
+
+.split-label {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 2.5rem;
+	z-index: 3;
+	text-align: center;
+	pointer-events: none;
+}
+
+.split-tag {
+	display: block;
+	font-family: sans-serif;
+	font-size: 10px;
+	letter-spacing: 4px;
+	text-transform: uppercase;
+	color: rgba(255,255,255,0.35);
+	margin-bottom: 10px;
+	transition: color .5s ease, letter-spacing .5s ease;
+}
+
+.split-heading {
+	margin: 0;
+	font-family: Georgia, serif;
+	font-weight: 400;
+	font-size: 26px;
+	letter-spacing: 2px;
+	color: rgba(255,255,255,0.3);
+	transition: color .5s ease, text-shadow .5s ease, letter-spacing .5s ease;
+}
+
+.split-play {
+	margin-top: 18px;
+	padding: 10px 32px;
+	font-family: sans-serif;
+	font-size: 10px;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	border-radius: 1px;
+	border: 1px solid rgba(255,255,255,0.1);
+	color: rgba(255,255,255,0.15);
+	background: transparent;
+	cursor: pointer;
+	pointer-events: auto;
+	opacity: 0;
+	transform: translateY(12px);
+	transition: all .5s ease;
+}
+
+.split-panel:hover {
+	flex: 1.12;
+}
+
+.split-panel:hover .split-image {
+	filter: grayscale(0%) brightness(.85) contrast(1.05) saturate(1.1);
+	transform: scale(1);
+}
+
+.split-panel:hover .split-vignette {
+	opacity: .85;
+}
+
+.split-panel:hover .split-tag {
+	color: rgba(255,210,120,0.9);
+	letter-spacing: 5px;
+}
+
+.split-panel:hover .split-heading {
+	color: #ffffff;
+	letter-spacing: 3px;
+	text-shadow: 0 0 30px rgba(255,160,40,0.7), 0 0 60px rgba(255,120,20,0.3);
+}
+
+.split-panel:hover .split-play {
+	opacity: 1;
+	transform: translateY(0);
+	border: 1px solid rgba(255,200,80,0.5);
+	color: rgba(255,215,130,1);
+	background: rgba(0,0,0,0.3);
+	box-shadow: 0 0 20px rgba(255,160,40,0.15);
+}
+
+.split-divider {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 1px;
+	transform: translateX(-50%);
+	z-index: 5;
+	pointer-events: none;
+	background: linear-gradient(to bottom,
+		transparent 0%,
+		rgba(255,255,255,0.1) 20%,
+		rgba(255,255,255,0.25) 50%,
+		rgba(255,255,255,0.1) 80%,
+		transparent 100%);
+	transition: left .6s cubic-bezier(0.4,0,0.2,1);
+}
+
+.lobby-split:has(#split-computer:hover) .split-divider {
+	left: 52.83%;
+}
+
+.lobby-split:has(#split-player:hover) .split-divider {
+	left: 47.17%;
+}
+
+.split-badge {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 46px;
+	height: 46px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: rgba(8,6,4,0.95);
+	border: 1px solid rgba(255,255,255,0.15);
+	color: rgba(255,255,255,0.3);
+	font-size: 18px;
+	transition: border-color .4s ease, color .4s ease, box-shadow .4s ease;
+}
+
+.lobby-split:hover .split-badge {
+	border-color: rgba(255,200,80,0.4);
+	color: rgba(255,210,120,0.7);
+	box-shadow: 0 0 20px rgba(255,160,40,0.15);
 }
 
 /* ----- multiplayer status strip in the deck builder ----- */
 
 #mp-status {
 	position: absolute;
-	top: 1vw;
+	top: 3vw;
 	left: 1vw;
 	font-size: .9vw;
-	color: limegreen;
+	color: rgba(255, 255, 255, 0.75);
 	z-index: 90;
 }
 
