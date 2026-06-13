@@ -675,15 +675,17 @@ class CardContainer {
 	}
 	
 	// Returns a list of up to n cards that satisfy the predicate. Does not modify container.
-	findCardsRandom(predicate, n){
+	// Game-logic callers pass GameRNG.game so both clients agree in online games.
+	findCardsRandom(predicate, n, rng){
 		let valid = predicate ? this.cards.filter(predicate) : this.cards;
 		if (valid.length === 0)
 			return [];
+		const pick = max => rng ? rng.int(max) : randomInt(max);
 		if (!n || n === 1)
-			return [valid[randomInt(valid.length)]];
+			return [valid[pick(valid.length)]];
 		let out = [];
 		for (let i=Math.min(n, valid.length); i>0 ; --i){
-			let index = randomInt(valid.length);
+			let index = pick(valid.length);
 			out.push( valid.splice(index,1)[0] );
 		}
 		return out;
@@ -741,10 +743,12 @@ class CardContainer {
 		return i;
 	}
 	
-	// Adds a card to a random index of the CardContainer
+	// Adds a card to a random index of the CardContainer. Decks draw from their
+	// player's seeded shuffle stream so both clients shuffle identically online.
 	addCardRandom(card){
 		this.cards.push(card);
-		let index = randomInt(this.cards.length);
+		const rng = this.rngRole ? GameRNG.deckFor(this.rngRole) : null;
+		let index = rng ? rng.int(this.cards.length) : randomInt(this.cards.length);
 		if (index !== this.cards.length-1) {
 			let t = this.cards[this.cards.length-1];
 			this.cards[this.cards.length-1] = this.cards[index];
@@ -1685,15 +1689,17 @@ class Game {
 	newOpponentGame()
 	{
 		this.reset();
+		GameRNG.reset(GameRNG.randomSeed());
 		player_me.reset();
 		player_op = new Player('op', 'Player 2', dm.constructOpponentDeck(false));
 		this.endScreen.classList.add("hide");
 		this.startGame();
 	}
-	
+
 	// Restarts the last game with the dame decks
 	rematchGame(){
 		this.reset();
+		GameRNG.reset(GameRNG.randomSeed());
 		player_me.reset();
 		player_op.reset();
 		this.endScreen.classList.add("hide");
@@ -2831,17 +2837,19 @@ class DeckMaker {
 			AudioManager.playSFX("warning");
 			return alert(warning);
 		}
-		
-		const me_deck = { 
+
+		GameRNG.reset(GameRNG.randomSeed());
+
+		const me_deck = {
 			faction: this.faction,
-			leader: card_dict[this.leader.index], 
+			leader: card_dict[this.leader.index],
 			cards: this.deck.filter(x => x.count > 0)
 		};
 		const op_deck = this.constructOpponentDeck(true);
-		
+
 		player_me = new Player(0, "Player 1", me_deck);
 		player_op = new Player(1, "Player 2", op_deck);
-		
+
 		this.elem.classList.add("hide");
 		game.startGame();
 	}
