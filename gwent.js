@@ -461,14 +461,15 @@ class ControllerAI {
 
 // Can make actions during turns like playing cards that it owns
 class Player {
-	constructor(id, name, deck) {
+	constructor(id, name, deck, remote = false) {
 		this.id = id;
 		this.tag = (id === 0) ? "me" : "op";
-		this.controller = (id === 0) ? new Controller() : new ControllerAI(this);
-		
-		this.hand = (id === 0) ? new Hand(document.getElementById("hand-row")) : new HandAI();
+		this.controller = (id === 0) ? new Controller() : remote ? new ControllerRemote(this) : new ControllerAI(this);
+
+		this.hand = (id === 0) ? new Hand(document.getElementById("hand-row")) : remote ? new HandRemote() : new HandAI();
 		this.grave =  new Grave( document.getElementById("grave-" + this.tag));
 		this.deck = new Deck(deck.faction, document.getElementById("deck-" + this.tag));
+		this.deck.rngRole = mp.roleOfId(id);
 		this.deck_data = deck;
 		
 		this.leader = new Card(deck.leader, this);
@@ -541,7 +542,7 @@ class Player {
 			document.getElementById("pass-button").classList.remove("noclick");
 		}
 		
-		if (this.controller instanceof ControllerAI) {
+		if (typeof this.controller.startTurn === "function") {
 			await this.controller.startTurn(this);
 		}
 	}
@@ -1509,11 +1510,12 @@ class Game {
 		this.startRound();
 	}
 	
-	// Simulated coin toss to determine who starts game
+	// Simulated coin toss to determine who starts game. Uses the shared seeded
+	// stream, expressed in host/guest terms so both clients agree online.
 	async coinToss(){
 		if (this.firstPlayer)
 			return;
-		this.firstPlayer = (Math.random() < 0.5) ? player_me : player_op;
+		this.firstPlayer = GameRNG.game.coin() ? mp.playerOf("host") : mp.playerOf("guest");
 		await ui.notification(this.firstPlayer.tag + "-coin", 1200);
 	}
 	
@@ -3348,7 +3350,7 @@ async function translateTo(card, container_source, container_dest){
 	if (container_dest instanceof Row && container_dest.cards.length !== 0 && !card.isSpecial() ){
 		x += (container_dest.getSortedIndex(card) === container_dest.cards.length) ? elem.offsetWidth/2 : -elem.offsetWidth/2;
 	}
-	if (card.holder.controller instanceof ControllerAI)
+	if (card.holder.controller instanceof ControllerAI || card.holder.controller instanceof ControllerRemote)
 		x += elem.offsetWidth/2;
 	if (container_source instanceof Row && container_dest instanceof Grave && !card.isSpecial()) {
 		let mid = trueOffset(container_source.elem, true) + container_source.elem.offsetWidth/2;
