@@ -206,6 +206,36 @@ class MPSession {
 			return null;
 		}
 	}
+
+	// ---- desync safety net ----
+
+	// Cheap state fingerprint exchanged after every turn. Graves are left out
+	// on purpose: the avenger ability prunes its summon from the grave on a
+	// wall-clock timer, which could straddle the checksum point on one client.
+	checksum() {
+		const parts = [];
+		for (const role of ["host", "guest"]) {
+			const p = this.playerOf(role);
+			parts.push(p.total, p.health, p.passed ? 1 : 0, p.hand.cards.length, p.deck.cards.length);
+			for (const row of board.playerRows(p))
+				parts.push(row.total, row.cards.length, row.special ? 1 : 0);
+		}
+		parts.push(weather.cards.length, game.roundCount);
+		const s = parts.join(",");
+		let h = 2166136261 >>> 0;
+		for (let i = 0; i < s.length; i++) {
+			h ^= s.charCodeAt(i);
+			h = Math.imul(h, 16777619) >>> 0;
+		}
+		return h.toString(16);
+	}
+
+	desync() {
+		if (!this.active)
+			return;
+		this.deactivate();
+		lobby.endMultiplayerGame("Game Desynced", "The two game states no longer match, so the match cannot continue. Sorry!");
+	}
 }
 
 var mp = new MPSession();
