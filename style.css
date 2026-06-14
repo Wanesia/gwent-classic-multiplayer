@@ -32,6 +32,7 @@ main {
 	position:absolute;
 	width: 100%;
 	height: calc(100vw * 1080 / 1920);
+	transform-origin: top center;
 	background-image: url('img/board.jpg');
 	background-size: 100% auto;
 	background-repeat: no-repeat;
