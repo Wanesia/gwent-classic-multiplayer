@@ -3736,7 +3736,11 @@ function setupFullscreenHint(elem) {
 	if (!elem)
 		return () => {};
 	let shown = false;
+	let timer = null;
 	const hide = () => elem.classList.add("hide");
+	const scheduleHide = delay => timer = setTimeout(hide, delay);
+	elem.addEventListener("mouseenter", () => clearTimeout(timer), false);
+	elem.addEventListener("mouseleave", () => scheduleHide(1000), false);
 	elem.querySelector(".fs-hint-text").addEventListener("click", () => {
 		requestFullscreen();
 		hide();
@@ -3747,7 +3751,7 @@ function setupFullscreenHint(elem) {
 			return;
 		shown = true;
 		elem.classList.remove("hide");
-		setTimeout(hide, 5000);
+		scheduleHide(5000);
 	};
 }
 

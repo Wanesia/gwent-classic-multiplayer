@@ -2228,14 +2228,13 @@ main { background-image: url('img/boardtest8.png'); }
 	align-items: center;
 	gap: 0.9vw;
 	padding: 0.6vw 1.1vw;
-	background: rgba(0, 0, 0, 0.78);
-	border: 1px solid rgba(218, 165, 32, 0.55);
+	background: rgba(0, 0, 0, 1);
+	border: 1px solid rgba(218, 165, 32, 0.7);
 	border-radius: 0.4vw;
 	color: goldenrod;
 	font-family: Arial Narrow, sans-serif;
 	font-size: 1.1vw;
-	box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.5);
-	opacity: 0.92;
+	box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.6);
 	transition: opacity 0.4s ease;
 }
 
