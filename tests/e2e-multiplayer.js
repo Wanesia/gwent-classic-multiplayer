@@ -51,16 +51,15 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	assert(await A.isVisible('#lobby-mode'), 'lobby menu shown on load');
 
 	// --- lobby: create + join ---
-	await A.click('#lobby-vs-player');
+	await A.click('#split-player');
 	await A.click('#lobby-create-button');
 	await waitFor(A, () => /^[2-9A-Z]{5}$/.test(document.getElementById('room-code').textContent), 'host got room code');
 	const code = await A.textContent('#room-code');
 	console.log('     room code: ' + code);
 
-	await B.click('#lobby-vs-player');
+	await B.click('#split-player');
 	await B.click('#lobby-join-button');
-	await B.fill('#join-code', code);
-	await B.click('#join-button');
+	await B.fill('#join-code', code); // a full 5-char code auto-submits via the input handler
 
 	await waitFor(A, () => lobby.inMultiplayer, 'host entered deck setup');
 	await waitFor(B, () => lobby.inMultiplayer, 'guest entered deck setup');
