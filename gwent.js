@@ -3715,5 +3715,52 @@ AudioManager.init();
 ui.enablePlayer(false);
 let dm = new DeckMaker();
 
+function requestFullscreen() {
+	document.documentElement.requestFullscreen?.().catch(() => {});
+}
+
+function toggleFullscreen() {
+	if (document.fullscreenElement)
+		document.exitFullscreen?.();
+	else
+		requestFullscreen();
+}
+
+function isFullscreen() {
+	if (document.fullscreenElement)
+		return true;
+	return screen && (screen.height - window.innerHeight) <= 2;
+}
+
+function setupFullscreenHint(elem) {
+	if (!elem)
+		return () => {};
+	let shown = false;
+	const hide = () => elem.classList.add("hide");
+	elem.querySelector(".fs-hint-text").addEventListener("click", () => {
+		requestFullscreen();
+		hide();
+	}, false);
+	elem.querySelector(".fs-hint-close").addEventListener("click", hide, false);
+	return () => {
+		if (shown || isFullscreen())
+			return;
+		shown = true;
+		elem.classList.remove("hide");
+		setTimeout(hide, 5000);
+	};
+}
+
+const showGameFullscreenHint = setupFullscreenHint(document.getElementById("fullscreen-hint"));
+EventManager.gameOpened.bind(showGameFullscreenHint);
+
+const fullscreenToggle = document.getElementById("fullscreen-toggle");
+if (fullscreenToggle) {
+	fullscreenToggle.addEventListener("click", toggleFullscreen, false);
+	document.addEventListener("fullscreenchange", () => {
+		fullscreenToggle.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen mode";
+	});
+}
+
 
 document.addEventListener('click', () => userInteracted = true, { once: true });

@@ -1306,6 +1306,36 @@ main { background-image: url('img/boardtest8.png'); }
 	opacity: 1;
 }
 
+#fullscreen-toggle {
+	position: absolute;
+	top: 1vw;
+	right: 1vw;
+	font-size: 1vw;
+	color: white;
+	z-index: 90;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 0.4vw;
+}
+#fullscreen-toggle::before {
+	content: "";
+	display: inline-block;
+	width: 0.85vw;
+	height: 0.85vw;
+	background-image: url("svg/fullscreen.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	opacity: 0.6;
+	filter: brightness(0) invert(1);
+}
+#fullscreen-toggle:hover {
+	text-decoration: underline;
+}
+#fullscreen-toggle:hover::before {
+	opacity: 1;
+}
+
 .card-array {
 	position: absolute;
 	width: 34.4%;
@@ -2186,4 +2216,57 @@ main { background-image: url('img/boardtest8.png'); }
 .mp-locked .deck-options {
 	pointer-events: none;
 	opacity: .55;
+}
+
+/* Subtle, non-blocking hint nudging the player toward fullscreen. Shown once
+   per session — in the deck builder (top) and when a game starts (bottom) —
+   only if the window isn't already fullscreen. Fades via the .hide toggle. */
+.fs-hint {
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 0.9vw;
+	padding: 0.6vw 1.1vw;
+	background: rgba(0, 0, 0, 0.78);
+	border: 1px solid rgba(218, 165, 32, 0.55);
+	border-radius: 0.4vw;
+	color: goldenrod;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 1.1vw;
+	box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.5);
+	opacity: 0.92;
+	transition: opacity 0.4s ease;
+}
+
+/* in-game: fixed to the bottom of the viewport */
+#fullscreen-hint {
+	position: fixed;
+	bottom: 1.6vw;
+	z-index: 95;
+}
+
+.fs-hint.hide {
+	display: flex;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.fs-hint-text {
+	cursor: pointer;
+}
+
+.fs-hint-text:hover {
+	color: #ffd864;
+}
+
+.fs-hint-close {
+	cursor: pointer;
+	font-size: 1.4vw;
+	line-height: 1;
+	color: rgba(218, 165, 32, 0.7);
+}
+
+.fs-hint-close:hover {
+	color: goldenrod;
 }
