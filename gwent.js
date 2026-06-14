@@ -3715,24 +3715,5 @@ AudioManager.init();
 ui.enablePlayer(false);
 let dm = new DeckMaker();
 
-// Scale the board down to fit the viewport height when the window is shorter
-// than 16:9 of its width, so the hand row isn't cut off. Scaling the whole
-// rendered board uniformly keeps every element aligned. Gated to wide (desktop)
-// viewports only — laptops, which already fit, are left completely untouched.
-const DESKTOP_MIN_WIDTH = 1700;
-function fitBoardToViewport() {
-	const main = document.querySelector("main");
-	if (!main)
-		return;
-	if (window.innerWidth < DESKTOP_MIN_WIDTH) {
-		main.style.transform = "";
-		return;
-	}
-	const scale = Math.min(1, window.innerHeight / (window.innerWidth * 1080 / 1920));
-	main.style.transform = scale < 1 ? "scale(" + scale + ")" : "";
-}
-window.addEventListener("resize", fitBoardToViewport);
-fitBoardToViewport();
-
 
 document.addEventListener('click', () => userInteracted = true, { once: true });
