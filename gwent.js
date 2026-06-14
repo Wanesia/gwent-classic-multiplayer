@@ -1551,16 +1551,25 @@ class Game {
 	// once the local carousel is closed AND the remote picks have all arrived.
 	async initialRedraw(){
 		if (mp.active) {
+			let opRedrawDone = false;
 			await Promise.all([
 				ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
 					AudioManager.playSFX('redraw');
 					await player_me.deck.swap(c, c.cards[i]);
 				}, c => true, false, true, "Choose up to 2 cards to redraw.")
-					.then(() => ui.enablePlayer(false)), // no acting while the opponent finishes
+					.then(() => {
+						ui.enablePlayer(false); // no acting while the opponent finishes
+						// We are done but the opponent still is: tell the player why
+						// the game appears to pause instead of leaving a blank board.
+						if (!opRedrawDone)
+							ui.showNotification("op-redraw");
+					}),
 				ui.queueSyncedCarousel(player_op, player_op.hand, 2, async (c, i) => {
 					await player_op.deck.swap(c, c.cards[i]);
 				}, c => true, false, true)
+					.then(() => { opRedrawDone = true; })
 			]);
+			await ui.hideNotification();
 		} else {
 			for (let i=0; i< 2; i++)
 				player_op.controller.redraw();
@@ -2299,6 +2308,21 @@ class UI {
 		await fadeIn(this.notif_elem, fadeSpeed);
 		await sleep(duration);
 		await fadeOut(this.notif_elem, fadeSpeed);
+	}
+
+	// Shows a notification that stays visible until hideNotification() is called.
+	// Used to explain waits with no fixed duration (e.g. the opponent is still
+	// redrawing online), so the game does not silently appear stuck.
+	async showNotification(name){
+		if (!Settings.notifications.isEnabled())
+			return;
+		this.notif_elem.children[0].id = "notif-" + name;
+		await fadeIn(this.notif_elem, 150);
+	}
+
+	// Hides a notification shown by showNotification().
+	async hideNotification(){
+		await fadeOut(this.notif_elem, 150);
 	}
 	
 	// Displays a cancellable Carousel for a single card 

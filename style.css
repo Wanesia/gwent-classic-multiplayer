@@ -253,6 +253,9 @@ html {
 #notif-op-turn { background-image: url('img/icons/notif_op_turn.png'); }
 #notif-op-turn::after { content:"Opponent's turn"; }
 
+#notif-op-redraw { background-image: url('img/icons/notif_op_turn.png'); }
+#notif-op-redraw::after { content:"Waiting for your opponent to redraw\2026"; }
+
 #notif-north { background-image: url('img/icons/notif_north.png'); }
 #notif-north::after { content:"Northern Realms faction ability triggered - North draws an additional card."; }
 
