@@ -4,7 +4,7 @@
 // the relay server (server/server.js), which pairs two players by room code
 // and forwards "msg" frames between them verbatim, in order.
 var Net = {
-	DEFAULT_URL: "ws://localhost:8765",
+	DEFAULT_URL: "wss://gwent-classic-multiplayer.duckdns.org",
 
 	socket: null,
 	connected: false,
