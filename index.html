@@ -220,10 +220,16 @@
 				</tr>
 			</tbody>
 		</table>
-		<p class="hide">The battle cannot end in a draw. You can play a rematch using the same decks or surrender.</p>
-		<button>Customize</button>
-		<button>Rematch</button>
-		<button>New Game</button>
+		<div class="end-actions">
+			<div id="end-playagain-wrap" class="end-action-stack hide">
+				<button id="end-playagain">Play Again</button>
+				<span id="rematch-status" class="hide"></span>
+			</div>
+			<button id="end-customize">Customize</button>
+			<button id="end-rematch">Rematch</button>
+			<button id="end-newgame">New Game</button>
+			<button id="end-leave" class="hide">Leave</button>
+		</div>
 	</section>
 	
 	<section id="deck-selector">

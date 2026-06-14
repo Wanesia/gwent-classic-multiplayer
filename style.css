@@ -579,27 +579,73 @@ html {
 	color: rgb(180,180,180);
 }
 
-#end-screen button {
+#end-screen .end-actions {
     position: absolute;
-    height: 3vw;
-    width: 10vw;
-    top: 87%;
-	font-family: Arial Narrow;
-    font-size: 1.5vw;
-    color: goldenrod;
-    background-color: #4c390a66;
-    border: .2vw solid #1d180b;
-    border-radius: 0.1vw;
-    box-shadow: 0 0 .5vw #6d5210;
+    top: 80%;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.6vw;
 }
 
-#end-screen button:hover {
-	box-shadow: 0 0 2vw #6d5210;
+/* Modern, minimal action buttons matching the main-menu "Play Now" style */
+#end-screen .end-actions button {
+    position: static;
+    min-width: 9vw;
+    padding: .7vw 1.8vw;
+    background: transparent;
+    border: 1px solid rgba(255,200,80,0.25);
+    border-radius: 2px;
+    font-family: sans-serif;
+    font-size: .8vw;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,210,120,0.7);
+    box-shadow: none;
+    transition: border-color .35s ease, color .35s ease, background-color .35s ease, box-shadow .35s ease;
 }
 
-#end-screen button:nth-of-type(1) { left: 31%; }
-#end-screen button:nth-of-type(2) { left: 45%; }
-#end-screen button:nth-of-type(3) { left: 59%; }
+#end-screen .end-actions button:hover {
+    border-color: rgba(255,200,80,0.55);
+    color: rgba(255,215,130,1);
+    box-shadow: 0 0 1.6vw rgba(255,160,40,0.15);
+}
+
+#end-screen .end-action-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+#end-screen #rematch-status {
+    max-width: 11vw;
+    font-size: 0.8vw;
+    line-height: 1.35;
+    text-align: center;
+    color: rgba(255,210,120,0.55);
+    letter-spacing: 1px;
+}
+
+#end-screen #rematch-status span { display: block; }
+
+/* Opponent has asked for a rematch: nudge attention to the still-unfilled button */
+#end-screen .end-actions .rematch-wanted {
+    border-color: rgba(255,200,80,0.7);
+    color: rgba(255,225,150,1);
+    box-shadow: 0 0 1.4vw rgba(255,160,40,0.25);
+}
+
+/* You readied up: filled so it clearly reads as "active / locked in" */
+#end-screen .end-actions .rematch-waiting,
+#end-screen .end-actions .rematch-waiting:hover {
+    background: rgba(255,180,60,0.92);
+    border-color: rgba(255,215,140,0.95);
+    color: #1a1206;
+    box-shadow: 0 0 1.8vw rgba(255,160,40,0.4);
+}
 
 /* --------------------- panels ---------------------------  */
 

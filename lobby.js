@@ -24,6 +24,7 @@ class Lobby {
 		this.inMultiplayer = false;
 		this.localReady = false;
 		this.remoteReady = false;
+		this.remoteCustomizing = false;
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
@@ -179,6 +180,7 @@ class Lobby {
 		this.inMultiplayer = true;
 		this.localReady = false;
 		this.remoteReady = false;
+		this.remoteCustomizing = false;
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
@@ -216,12 +218,23 @@ class Lobby {
 		switch (m.t) {
 			case "lobby-ready":
 				this.remoteReady = true;
+				this.remoteCustomizing = false;
 				this.remoteDeckRaw = m.deck;
 				this.updateStatus();
 				this.checkStart();
 				break;
 			case "lobby-unready":
 				this.remoteReady = false;
+				this.remoteCustomizing = false;
+				this.remoteDeckRaw = null;
+				this.starting = false;
+				this.pendingSeed = null;
+				this.updateStatus();
+				break;
+			case "lobby-customizing":
+				// Peer left the end screen to edit their deck; still connected
+				this.remoteReady = false;
+				this.remoteCustomizing = true;
 				this.remoteDeckRaw = null;
 				this.starting = false;
 				this.pendingSeed = null;
@@ -261,6 +274,12 @@ class Lobby {
 	beginMatch(seed) {
 		const localRaw = JSON.parse(dm.deckToJSON());
 		const remoteRaw = this.remoteDeckRaw;
+		// A rematch starts straight from the end screen: clear the finished game
+		// and hide the scoreboard before the fresh match spins up.
+		if (game.state === GameState.END_SCREEN) {
+			game.reset();
+			game.endScreen.classList.add("hide");
+		}
 		this.resetReadyState();
 		mp.startMatch(seed, localRaw, remoteRaw);
 	}
@@ -268,6 +287,7 @@ class Lobby {
 	resetReadyState() {
 		this.localReady = false;
 		this.remoteReady = false;
+		this.remoteCustomizing = false;
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
@@ -281,6 +301,39 @@ class Lobby {
 			text = "Opponent: " + (this.remoteReady ? "ready" : "connected") +
 				(this.localReady && !this.remoteReady ? " — waiting for them to ready up" : "");
 		this.statusText.textContent = text;
+		// The same ready-up state drives the end-screen "Play Again" button
+		if (game.state === GameState.END_SCREEN)
+			game.updateRematchButton();
+	}
+
+	// End-screen "Play Again": ready up for a rematch with the current decks,
+	// reusing the lobby ready/start handshake. When both players have asked, the
+	// host drives the restart (lobby-start) exactly as a first match would.
+	toggleRematch() {
+		if (this.starting)
+			return;
+		if (!this.localReady) {
+			this.localReady = true;
+			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()) });
+			this.checkStart();
+		} else {
+			this.localReady = false;
+			Net.send({ t: "lobby-unready" });
+		}
+		game.updateRematchButton();
+	}
+
+	// End-screen "Leave": disconnect from the room and return to the main menu.
+	leaveFromEndScreen() {
+		if (!this.inMultiplayer)
+			return;
+		AudioManager.playSFX("menu_opening");
+		this.inMultiplayer = false;
+		mp.deactivate();
+		Net.leave();
+		if (game.state !== GameState.CUSTOMIZE)
+			game.returnToCustomization();
+		this.exitMultiplayer();
 	}
 
 	// The local player returned to the deck builder while an online match was
@@ -294,6 +347,11 @@ class Lobby {
 		if (game.state === GameState.PLAYING) {
 			Net.leave();
 			this.exitMultiplayer();
+		} else {
+			// Left the end screen to edit the deck: stay connected, but let the
+			// peer's Play Again status know we're customizing rather than ready
+			this.localReady = false;
+			Net.send({ t: "lobby-customizing" });
 		}
 	}
 
@@ -336,6 +394,7 @@ class Lobby {
 		this.inMultiplayer = false;
 		this.localReady = false;
 		this.remoteReady = false;
+		this.remoteCustomizing = false;
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
