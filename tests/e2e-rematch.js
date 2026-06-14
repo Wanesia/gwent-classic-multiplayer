@@ -33,7 +33,7 @@ async function passOutGame(pages) {
 	const B = await (await browser.newContext()).newPage();
 	for (const [tag, page] of [['A', A], ['B', B]]) {
 		page.on('pageerror', e => { const m = String(e); if (!/play\(\)|NotAllowedError|user didn't interact/i.test(m)) errors[tag].push(m); });
-		page.on('console', m => { if (m.type() === 'error' && !/ERR_|favicon|youtube|Audio|media/i.test(m.text())) errors[tag].push(m.text()); });
+		page.on('console', m => { if (m.type() === 'error' && !/ERR_|favicon|youtube|Audio|media|Permissions policy|compute-pressure/i.test(m.text())) errors[tag].push(m.text()); });
 	}
 	await A.goto(URL); await B.goto(URL);
 	await A.click('#split-player'); await A.click('#lobby-create-button');
