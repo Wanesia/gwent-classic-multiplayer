@@ -36,11 +36,11 @@ async function passOutGame(pages) {
 		page.on('console', m => { if (m.type() === 'error' && !/ERR_|favicon|youtube|Audio|media/i.test(m.text())) errors[tag].push(m.text()); });
 	}
 	await A.goto(URL); await B.goto(URL);
-	await A.click('#lobby-vs-player'); await A.click('#lobby-create-button');
+	await A.click('#split-player'); await A.click('#lobby-create-button');
 	await A.waitForFunction(() => /^[2-9A-Z]{5}$/.test(document.getElementById('room-code').textContent));
 	const code = await A.textContent('#room-code');
-	await B.click('#lobby-vs-player'); await B.click('#lobby-join-button');
-	await B.fill('#join-code', code); await B.click('#join-button');
+	await B.click('#split-player'); await B.click('#lobby-join-button');
+	await B.fill('#join-code', code); // a full 5-char code auto-submits via the input handler
 	await waitFor(A, () => lobby.inMultiplayer, 'host in deck setup');
 	await waitFor(B, () => lobby.inMultiplayer, 'guest in deck setup');
 

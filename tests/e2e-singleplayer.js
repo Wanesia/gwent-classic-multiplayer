@@ -29,13 +29,17 @@ async function waitFor(page, fn, label, timeout = 30000) {
 
 	await page.goto(URL);
 	await page.waitForFunction(() => typeof lobby !== 'undefined');
-	await page.click('#lobby-vs-computer');
+	await page.click('#split-computer');
 	assert(await page.isHidden('#lobby'), 'lobby hidden after Vs Computer');
 	assert(await page.isVisible('#deck-customization'), 'deck builder visible');
 	assert((await page.textContent('#start-game')).trim() === 'Start game', 'start button label unchanged');
-	assert(await page.isHidden('#mp-status'), 'no mp status strip in single player');
+	assert(await page.isVisible('#mp-status'), 'status strip shown in single player');
+	assert((await page.textContent('#mp-opponent-state')).trim() === 'vs Computer', 'status strip labels the mode "vs Computer"');
 	assert(await page.isVisible('#opponent-preview'), 'opponent preview visible in single player');
 
+	// Pin the RNG so the dealt hand is deterministic — otherwise the random deck
+	// shuffle occasionally deals an opening hand with no plain unit to play below.
+	await page.evaluate(() => { GameRNG.randomSeed = () => 1; });
 	await page.evaluate(() => document.getElementById('start-game').click());
 	await waitFor(page, () => game.state.val === 10, 'game started vs AI');
 	assert(await page.evaluate(() => !mp.active), 'mp session inactive');
