@@ -1,7 +1,9 @@
 # gwent-classic
 ![cover](https://user-images.githubusercontent.com/26311830/116256903-f1599b00-a7b6-11eb-84a1-16dcb5c9bfc6.jpg)
 
-A browser remake of the original Gwent minigame from The Witcher 3: Wild Hunt including all cards from the DLC. To play, download the repo and open index.html in a browser. For the best experience, play in fullscreen which can be toggled in most browsers with F11.
+A browser remake of the original Gwent minigame from The Witcher 3: Wild Hunt including all cards from the DLC. You can play it right now at **[gwent-classic-multiplayer.pages.dev](https://gwent-classic-multiplayer.pages.dev)**. For the best experience, play in fullscreen which can be toggled with F11.
+
+On startup you can choose to play against the computer or **online against a friend**. To play together, one of you creates a game and gets a short 5-letter code and the other joins by entering that code. You're then paired automatically and can build decks and play a full match against each other.
 
 ## Rules
 The game is played in the same way as the original. The player aims to win two of three rounds, where victory within a given round is determined by whoever scores the most points. 
@@ -24,6 +26,9 @@ This remake aims to resemble the orignal minigame as closely as possible from th
 
 #### AI opponent
 When you start a game you will face off againsts a fully implemented AI oponent. The opponent uses premade decks and will make intelligent decisions based on the cards in its hand, on the table, and in the discard piles.
+
+#### Online multiplayer vs a friend
+Pick "Vs Player" on the start menu to play against a friend instead of the computer. One player creates a game and shares the 5-letter code, the other joins with it. A small relay server pairs the two of you by that code. The game itself runs entirely in your two browsers. Both players then build their decks as usual and click Ready. The match starts when both are ready, and after it ends you can ready up again for a rematch. The hosted site already has a server running, so there is nothing to set up.
 
 #### Customize, save and upload decks
 You can select a faction to play as at the top of the screen and then add and remove cards from your deck by clicking on the cards in either scroll-down menu. You can also pick a leader card by selecting the current leader and scrolling through the options for that faction. At the top of the screen there are buttons to upload and download decks to play with. These are stored in json format and are checked to see if they comply with their assigned faction and maximum card counts. At the bottom of the screen, you can also customize your opponent by uploading the deck they will play with. 
