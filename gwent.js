@@ -1430,13 +1430,19 @@ const GameState = Object.freeze({
 class Game {
 	constructor() {
 		this.endScreen = document.getElementById("end-screen");
-		let buttons = this.endScreen.getElementsByTagName("button");
-		this.customize_elem = buttons[0];
-		this.rematch_elem = buttons[1];
-		this.newGame_elem = buttons[2];
+		this.customize_elem = document.getElementById("end-customize");
+		this.rematch_elem = document.getElementById("end-rematch");
+		this.newGame_elem = document.getElementById("end-newgame");
+		this.playAgain_elem = document.getElementById("end-playagain");
+		this.playAgainWrap_elem = document.getElementById("end-playagain-wrap");
+		this.rematchStatus_elem = document.getElementById("rematch-status");
+		this.leave_elem = document.getElementById("end-leave");
 		this.customize_elem.addEventListener("click", () => this.returnToCustomization(), false);
 		this.rematch_elem.addEventListener("click", () => this.rematchGame(), false);
 		this.newGame_elem.addEventListener("click", () => this.newOpponentGame(), false);
+		// Online-only: rematch with the same decks (mutual ready-up) and leave
+		this.playAgain_elem.addEventListener("click", () => lobby.toggleRematch(), false);
+		this.leave_elem.addEventListener("click", () => lobby.leaveFromEndScreen(), false);
 		this.state = GameState.CUSTOMIZE;
 		this.reset();
 	}
@@ -1697,14 +1703,17 @@ class Game {
 			rows[2].children[i].style.color = round && round.winner === player_op ? "goldenrod" : "";
 		}
 		
-		// Online there is no rematch-with-same-decks or new-AI-opponent; both
-		// players return to the deck builder and can ready up again
+		// Offline: rematch-with-same-decks / new-AI-opponent. Online: a networked
+		// Play Again (mutual ready-up, same decks) and Leave (disconnect) instead.
 		this.rematch_elem.classList.toggle("hide", mp.active);
 		this.newGame_elem.classList.toggle("hide", mp.active);
+		this.playAgainWrap_elem.classList.toggle("hide", !mp.active);
+		this.leave_elem.classList.toggle("hide", !mp.active);
+		if (mp.active)
+			this.updateRematchButton();
 
 		endScreen.children[0].className = "";
 		if (player_op.health <= 0 && player_me.health <= 0) {
-			endScreen.getElementsByTagName("p")[0].classList.remove("hide");
 			AudioManager.playSFX("game_lose");
 			endScreen.children[0].classList.add("end-draw");
 		} else if (player_op.health === 0){
@@ -1718,6 +1727,32 @@ class Game {
 		fadeIn(endScreen, 300);
 		ui.enablePlayer(true);
 		this.setState(GameState.END_SCREEN);
+	}
+
+	// Reflects the shared ready-up state on the online "Play Again" button. The
+	// label stays put; the line beneath it reports where both players stand.
+	updateRematchButton() {
+		const btn = this.playAgain_elem;
+		const status = this.rematchStatus_elem;
+		if (!btn || !status)
+			return;
+		btn.classList.toggle("rematch-waiting", lobby.localReady);
+		btn.classList.toggle("rematch-wanted", lobby.remoteReady && !lobby.localReady);
+
+		const show = lobby.localReady || lobby.remoteReady || lobby.remoteCustomizing;
+		status.classList.toggle("hide", !show);
+		if (!show) {
+			status.textContent = "";
+			return;
+		}
+		const you = lobby.localReady ? "ready" : "not ready";
+		const opp = lobby.remoteCustomizing ? "customizing deck"
+			: lobby.remoteReady ? "ready" : "not ready";
+		const line1 = document.createElement("span");
+		line1.textContent = "You: " + you;
+		const line2 = document.createElement("span");
+		line2.textContent = "Opponent: " + opp;
+		status.replaceChildren(line1, line2);
 	}
 
 	exitGame()
@@ -2034,7 +2069,7 @@ class UI {
 		[	'.settings-button',
 			'.deck-options',
 			'#pass-button',
-			'#end-screen>button',
+			'#end-screen .end-actions button',
 			'#op-preview-leader',
 			'#opponent-preview button'
 		].forEach(addMouseEnterSFXBySelector);
