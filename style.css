@@ -2235,6 +2235,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-family: Arial Narrow, sans-serif;
 	font-size: 1.1vw;
 	box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.6);
+	pointer-events: auto;
 	transition: opacity 0.4s ease;
 }
 
