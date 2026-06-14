@@ -16,7 +16,7 @@ function watch(page, tag) {
 	page.on('console', m => {
 		if (m.type() !== 'error') return;
 		const txt = m.text();
-		if (/ERR_|favicon|youtube|Audio|media/i.test(txt)) return; // offline iframe api, audio
+		if (/ERR_|favicon|youtube|Audio|media|Permissions policy|compute-pressure/i.test(txt)) return; // offline iframe api, audio, browser policy noise
 		errors[tag].push(txt);
 	});
 }
@@ -67,6 +67,9 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	assert((await B.textContent('#start-game')).trim() === 'Ready', 'start button relabeled Ready');
 
 	// --- ready up (host first, then guest) ---
+	// Pin the shared seed (the host generates it and sends it to the guest) so
+	// the deal is deterministic and the first player always holds a unit to play.
+	await A.evaluate(() => { GameRNG.randomSeed = () => 1; });
 	await A.evaluate(() => document.getElementById('start-game').click());
 	await waitFor(B, () => lobby.remoteReady, 'guest sees host ready');
 	await B.evaluate(() => document.getElementById('start-game').click());

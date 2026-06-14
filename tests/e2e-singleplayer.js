@@ -23,7 +23,7 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	});
 	page.on('console', m => {
 		if (m.type() !== 'error') return;
-		if (/ERR_|favicon|youtube|Audio|media/i.test(m.text())) return;
+		if (/ERR_|favicon|youtube|Audio|media|Permissions policy|compute-pressure/i.test(m.text())) return;
 		errors.push(m.text());
 	});
 
