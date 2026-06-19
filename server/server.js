@@ -5,14 +5,48 @@
 // them verbatim. Holds no game logic and no persistent state; a room dies as
 // soon as either side leaves or disconnects.
 
+const http = require("http");
 const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 8765;
 const ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // no 0/O/1/I/L
 const CODE_LENGTH = 5;
 
-const rooms = new Map(); // code -> {host, guest}
-const wss = new WebSocketServer({ port: PORT });
+const rooms = new Map(); // code -> {host, guest, startedAt, messages}
+
+const server = http.createServer((req, res) => {
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	if (req.method === "OPTIONS") {
+		res.setHeader("Access-Control-Allow-Methods", "POST");
+		res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		res.writeHead(204);
+		res.end();
+		return;
+	}
+	if (req.method === "POST" && req.url === "/event") {
+		let body = "";
+		req.on("data", chunk => { body += chunk; if (body.length > 256) body = ""; });
+		req.on("end", () => {
+			try {
+				const { type } = JSON.parse(body);
+				if (type && typeof type === "string" && type.length <= 32)
+					log(type);
+			} catch (_) {}
+			res.writeHead(204);
+			res.end();
+		});
+		return;
+	}
+	res.writeHead(404);
+	res.end();
+});
+
+const wss = new WebSocketServer({ server });
+
+function log(event, fields = {}) {
+	const parts = Object.entries(fields).map(([k, v]) => `${k}=${v}`).join("  ");
+	console.log(`[${new Date().toISOString()}] ${event.padEnd(14)} ${parts}`);
+}
 
 function makeCode() {
 	let code;
@@ -36,7 +70,7 @@ function peerOf(ws) {
 	return room.host === ws ? room.guest : room.host;
 }
 
-function destroyRoom(ws, notifyPeer) {
+function destroyRoom(ws, notifyPeer, reason) {
 	const room = rooms.get(ws.room);
 	ws.room = null;
 	if (!room)
@@ -47,6 +81,12 @@ function destroyRoom(ws, notifyPeer) {
 		peer.room = null;
 		if (notifyPeer)
 			send(peer, { type: "peer-left" });
+	}
+	if (room.startedAt) {
+		const mins = Math.round((Date.now() - room.startedAt) / 60000);
+		log("game-ended", { code: room.code, messages: room.messages, duration: `${mins}m`, reason });
+	} else {
+		log("room-closed", { code: room.code, reason });
 	}
 }
 
@@ -67,9 +107,10 @@ wss.on("connection", ws => {
 				if (ws.room)
 					return send(ws, { type: "error", code: "already-in-room" });
 				const code = makeCode();
-				rooms.set(code, { code: code, host: ws, guest: null });
+				rooms.set(code, { code: code, host: ws, guest: null, startedAt: null, messages: 0 });
 				ws.room = code;
 				send(ws, { type: "created", code: code });
+				log("room-created", { code });
 				break;
 			}
 			case "join": {
@@ -82,9 +123,11 @@ wss.on("connection", ws => {
 				if (room.guest)
 					return send(ws, { type: "error", code: "full" });
 				room.guest = ws;
+				room.startedAt = Date.now();
 				ws.room = code;
 				send(ws, { type: "joined", code: code });
 				send(room.host, { type: "peer-joined" });
+				log("game-started", { code });
 				break;
 			}
 			case "msg": {
@@ -92,17 +135,19 @@ wss.on("connection", ws => {
 				if (!peer)
 					return send(ws, { type: "error", code: "no-peer" });
 				send(peer, { type: "msg", data: msg.data });
+				const room = rooms.get(ws.room);
+				if (room) room.messages++;
 				break;
 			}
 			case "leave":
-				destroyRoom(ws, true);
+				destroyRoom(ws, true, "leave");
 				break;
 			default:
 				send(ws, { type: "error", code: "bad-request" });
 		}
 	});
 
-	ws.on("close", () => destroyRoom(ws, true));
+	ws.on("close", () => destroyRoom(ws, true, "disconnect"));
 });
 
 // Reap dead connections (browsers answer pings automatically)
@@ -117,4 +162,4 @@ setInterval(() => {
 	}
 }, 30000);
 
-console.log("gwent-classic relay listening on port " + PORT);
+server.listen(PORT, () => log("server-start", { port: PORT }));

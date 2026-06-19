@@ -1521,6 +1521,7 @@ class Game {
 	// Sets initializes player abilities, player hands and redraw
 	async startGame() {
 		EventManager.gameOpened.dispatch();
+		if (!mp.active) Net.trackEvent("sp-game-started");
 		this.initPlayers(player_me, player_op);
 		this.setState(GameState.PLAYING);
 		AudioManager.playSFX('game_opening');
@@ -1698,6 +1699,7 @@ class Game {
 	
 	// Sets up and displays the end-game screen
 	async endGame() {
+		Net.trackEvent(mp.active ? "mp-game-completed" : "sp-game-finished");
 		let endScreen = document.getElementById("end-screen");
 		let rows = endScreen.getElementsByTagName("tr");
 		rows[1].children[0].innerHTML = player_me.name;

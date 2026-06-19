@@ -30,7 +30,7 @@ class Lobby {
 		this.pendingSeed = null;
 
 		document.getElementById("split-computer").addEventListener("click", () => this.startSinglePlayer());
-		document.getElementById("split-player").addEventListener("click", () => this.showView("lobby-mp"));
+		document.getElementById("split-player").addEventListener("click", () => { Net.trackEvent("mode-mp"); this.showView("lobby-mp"); });
 		document.getElementById("lobby-create-button").addEventListener("click", () => this.createGame());
 		document.getElementById("lobby-join-button").addEventListener("click", () => this.showJoin());
 		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
@@ -72,6 +72,7 @@ class Lobby {
 	}
 
 	startSinglePlayer() {
+		Net.trackEvent("mode-sp");
 		AudioManager.playSFX("menu_opening");
 		this.statusText.textContent = "vs Computer";
 		this.statusElem.classList.remove("hide");

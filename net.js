@@ -125,6 +125,12 @@ var Net = {
 			p.resolve(val);
 	},
 
+	trackEvent(type) {
+		const url = this.serverURL().replace(/^wss:/, "https:").replace(/^ws:/, "http:") + "/event";
+		fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type }) })
+			.catch(() => {});
+	},
+
 	// Losing the relay connection mid-room is equivalent to the peer leaving:
 	// the match cannot continue either way.
 	handleClose() {
