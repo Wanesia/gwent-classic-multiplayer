@@ -741,6 +741,10 @@ html {
     gap: 0.5vw;
 }
 
+/* This id+class rule would otherwise outrank the generic `.hide`, leaving the
+   online-only Play Again stack visible in single player. */
+#end-screen .end-action-stack.hide { display: none; }
+
 #end-screen #rematch-status {
     max-width: 11vw;
     font-size: 0.8vw;
