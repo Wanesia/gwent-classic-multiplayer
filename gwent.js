@@ -1557,7 +1557,7 @@ class Game {
 				ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
 					AudioManager.playSFX('redraw');
 					await player_me.deck.swap(c, c.cards[i]);
-				}, c => true, false, true, "Choose up to 2 cards to redraw.")
+				}, c => true, false, true, "Choose up to 2 cards to redraw.", true)
 					.then(() => {
 						ui.enablePlayer(false); // no acting while the opponent finishes
 						// We are done but the opponent still is: tell the player why
@@ -1577,7 +1577,7 @@ class Game {
 			await ui.queueCarousel(player_me.hand, 2, async (c, i) => {
 				AudioManager.playSFX('redraw');
 				await player_me.deck.swap(c, c.cards[i]);
-			}, c => true, false, true, "Choose up to 2 cards to redraw.");
+			}, c => true, false, true, "Choose up to 2 cards to redraw.", true);
 		}
 		ui.enablePlayer(false);
 	}
@@ -2344,7 +2344,7 @@ class UI {
 	
 	// Displays a Carousel menu of filtered container items that match the predicate.
 	// Suspends gameplay until the Carousel is closed. Automatically picks random card if activated for AI player
-	async queueCarousel(container, count, action, predicate, bSort, bQuit, title){
+	async queueCarousel(container, count, action, predicate, bSort, bQuit, title, bRedraw){
 		if (game.currPlayer === player_op) {
 			if (player_op.controller instanceof ControllerAI)
 				for (let i=0; i<count; ++i){
@@ -2355,7 +2355,7 @@ class UI {
 				}
 			return;
 		}
-		let carousel = new Carousel(container, count, action, predicate, bSort, bQuit, title);
+		let carousel = new Carousel(container, count, action, predicate, bSort, bQuit, title, bRedraw);
 		if (Carousel.curr === undefined || Carousel.curr === null)
 			carousel.start();
 		else {
@@ -2378,7 +2378,7 @@ class UI {
 	// the remote player, picks are consumed from the wire and applied directly
 	// without opening a carousel. In single-player this behaves exactly like
 	// queueCarousel.
-	async queueSyncedCarousel(chooser, container, count, action, predicate, bSort, bQuit, title){
+	async queueSyncedCarousel(chooser, container, count, action, predicate, bSort, bQuit, title, bRedraw){
 		if (mp.isRemote(chooser)) {
 			while (true) {
 				const m = await mp.next("pick", "pickEnd");
@@ -2388,12 +2388,12 @@ class UI {
 			}
 		}
 		if (chooser.controller instanceof ControllerAI)
-			return await this.queueCarousel(container, count, action, predicate, bSort, bQuit, title);
+			return await this.queueCarousel(container, count, action, predicate, bSort, bQuit, title, bRedraw);
 		const wrapped = !mp.active ? action : async (c, i) => {
 			mp.send({t: "pick", i: i});
 			return await action(c, i);
 		};
-		await this.queueCarousel(container, count, wrapped, predicate, bSort, bQuit, title);
+		await this.queueCarousel(container, count, wrapped, predicate, bSort, bQuit, title, bRedraw);
 		if (mp.active)
 			mp.send({t: "pickEnd"});
 	}
@@ -2521,7 +2521,7 @@ class UI {
 // Clicking the middle card performs the action on that card "count" times
 // Clicking adejacent cards shifts the menu to focus on that card
 class Carousel {
-	constructor(container, count, action, predicate, bSort, bExit = false, title) {
+	constructor(container, count, action, predicate, bSort, bExit = false, title, bRedraw = false) {
 		if (count <= 0 || !container || !action || container.cards.length === 0)
 			return ;
 		this.container = container;
@@ -2534,18 +2534,24 @@ class Carousel {
 		this.bExit = bExit;
 		this.title = title;
 		this.cancelled = false;
-		
+		this.bRedraw = bRedraw;
+		this.totalCount = count;
+
 		if (!Carousel.elem) {
 			Carousel.elem = document.getElementById("carousel");
 			Carousel.elem.children[0].addEventListener("click", () => Carousel.curr.cancel(), false);
+			Carousel.initScrollInput();
 		}
 		this.elem = Carousel.elem;
 		document.getElementsByTagName("main")[0].classList.remove("noclick");
-		
+
 		this.elem.children[0].classList.remove("noclick");
 		this.previews = this.elem.getElementsByClassName("card-lg");
 		this.desc = this.elem.getElementsByClassName("card-description")[0];
 		this.title_elem = this.elem.children[2];
+		this.leftArrow = this.elem.querySelector(".carousel-arrow-left");
+		this.rightArrow = this.elem.querySelector(".carousel-arrow-right");
+		this.pips = this.elem.querySelector("#carousel-progress");
 		[...this.elem.children[0].children].forEach(e => e.addEventListener("mouseout", evt=>Carousel.curr?.nudge(0)));
 		this.elem.children[0].style.setProperty('--carousel-trans-time', "0.25s");
 	}
@@ -2560,9 +2566,10 @@ class Carousel {
 		if (this.bSort)
 			this.indices.sort( (a, b) => Card.compare(this.container.cards[a],this.container.cards[b]) );
 		
+		this.setupControls();
 		this.update();
 		Carousel.setCurrent(this);
-		
+
 		if (this.title) {
 			this.title_elem.innerHTML = this.title;
 			this.title_elem.classList.remove("hide");
@@ -2577,7 +2584,10 @@ class Carousel {
 	// Called by the client to cycle cards displayed by n
 	shift(event, n){
 		(event || window.event).stopPropagation();
-		this.index = Math.max(0, Math.min(this.indices.length-1, this.index+n));
+		const next = Math.max(0, Math.min(this.indices.length-1, this.index+n));
+		if (next === this.index)
+			return;
+		this.index = next;
 		AudioManager.playSFX('ui_card');
 		this.update();
 	}
@@ -2602,6 +2612,8 @@ class Carousel {
 	// Called by client to perform action on the middle card in focus
 	async select(event) {
 		(event || window.event).stopPropagation();
+		if (this.bRedraw)
+			this.discardEffect(this.previews[2]);
 		--this.count;
 		if (this.isLastSelection())
 			this.elem.classList.add("hide");
@@ -2611,6 +2623,8 @@ class Carousel {
 		if (this.isLastSelection() && !this.cancelled)
 			return this.exit();
 		this.update();
+		if (this.bRedraw)
+			this.drawInEffect(this.previews[2]);
 	}
 	
 	// Called by client to exit out of the current Carousel if allowed. Enables player interraction.
@@ -2651,8 +2665,59 @@ class Carousel {
 			}
 		}
 		ui.setDescription(this.container.cards[this.indices[this.index]], this.desc);
+		this.refreshControls();
 	}
-	
+
+	setupControls(){
+		if (this.bRedraw && this.pips) {
+			this.pips.classList.remove("hide");
+			this.pips.innerHTML = "";
+			for (let i = 0; i < this.totalCount; i++)
+				this.pips.appendChild(document.createElement("div"));
+		} else if (this.pips) {
+			this.pips.classList.add("hide");
+		}
+		this.refreshControls();
+	}
+
+	refreshControls(){
+		this.leftArrow?.classList.toggle("disabled", this.index <= 0);
+		this.rightArrow?.classList.toggle("disabled", this.index >= this.indices.length - 1);
+		if (this.bRedraw && this.pips) {
+			const used = this.totalCount - this.count;
+			[...this.pips.children].forEach((p, i) => p.classList.toggle("used", i < used));
+		}
+	}
+
+	discardEffect(previewElem){
+		if (!previewElem || !previewElem.style.backgroundImage)
+			return;
+		const rect = previewElem.getBoundingClientRect();
+		const ghost = document.createElement("div");
+		ghost.className = "carousel-discard";
+		ghost.style.backgroundImage = previewElem.style.backgroundImage;
+		ghost.style.left = rect.left + "px";
+		ghost.style.top = rect.top + "px";
+		ghost.style.width = rect.width + "px";
+		ghost.style.height = rect.height + "px";
+		const sym = document.createElement("div");
+		sym.className = "carousel-discard-symbol";
+		ghost.appendChild(sym);
+		document.body.appendChild(ghost);
+		requestAnimationFrame(() => ghost.classList.add("go"));
+		setTimeout(() => ghost.remove(), 750);
+	}
+
+	// Briefly scales/fades a preview slot in — used for the freshly drawn (or
+	// restored) card so the replacement is obvious.
+	drawInEffect(elem){
+		if (!elem)
+			return;
+		elem.classList.remove("carousel-drawn");
+		void elem.offsetWidth; // restart the animation
+		elem.classList.add("carousel-drawn");
+	}
+
 	// Clears and quits the current carousel
 	exit() {
 		for (let x of this.previews)
@@ -2670,6 +2735,75 @@ class Carousel {
 	// Statically clears the current carousel
 	static clearCurrent() {
 		this.curr = null;
+	}
+
+	// Attached once to the (reused) carousel element. Adds smooth wheel,
+	// touch-swipe and keyboard navigation on top of the existing click-to-shift
+	static initScrollInput() {
+		const row = Carousel.elem.children[0];
+		let wheelAccum = 0;
+		let wheelLocked = false;
+		const WHEEL_THRESHOLD = 30;
+		row.addEventListener("wheel", e => {
+			const c = Carousel.curr;
+			if (!c) return;
+			e.preventDefault();
+			// Honour horizontal trackpad scrolling as well as vertical wheels.
+			const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+			wheelAccum += delta;
+			if (wheelLocked) return;
+			if (Math.abs(wheelAccum) >= WHEEL_THRESHOLD) {
+				const dir = Math.sign(wheelAccum);
+				wheelAccum = 0;
+				wheelLocked = true;
+				c.shift(e, dir);
+				setTimeout(() => { wheelLocked = false; }, 90);
+			}
+		}, { passive: false });
+
+		let originX = 0, lastX = 0, swiping = false, moved = false;
+		row.addEventListener("touchstart", e => {
+			if (!Carousel.curr) return;
+			originX = lastX = e.touches[0].clientX;
+			swiping = true;
+			moved = false;
+		}, { passive: true });
+
+		row.addEventListener("touchmove", e => {
+			const c = Carousel.curr;
+			if (!swiping || !c) return;
+			e.preventDefault();
+			const x = e.touches[0].clientX;
+			const step = window.innerWidth * 0.11; // px of drag per card
+			let dx = x - originX;
+			while (dx >= step)  { c.shift(e, -1); originX += step; dx -= step; moved = true; }
+			while (dx <= -step) { c.shift(e,  1); originX -= step; dx += step; moved = true; }
+			if (Math.abs(x - lastX) > 4) moved = true;
+			lastX = x;
+			const mag = Math.max(-1.5, Math.min(1.5, (dx / step) * 1.5));
+			row.style.setProperty('--magnitude', mag);
+		}, { passive: false });
+
+		const endTouch = e => {
+			if (!swiping) return;
+			swiping = false;
+			row.style.setProperty('--magnitude', 0);
+			if (moved && e.cancelable) e.preventDefault();
+		};
+		row.addEventListener("touchend", endTouch, { passive: false });
+		row.addEventListener("touchcancel", endTouch, { passive: false });
+
+		document.addEventListener("keydown", e => {
+			const c = Carousel.curr;
+			if (!c) return;
+			switch (e.key) {
+				case "ArrowLeft":  e.preventDefault(); c.shift(e, -1); break;
+				case "ArrowRight": e.preventDefault(); c.shift(e,  1); break;
+				case "Enter":
+				case " ":          e.preventDefault(); c.select(e);    break;
+				case "Escape":     e.preventDefault(); c.cancel();     break;
+			}
+		});
 	}
 }
 

@@ -443,6 +443,124 @@ html {
     box-shadow: 0 0 1vw #ffffff54;
 }
 
+/* ---- carousel navigation arrows (all carousels) ---- */
+.carousel-arrow {
+	position: absolute;
+	top: 44%;
+	transform: translateY(-50%);
+	z-index: 95;
+	width: 4vw;
+	height: 4vw;
+	padding: 0 0 0.4vw 0;
+	border: 0.12vw solid goldenrod;
+	border-radius: 50%;
+	background-color: rgba(10,10,10,.55);
+	color: goldenrod;
+	font-family: serif;
+	font-size: 3vw;
+	line-height: 1;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 0 1vw rgba(0,0,0,.6);
+	transition: background-color .15s, box-shadow .15s, color .15s, opacity .2s, transform .1s;
+}
+.carousel-arrow:hover {
+	background-color: rgba(35,30,15,.9);
+	box-shadow: 0 0 1.4vw goldenrod;
+	color: #ffd700;
+}
+.carousel-arrow:active {
+	transform: translateY(-50%) scale(.9);
+}
+.carousel-arrow-left  { left: 2%; }
+.carousel-arrow-right { right: 2%; }
+.carousel-arrow.disabled {
+	opacity: .2;
+	pointer-events: none;
+}
+
+/* ---- redraw progress pips (sit above the title text) ---- */
+#carousel-progress {
+	position: absolute;
+	top: 6%;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 95;
+	display: flex;
+	gap: 1vw;
+	padding: .7vw 1.2vw;
+	border-radius: 2vw;
+	background-color: rgba(10,10,10,.7);
+	box-shadow: 0 0 1vw rgba(0,0,0,.5);
+}
+#carousel-progress.hide { display: none; }
+#carousel-progress > div {
+	width: 1vw;
+	height: 1vw;
+	border-radius: 50%;
+	border: 0.12vw solid goldenrod;
+	background-color: rgba(255,255,255,.12);
+	box-shadow: 0 0 .4vw rgba(0,0,0,.6);
+	transition: background-color .25s, box-shadow .25s, transform .25s;
+}
+#carousel-progress > div.used {
+	background-color: goldenrod;
+	box-shadow: 0 0 .8vw goldenrod;
+	transform: scale(1.15);
+}
+
+/* ---- discard fly-away ghost ---- */
+.carousel-discard {
+	position: fixed;
+	z-index: 130;
+	background-size: cover;
+	background-position: center;
+	border: .3vw solid goldenrod;
+	border-radius: 1.5vw;
+	box-shadow: 0 0 4vw goldenrod;
+	background-origin: border-box;
+	pointer-events: none;
+	opacity: 1;
+	transform: translate(0,0) scale(1) rotate(0deg);
+	transition: transform .6s cubic-bezier(.55,-0.2,.6,1),
+				opacity .35s ease-in .3s,
+				filter .5s ease-in .15s;
+}
+.carousel-discard.go {
+	transform: translateY(9vh) scale(.5) rotate(-10deg);
+	opacity: 0;
+	filter: grayscale(.8) brightness(.5);
+}
+.carousel-discard-symbol {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 45%;
+	height: 45%;
+	background: url('svg/trash.svg') center/contain no-repeat;
+	filter: drop-shadow(0 0 .6vw #000);
+	opacity: 0;
+	transform: translate(-50%,-50%) scale(.4);
+	transition: opacity .25s ease-out .05s,
+				transform .35s cubic-bezier(.2,1.4,.4,1) .05s;
+}
+.carousel-discard.go .carousel-discard-symbol {
+	opacity: 1;
+	transform: translate(-50%,-50%) scale(1);
+}
+
+/* ---- freshly drawn / restored card pop-in ---- */
+@keyframes carousel-draw-in {
+	0%   { opacity: 0; transform: scale(.78); }
+	60%  { opacity: 1; }
+	100% { opacity: 1; transform: scale(1); }
+}
+#carousel .card-lg.carousel-drawn {
+	animation: carousel-draw-in .42s cubic-bezier(.2,.9,.3,1.1);
+}
+
 /* --------------------- popup ---------------------------  */
 
 #popup {
