@@ -41,7 +41,11 @@ const server = http.createServer((req, res) => {
 	res.end();
 });
 
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({
+	server,
+	maxPayload: 32 * 1024,
+	perMessageDeflate: false
+});
 
 function log(event, fields = {}) {
 	const parts = Object.entries(fields).map(([k, v]) => `${k}=${v}`).join("  ");
