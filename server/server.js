@@ -17,6 +17,8 @@ const rooms = new Map(); // code -> {host, guest, startedAt, messages}
 const MAX_CLIENTS = 400;
 const MAX_PER_IP = 10;
 const ROOM_TTL_MS = 30 * 60 * 1000;
+const MSG_RATE = 25;
+const MSG_BURST = 50;
 
 const ipCounts = new Map();
 let lastOverloadLog = 0;
@@ -91,6 +93,16 @@ function clientIp(req) {
 	return req.socket.remoteAddress || "?";
 }
 
+function allowMessage(ws) {
+	const now = Date.now();
+	ws.tokens = Math.min(MSG_BURST, ws.tokens + (now - ws.lastRefill) / 1000 * MSG_RATE);
+	ws.lastRefill = now;
+	if (ws.tokens < 1)
+		return false;
+	ws.tokens -= 1;
+	return true;
+}
+
 function destroyRoom(ws, notifyPeer, reason) {
 	const room = rooms.get(ws.room);
 	ws.room = null;
@@ -132,9 +144,13 @@ wss.on("connection", (ws, req) => {
 	ws.ip = ip;
 	ws.isAlive = true;
 	ws.room = null;
+	ws.tokens = MSG_BURST;
+	ws.lastRefill = Date.now();
 	ws.on("pong", () => ws.isAlive = true);
 
 	ws.on("message", raw => {
+		if (!allowMessage(ws))
+			return ws.close(1008, "rate");
 		let msg;
 		try {
 			msg = JSON.parse(raw);
