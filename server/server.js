@@ -14,6 +14,14 @@ const CODE_LENGTH = 5;
 
 const rooms = new Map(); // code -> {host, guest, startedAt, messages}
 
+const MAX_CLIENTS = 400;
+const MAX_PER_IP = 10;
+const ROOM_TTL_MS = 30 * 60 * 1000;
+
+const ipCounts = new Map();
+let lastOverloadLog = 0;
+let refusedSinceLog = 0;
+
 const server = http.createServer((req, res) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
 	if (req.method === "OPTIONS") {
@@ -74,6 +82,15 @@ function peerOf(ws) {
 	return room.host === ws ? room.guest : room.host;
 }
 
+function clientIp(req) {
+	const xff = req.headers["x-forwarded-for"];
+	if (xff) {
+		const parts = xff.split(",");
+		return parts[parts.length - 1].trim();
+	}
+	return req.socket.remoteAddress || "?";
+}
+
 function destroyRoom(ws, notifyPeer, reason) {
 	const room = rooms.get(ws.room);
 	ws.room = null;
@@ -94,7 +111,25 @@ function destroyRoom(ws, notifyPeer, reason) {
 	}
 }
 
-wss.on("connection", ws => {
+wss.on("connection", (ws, req) => {
+	if (wss.clients.size > MAX_CLIENTS) {
+		refusedSinceLog++;
+		const now = Date.now();
+		if (now - lastOverloadLog > 60000) {
+			log("overloaded", { clients: wss.clients.size, refused: refusedSinceLog });
+			lastOverloadLog = now;
+			refusedSinceLog = 0;
+		}
+		ws.close(1013, "overloaded");
+		return;
+	}
+	const ip = clientIp(req);
+	if ((ipCounts.get(ip) || 0) >= MAX_PER_IP) {
+		ws.close(1013, "too-many");
+		return;
+	}
+	ipCounts.set(ip, (ipCounts.get(ip) || 0) + 1);
+	ws.ip = ip;
 	ws.isAlive = true;
 	ws.room = null;
 	ws.on("pong", () => ws.isAlive = true);
@@ -111,7 +146,7 @@ wss.on("connection", ws => {
 				if (ws.room)
 					return send(ws, { type: "error", code: "already-in-room" });
 				const code = makeCode();
-				rooms.set(code, { code: code, host: ws, guest: null, startedAt: null, messages: 0 });
+				rooms.set(code, { code: code, host: ws, guest: null, startedAt: null, createdAt: Date.now(), messages: 0 });
 				ws.room = code;
 				send(ws, { type: "created", code: code });
 				log("room-created", { code });
@@ -151,11 +186,29 @@ wss.on("connection", ws => {
 		}
 	});
 
-	ws.on("close", () => destroyRoom(ws, true, "disconnect"));
+	ws.on("close", () => {
+		const n = (ipCounts.get(ws.ip) || 1) - 1;
+		if (n <= 0)
+			ipCounts.delete(ws.ip);
+		else
+			ipCounts.set(ws.ip, n);
+		destroyRoom(ws, true, "disconnect");
+	});
 });
 
 // Reap dead connections (browsers answer pings automatically)
 setInterval(() => {
+	const now = Date.now();
+	const stale = [];
+	for (const room of rooms.values())
+		if (!room.startedAt && now - room.createdAt > ROOM_TTL_MS)
+			stale.push(room);
+	for (const room of stale) {
+		const host = room.host;
+		destroyRoom(host, false, "idle-timeout");
+		if (host)
+			host.close(1013, "idle");
+	}
 	for (const ws of wss.clients) {
 		if (!ws.isAlive) {
 			ws.terminate();
