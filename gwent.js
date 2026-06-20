@@ -2314,10 +2314,10 @@ class UI {
 
 	// Shows a notification that stays visible until hideNotification() is called.
 	// Used to explain waits with no fixed duration (e.g. the opponent is still
-	// redrawing online), so the game does not silently appear stuck.
+	// redrawing online), so the game does not silently appear stuck. This kind of
+	// banner is shown even when notifications are disabled: it is the only signal
+	// the player has that the game is waiting on the opponent rather than frozen.
 	async showNotification(name){
-		if (!Settings.notifications.isEnabled())
-			return;
 		this.notif_elem.children[0].id = "notif-" + name;
 		await fadeIn(this.notif_elem, 150);
 	}
