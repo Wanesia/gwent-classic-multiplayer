@@ -19,6 +19,7 @@ const MAX_PER_IP = 10;
 const ROOM_TTL_MS = 30 * 60 * 1000;
 const MSG_RATE = 25;
 const MSG_BURST = 50;
+const MAX_BUFFER = 1024 * 1024;
 const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
 const EVENT_MAX_PER_IP = 60;
 const EVENT_MAX_IPS = 5000;
@@ -95,8 +96,13 @@ function makeCode() {
 }
 
 function send(ws, obj) {
-	if (ws && ws.readyState === ws.OPEN)
+	if (ws && ws.readyState === ws.OPEN) {
+		if (ws.bufferedAmount > MAX_BUFFER) {
+			ws.terminate();
+			return;
+		}
 		ws.send(JSON.stringify(obj));
+	}
 }
 
 function peerOf(ws) {
