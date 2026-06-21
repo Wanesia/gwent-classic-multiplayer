@@ -265,4 +265,4 @@ setInterval(() => {
 
 setInterval(() => { eventHits = new Map(); }, EVENT_WINDOW_MS);
 
-server.listen(PORT, () => log("server-start", { port: PORT }));
+server.listen(PORT, "127.0.0.1", () => log("server-start", { port: PORT }));
