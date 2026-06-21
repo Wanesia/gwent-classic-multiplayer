@@ -19,10 +19,15 @@ const MAX_PER_IP = 10;
 const ROOM_TTL_MS = 30 * 60 * 1000;
 const MSG_RATE = 25;
 const MSG_BURST = 50;
+const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
+const EVENT_MAX_PER_IP = 60;
+const EVENT_MAX_IPS = 5000;
+const EVENT_WINDOW_MS = 60 * 1000;
 
 const ipCounts = new Map();
 let lastOverloadLog = 0;
 let refusedSinceLog = 0;
+let eventHits = new Map();
 
 const server = http.createServer((req, res) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
@@ -34,12 +39,29 @@ const server = http.createServer((req, res) => {
 		return;
 	}
 	if (req.method === "POST" && req.url === "/event") {
+		const ip = clientIp(req);
+		const hits = eventHits.get(ip) || 0;
+		if (hits >= EVENT_MAX_PER_IP || (hits === 0 && eventHits.size >= EVENT_MAX_IPS)) {
+			res.writeHead(429);
+			res.end();
+			return;
+		}
+		eventHits.set(ip, hits + 1);
 		let body = "";
-		req.on("data", chunk => { body += chunk; if (body.length > 256) body = ""; });
+		let aborted = false;
+		req.on("data", chunk => {
+			if (aborted) return;
+			body += chunk;
+			if (body.length > 256) {
+				aborted = true;
+				req.destroy();
+			}
+		});
 		req.on("end", () => {
+			if (aborted) return;
 			try {
 				const { type } = JSON.parse(body);
-				if (type && typeof type === "string" && type.length <= 32)
+				if (VALID_EVENTS.has(type))
 					log(type);
 			} catch (_) {}
 			res.writeHead(204);
@@ -234,5 +256,7 @@ setInterval(() => {
 		ws.ping();
 	}
 }, 30000);
+
+setInterval(() => { eventHits = new Map(); }, EVENT_WINDOW_MS);
 
 server.listen(PORT, () => log("server-start", { port: PORT }));
