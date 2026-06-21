@@ -45,6 +45,8 @@ class ControllerRemote {
 
 	async startTurn(player) {
 		const m = await mp.next("play", "scorch", "decoy", "pass", "leader");
+		const desync = () => { mp.desync(); return new Promise(() => {}); };
+		const validCard = Number.isInteger(m.i) && m.i >= 0 && m.i < player.hand.cards.length;
 		switch (m.t) {
 			case "pass":
 				player.passRound();
@@ -53,15 +55,23 @@ class ControllerRemote {
 				await player.activateLeader();
 				break;
 			case "scorch":
+				if (!validCard)
+					return desync();
 				await player.playScorch(player.hand.cards[m.i]);
 				break;
-			case "play":
-				await player.playCardToRow(player.hand.cards[m.i], mp.destFromWire(m.d));
+			case "play": {
+				const row = mp.destFromWire(m.d);
+				if (!validCard || !row)
+					return desync();
+				await player.playCardToRow(player.hand.cards[m.i], row);
 				break;
+			}
 			case "decoy": {
+				const row = mp.destFromWire(m.d);
+				if (!validCard || !row || !Number.isInteger(m.j) || m.j < 0 || m.j >= row.cards.length)
+					return desync();
 				// mirrors the execution order of the sender's ui.selectCard
 				const card = player.hand.cards[m.i];
-				const row = mp.destFromWire(m.d);
 				const target = row.cards[m.j];
 				board.toHand(target, row);
 				await board.moveTo(card, row, player.hand);
@@ -175,9 +185,11 @@ class MPSession {
 	destFromWire(d) {
 		if (d === "weather")
 			return weather;
+		if (!d || typeof d !== "object")
+			return null;
 		const isMe = this.playerOf(d.o) === player_me;
 		const index = { close: isMe ? 3 : 2, ranged: isMe ? 4 : 1, siege: isMe ? 5 : 0 }[d.r];
-		return board.row[index];
+		return board.row[index] || null;
 	}
 
 	// ---- match start ----
