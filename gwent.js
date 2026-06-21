@@ -2741,6 +2741,14 @@ class Carousel {
 	// touch-swipe and keyboard navigation on top of the existing click-to-shift
 	static initScrollInput() {
 		const row = Carousel.elem.children[0];
+		const offsets = [-2, -1, 0, 1, 2];
+		[...row.children].forEach((card, i) => {
+			const off = offsets[i];
+			card.addEventListener("click", e => off === 0 ? Carousel.curr?.select(e) : Carousel.curr?.shift(e, off));
+			card.addEventListener("mouseover", () => Carousel.curr?.nudge(off));
+		});
+		Carousel.elem.querySelector(".carousel-arrow-left").addEventListener("click", e => Carousel.curr?.shift(e, -1));
+		Carousel.elem.querySelector(".carousel-arrow-right").addEventListener("click", e => Carousel.curr?.shift(e, 1));
 		let wheelAccum = 0;
 		let wheelLocked = false;
 		const WHEEL_THRESHOLD = 30;
@@ -2815,6 +2823,11 @@ class Popup {
 		
 		this.elem = document.getElementById("popup");
 		let main = this.elem.children[0];
+		if (!Popup.bound) {
+			Popup.bound = true;
+			main.children[2].children[0].addEventListener("click", () => Popup.curr?.selectYes());
+			main.children[2].children[1].addEventListener("click", () => Popup.curr?.selectNo());
+		}
 		main.children[0].innerHTML = header ? header : "";
 		main.children[1].innerHTML = description ? description : "";
 		main.children[2].children[0].innerHTML = (yesName) ? yesName : "Yes";
