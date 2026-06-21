@@ -3262,6 +3262,10 @@ class DeckMaker {
 	{
 		if (!deck)
 			return null;
+		if (!Array.isArray(deck.cards) || deck.cards.length > 100 || !card_dict[deck.leader])
+			return null;
+		const seen = new Set();
+		deck.cards = deck.cards.filter(c => Array.isArray(c) && !seen.has(c[0]) && seen.add(c[0]));
 		let warning = "";
 		// verify that leader card is actually a leader and that it's faction matches the deck faction
 		if (card_dict[deck.leader].row !== "leader")
