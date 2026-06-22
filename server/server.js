@@ -24,6 +24,7 @@ const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "sp-game-started", "sp-game-
 const EVENT_MAX_PER_IP = 60;
 const EVENT_MAX_IPS = 5000;
 const EVENT_WINDOW_MS = 60 * 1000;
+const ALLOWED_ORIGINS = new Set(["https://gwent-classic-multiplayer.pages.dev"]);
 
 const ipCounts = new Map();
 let lastOverloadLog = 0;
@@ -77,7 +78,11 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocketServer({
 	server,
 	maxPayload: 32 * 1024,
-	perMessageDeflate: false
+	perMessageDeflate: false,
+	verifyClient: ({ origin }, cb) => {
+		const ok = !origin || origin.startsWith("http://localhost") || ALLOWED_ORIGINS.has(origin);
+		cb(ok, 403, "forbidden");
+	}
 });
 
 function log(event, fields = {}) {
