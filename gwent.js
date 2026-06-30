@@ -2079,6 +2079,16 @@ class UI {
 		if (!Settings.soundEffects.isEnabled())
 			this.toggleSFX_elem.classList.add("fade");
 
+		this.toggleFeedback_elem = document.getElementById("toggle-feedback");
+		this.toggleSettings.push(this.toggleFeedback_elem);
+		this.feedbackModal = document.getElementById("feedback-modal");
+		const closeFeedback = () => this.feedbackModal.classList.add("hide");
+		this.toggleFeedback_elem.addEventListener("click", () => this.feedbackModal.classList.remove("hide"));
+		this.feedbackModal.querySelector(".fb-close").addEventListener("click", closeFeedback);
+		this.feedbackModal.addEventListener("click", e => { if (e.target === this.feedbackModal) closeFeedback(); });
+		this.feedbackModal.querySelectorAll(".fb-btn, .fb-repo").forEach(a => a.addEventListener("click", closeFeedback));
+		document.addEventListener("keydown", e => { if (e.key === "Escape" && !this.feedbackModal.classList.contains("hide")) closeFeedback(); });
+
 		EventManager.gameOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.remove('deck-menu')));
 		EventManager.customizationOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.add('deck-menu')));
 
