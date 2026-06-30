@@ -4074,6 +4074,8 @@ class KeyboardControls {
 		let i = list.indexOf(this.focusEl);
 		i = (i === -1) ? (dir > 0 ? 0 : list.length - 1)
 		               : (i + dir + list.length) % list.length;
+		if (list[i] !== this.focusEl)
+			AudioManager.playSFX('ui_card');
 		this.setFocus(list[i]);
 	}
 
