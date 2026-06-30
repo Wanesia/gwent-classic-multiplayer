@@ -1219,19 +1219,10 @@ main { background-image: url('img/boardtest8.png'); }
 	background-color: rgba(255,255,0, 0.08);
 }
 
-.row-selectable:hover {
-	box-shadow: 0 0 .25vw rgba(255,255,0, 1);
-	/*outline: .25vw solid rgba(255,255,0, 0.5);*/
-	box-sizing: border-box;
-}
-
-.card-selectable > .card:hover {
-	/*box-shadow: 0 0 .2vw rgba(255,255,0, 0.5);*/
-	border: .12vw outset goldenrod;
-	border-radius: .3vw;
-	margin-bottom: 1vw;
-	z-index: 1;
-}
+/* The hover highlight is unified with the keyboard cursor: hovering a card /
+   row sets .kb-focus (see KeyboardControls.onHoverIn), so the visual lives in
+   one place and the two inputs can never stack or leave a stuck highlight.
+   These :hover rules keep only the name tooltip, which is purely mouse-driven. */
 .card-selectable > .card:hover::after
 {
 	pointer-events: all;
@@ -2391,4 +2382,158 @@ main { background-image: url('img/boardtest8.png'); }
 
 .fs-hint-close:hover {
 	color: goldenrod;
+}
+
+/* ----------- keyboard controls ------------------ */
+
+/* The single highlight cursor shared by mouse and keyboard (hand card, board
+   row, special slot, weather row or a decoy target). The outline + glow draw
+   the ring without affecting layout; hand cards additionally lift so the
+   focused card pops out of the fanned-out hand. */
+.kb-focus {
+	outline: 0.2vw solid gold !important;
+	outline-offset: -0.2vw;
+	box-shadow: 0 0 0.7vw 0.1vw rgba(255, 215, 0, 0.8) !important;
+	border-radius: 0.3vw;
+	z-index: 3;
+}
+.card.kb-focus {
+	margin-bottom: 1vw;
+}
+
+/* "?" shortcut-legend toggle: sits flush against the exit button (top-left).
+   Exit is at left:1vw width:2vw (ends at ~3vw); this 3vw button butts right up
+   to it, raised so its centre lines up with the smaller exit icon. */
+#toggle-keybinds {
+	top: 0.9vw;
+	left: 3vw;
+	width: 3vw;
+	height: 3vw;
+}
+#toggle-keybinds.deck-menu {
+	display: none !important;
+}
+#toggle-keybinds > span {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 3vw;
+	height: 3vw;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 2.6vw;
+	font-weight: bold;
+	color: goldenrod;
+	filter: drop-shadow(0px 0px 2px black);
+}
+#toggle-keybinds:hover > span {
+	color: #ffd864;
+	filter: drop-shadow(0px 0px 3px rgba(255, 255, 255, 0.5));
+}
+
+/* Shortcut legend overlay */
+#keybind-legend {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.7);
+}
+#keybind-legend.hide {
+	display: none;
+}
+.kb-legend-panel {
+	position: relative;
+	min-width: 26vw;
+	max-width: 80vw;
+	padding: 1.6vw 2vw 1.4vw;
+	background: rgba(10, 10, 10, 0.97);
+	border: 1px solid rgba(218, 165, 32, 0.7);
+	border-radius: 0.5vw;
+	box-shadow: 0 0.4vw 2vw rgba(0, 0, 0, 0.7);
+	color: goldenrod;
+	font-family: Arial Narrow, sans-serif;
+}
+.kb-legend-panel h2 {
+	margin: 0 0 1vw;
+	font-size: 1.7vw;
+	text-align: center;
+	letter-spacing: 0.05vw;
+}
+.kb-legend-panel table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 1.15vw;
+}
+.kb-legend-panel td {
+	padding: 0.45vw 0.6vw;
+	vertical-align: middle;
+}
+.kb-legend-panel td:first-child {
+	white-space: nowrap;
+	text-align: right;
+	padding-right: 1.2vw;
+}
+.kb-legend-panel td:last-child {
+	color: #e8d8b0;
+}
+.kb-legend-panel tr.kb-sep > td {
+	border-top: 1px solid rgba(218, 165, 32, 0.25);
+	padding-top: 0.8vw;
+}
+.kb-legend-panel kbd {
+	display: inline-block;
+	min-width: 1.1vw;
+	padding: 0.15vw 0.5vw;
+	background: rgba(218, 165, 32, 0.12);
+	border: 1px solid rgba(218, 165, 32, 0.6);
+	border-radius: 0.3vw;
+	font-family: inherit;
+	font-size: 1.05vw;
+	color: goldenrod;
+	text-align: center;
+}
+.kb-legend-panel kbd.kb-arrow {
+	width: 1.9vw;
+	min-width: 0;
+	padding-left: 0;
+	padding-right: 0;
+}
+.kb-legend-panel .kb-hold {
+	font-size: 0.85vw;
+	color: rgba(218, 165, 32, 0.7);
+	font-style: italic;
+}
+.kb-legend-close {
+	position: absolute;
+	top: 0.5vw;
+	right: 0.9vw;
+	font-size: 1.8vw;
+	line-height: 1;
+	color: rgba(218, 165, 32, 0.7);
+	cursor: pointer;
+}
+.kb-legend-close:hover {
+	color: goldenrod;
+}
+
+/* Hold-to-pass progress: a bar that fills along the bottom of the Pass button
+   while P / F is held. Reaching full width (1s) commits the pass. Kept off the
+   text and out of overflow so the existing hover tooltip is never clipped. */
+#pass-button::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	height: 0.1vw;
+	width: 0;
+	background: goldenrod;
+	box-shadow: 0 0 0.25vw goldenrod;
+	border-radius: 0.1vw;
+	pointer-events: none;
+}
+#pass-button.kb-pass-hold::before {
+	width: 100%;
+	transition: width 1s linear;
 }
