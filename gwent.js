@@ -2804,12 +2804,15 @@ class Carousel {
 		document.addEventListener("keydown", e => {
 			const c = Carousel.curr;
 			if (!c) return;
-			switch (e.key) {
+			// Lowercase single-character keys so q works Caps Lock;
+			const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+			switch (k) {
 				case "ArrowLeft":  e.preventDefault(); c.shift(e, -1); break;
 				case "ArrowRight": e.preventDefault(); c.shift(e,  1); break;
 				case "Enter":
 				case " ":          e.preventDefault(); c.select(e);    break;
-				case "Escape":     e.preventDefault(); c.cancel();     break;
+				case "Escape":
+				case "q":          e.preventDefault(); c.cancel();     break;
 			}
 		});
 	}
@@ -3921,3 +3924,222 @@ if (fullscreenToggle) {
 
 
 document.addEventListener('click', () => userInteracted = true, { once: true });
+class KeyboardControls {
+	constructor() {
+		this.inGame = false;
+		this.focusEl = null;
+		this.focusFromHover = false;   // was the current focus set by the mouse?
+		this.passTimer = null;         // hold-to-pass timer
+		this.passHeld = false;         // guards against keydown auto-repeat
+		this.main = document.getElementsByTagName("main")[0];
+		this.passBtn = document.getElementById("pass-button");
+		this.legend = document.getElementById("keybind-legend");
+		this.toggleBtn = document.getElementById("toggle-keybinds");
+		this.toggleBtn?.addEventListener("click", () => this.toggleLegend());
+		this.legend?.querySelector(".kb-legend-close")?.addEventListener("click", () => this.hideLegend());
+
+		EventManager.gameOpened.bind(() => {
+			this.inGame = true;
+			this.clearFocus();
+			this.toggleBtn?.classList.remove("deck-menu");
+		});
+		EventManager.customizationOpened.bind(() => {
+			this.inGame = false;
+			this.clearFocus();
+			this.endPassHold();
+			this.hideLegend();
+			this.toggleBtn?.classList.add("deck-menu");
+		});
+
+		document.addEventListener("keydown", e => this.onKey(e));
+		document.addEventListener("keyup", e => this.onKeyUp(e));
+		window.addEventListener("blur", () => this.endPassHold());
+		document.addEventListener("click", () => this.clearFocus(), true);
+		document.addEventListener("mouseover", e => this.onHoverIn(e));
+		document.addEventListener("mouseout", e => this.onHoverOut(e));
+	}
+
+	get active() {
+		if (!this.inGame || Carousel.curr || Popup.curr)
+			return false;
+		return this.main && !this.main.classList.contains("noclick");
+	}
+
+	get placing() { return ui.previewCard !== null; }
+
+	onKey(e) {
+		if (e.ctrlKey || e.metaKey || e.altKey)
+			return;
+		const tag = e.target?.tagName;
+		if (e.target?.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT")
+			return;
+
+		// Single-character keys are matched case-insensitively so WASD etc. work
+		const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+
+		// Legend toggle works any time we are in a match (even between turns).
+		if ((k === "h" || k === "?") && this.inGame && !Carousel.curr && !Popup.curr) {
+			e.preventDefault();
+			this.toggleLegend();
+			return;
+		}
+		if (this.legendOpen()) {
+			if (k === "Escape" || k === "q" || k === "Backspace") {
+				e.preventDefault();
+				this.hideLegend();
+			}
+			return;
+		}
+
+		if (!this.active)
+			return;
+
+		switch (k) {
+			case "ArrowLeft":  case "a": e.preventDefault(); this.placing ? this.moveTarget(-1) : this.moveHand(-1); break;
+			case "ArrowRight": case "d": e.preventDefault(); this.placing ? this.moveTarget( 1) : this.moveHand( 1); break;
+			case "ArrowUp":    case "w": e.preventDefault(); if (this.placing) this.moveTarget(-1); break;
+			case "ArrowDown":  case "s": e.preventDefault(); if (this.placing) this.moveTarget( 1); break;
+			case "Enter":
+			case " ":                    e.preventDefault(); this.confirm(); break;
+			case "q": case "Backspace": case "Escape": e.preventDefault(); this.cancel(); break;
+			case "p": case "f":          e.preventDefault(); this.startPassHold(); break;
+			case "l": case "e":          e.preventDefault(); this.leader(); break;
+		}
+	}
+
+	// Pass keys (P / F) must be HELD to fire, so user can never surrender accidentally
+	onKeyUp(e) {
+		if (e.key.length !== 1)
+			return;
+		const k = e.key.toLowerCase();
+		if (k === "p" || k === "f")
+			this.endPassHold();
+	}
+
+	handCards() { return [...document.querySelectorAll("#hand-row > .card")]; }
+
+	targets() {
+		if (this.placing && ui.previewCard.name === "Decoy")
+			return [...document.querySelectorAll(".field-row.row-selectable .row-cards .card")]
+				.filter(el => !el.classList.contains("noclick"));
+		return [...document.querySelectorAll(".row-selectable")];
+	}
+
+	candidates() { return this.placing ? this.targets() : this.handCards(); }
+
+	clearFocus() {
+		document.querySelectorAll(".kb-focus").forEach(el => el.classList.remove("kb-focus"));
+		this.focusEl = null;
+		this.focusFromHover = false;
+	}
+
+	setFocus(el, fromHover = false) {
+		this.clearFocus();
+		if (!el)
+			return;
+		el.classList.add("kb-focus");
+		this.focusEl = el;
+		this.focusFromHover = fromHover;
+		if (!fromHover)
+			el.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+	}
+
+	onHoverIn(e) {
+		if (!this.active)
+			return;
+		const cands = this.candidates();
+		let node = e.target;
+		while (node && node.nodeType === 1) {
+			if (cands.includes(node)) {
+				if (node !== this.focusEl)
+					this.setFocus(node, true);
+				return;
+			}
+			node = node.parentElement;
+		}
+	}
+
+	onHoverOut(e) {
+		if (!this.focusEl || !this.focusFromHover)
+			return;
+		if (this.focusEl.contains(e.relatedTarget))
+			return;
+		if (this.focusEl === e.target || this.focusEl.contains(e.target))
+			this.clearFocus();
+	}
+
+	step(list, dir) {
+		if (!list.length)
+			return;
+		let i = list.indexOf(this.focusEl);
+		i = (i === -1) ? (dir > 0 ? 0 : list.length - 1)
+		               : (i + dir + list.length) % list.length;
+		this.setFocus(list[i]);
+	}
+
+	moveHand(dir)   { this.step(this.handCards(), dir); }
+	moveTarget(dir) { this.step(this.targets(),  dir); }
+
+	confirm() {
+		const list = this.candidates();
+		if (!list.length)
+			return;
+		if (!list.includes(this.focusEl)) {
+			this.setFocus(list[0]);
+			return;
+		}
+		const wasPlacing = this.placing;
+		const el = this.focusEl;
+		this.clearFocus();
+		el.click();
+		if (!wasPlacing && this.placing) {
+			const targets = this.targets();
+			if (targets.length)
+				this.setFocus(targets[0]);
+		}
+	}
+
+	cancel() {
+		if (this.placing)
+			ui.cancel();
+		this.clearFocus();
+	}
+	startPassHold() {
+		if (!this.passBtn || this.passBtn.classList.contains("noclick") || this.passHeld)
+			return;
+		this.passHeld = true;
+		this.passBtn.classList.add("kb-pass-hold");   // the 1s fill animation
+		this.passTimer = setTimeout(() => {
+			this.passTimer = null;
+			this.endPassHold();
+			if (this.active) {
+				this.clearFocus();
+				this.passBtn.click();
+			}
+		}, 1000);
+	}
+
+	endPassHold() {
+		this.passHeld = false;
+		if (this.passTimer) {
+			clearTimeout(this.passTimer);
+			this.passTimer = null;
+		}
+		this.passBtn?.classList.remove("kb-pass-hold");
+	}
+
+	leader() {
+		const el = player_me?.elem_leader;
+		if (el && !el.classList.contains("noclick")) {
+			this.clearFocus();
+			el.click();
+		}
+	}
+
+	legendOpen()   { return this.legend && !this.legend.classList.contains("hide"); }
+	toggleLegend() { this.legendOpen() ? this.hideLegend() : this.showLegend(); }
+	showLegend()   { this.legend?.classList.remove("hide"); }
+	hideLegend()   { this.legend?.classList.add("hide"); }
+}
+
+var keyboard = new KeyboardControls();
