@@ -1826,7 +1826,7 @@ main { background-image: url('img/boardtest8.png'); }
 	position: absolute;
 	width: 100%;
 	height: calc(100vw * 1080 / 1920);
-	background-color: rgba(10,10,10,.99);
+	background-color: rgb(10,10,10);
 	z-index: 90;
 	color: rgb(180,180,180);
 	text-align: center;
@@ -1865,7 +1865,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-size: 13px;
 	letter-spacing: 5px;
 	text-transform: uppercase;
-	color: rgba(255,255,255,0.25);
+	color: rgba(255,210,140,0.7);
 	margin: 0 0 2.2vw;
 }
 
@@ -1882,8 +1882,8 @@ main { background-image: url('img/boardtest8.png'); }
 .mp-option {
 	flex: 1;
 	padding: 1.8vw 1.5vw 1.6vw;
-	background: transparent;
-	border: 1px solid rgba(255,200,80,0.1);
+	background: rgba(255,160,40,0.04);
+	border: 1px solid rgba(255,200,80,0.35);
 	color: inherit;
 	text-align: center;
 	display: flex;
@@ -1894,9 +1894,9 @@ main { background-image: url('img/boardtest8.png'); }
 }
 
 .mp-option:hover {
-	border-color: rgba(255,200,80,0.45);
-	background: rgba(255,160,40,0.04);
-	box-shadow: 0 0 2vw rgba(255,160,40,0.1);
+	border-color: rgba(255,200,80,0.7);
+	background: rgba(255,160,40,0.1);
+	box-shadow: 0 0 2.5vw rgba(255,160,40,0.25);
 }
 
 .mp-option-tag {
@@ -1905,12 +1905,12 @@ main { background-image: url('img/boardtest8.png'); }
 	font-size: 12px;
 	letter-spacing: 4px;
 	text-transform: uppercase;
-	color: rgba(255,210,120,0.4);
+	color: rgba(255,210,120,0.8);
 	transition: color .4s ease;
 }
 
 .mp-option:hover .mp-option-tag {
-	color: rgba(255,210,120,0.85);
+	color: rgba(255,225,150,1);
 }
 
 .mp-option-heading {
@@ -1919,7 +1919,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-weight: 400;
 	font-size: 1.35vw;
 	letter-spacing: 2px;
-	color: rgba(255,255,255,0.4);
+	color: rgba(255,255,255,0.95);
 	transition: color .4s ease, text-shadow .4s ease;
 }
 
@@ -1933,19 +1933,19 @@ main { background-image: url('img/boardtest8.png'); }
 	font-family: sans-serif;
 	font-size: 14px;
 	letter-spacing: 1px;
-	color: rgba(255,255,255,0.18);
+	color: rgba(255,255,255,0.6);
 	transition: color .4s ease;
 }
 
 .mp-option:hover .mp-option-desc {
-	color: rgba(255,255,255,0.45);
+	color: rgba(255,255,255,0.85);
 }
 
 .mp-options-divider {
 	width: 1px;
 	align-self: stretch;
 	margin: 0 2vw;
-	background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+	background: linear-gradient(to bottom, transparent 0%, rgba(255,200,80,0.3) 50%, transparent 100%);
 }
 
 /* ---------- back / cancel link ---------- */
@@ -1963,7 +1963,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-size: 12px;
 	letter-spacing: 3px;
 	text-transform: uppercase;
-	color: rgba(255,255,255,0.2);
+	color: rgba(255,255,255,0.65);
 	transition: color .3s ease;
 }
 
@@ -1984,7 +1984,7 @@ main { background-image: url('img/boardtest8.png'); }
 }
 
 .mp-back:hover {
-	color: rgba(255,210,120,0.7);
+	color: rgba(255,215,130,1);
 }
 
 /* ---------- lobby-create/join ---------- */
@@ -1997,7 +1997,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-family: sans-serif;
 	font-size: 12px;
 	letter-spacing: 2px;
-	color: rgba(255,255,255,0.28);
+	color: rgba(255,255,255,0.6);
 	margin: .5vw 0;
 	min-height: 1.1vw;
 }
@@ -2012,7 +2012,7 @@ main { background-image: url('img/boardtest8.png'); }
 	font-size: 12px;
 	letter-spacing: 3px;
 	text-transform: uppercase;
-	color: rgba(255,200,80,0.45);
+	color: rgba(255,200,80,0.8);
 	margin: .6vw auto;
 	min-height: 1.2vw;
 	display: inline-block;
@@ -2044,8 +2044,8 @@ main { background-image: url('img/boardtest8.png'); }
 	letter-spacing: .8vw;
 	color: goldenrod;
 	background-color: transparent;
-	border: 1px solid rgba(255,200,80,0.25);
-	box-shadow: 0 0 1.5vw rgba(255,160,40,0.1);
+	border: 1px solid rgba(255,200,80,0.45);
+	box-shadow: 0 0 1.5vw rgba(255,160,40,0.15);
 	transition: border-color .4s ease, box-shadow .4s ease;
 }
 
@@ -2066,7 +2066,7 @@ main { background-image: url('img/boardtest8.png'); }
 	text-transform: uppercase;
 	color: goldenrod;
 	background-color: transparent;
-	border: 1px solid rgba(255,200,80,0.2);
+	border: 1px solid rgba(255,200,80,0.4);
 	outline: none;
 	transition: border-color .3s ease, box-shadow .3s ease;
 }
@@ -2081,19 +2081,19 @@ main { background-image: url('img/boardtest8.png'); }
 	margin: 1.2vw auto 0;
 	padding: .6vw 2.5vw;
 	background: transparent;
-	border: 1px solid rgba(255,200,80,0.25);
+	border: 1px solid rgba(255,200,80,0.45);
 	font-family: sans-serif;
 	font-size: 12px;
 	letter-spacing: 4px;
 	text-transform: uppercase;
-	color: rgba(255,210,120,0.6);
+	color: rgba(255,215,130,0.95);
 	transition: border-color .4s ease, color .4s ease, box-shadow .4s ease;
 }
 
 .mp-action-button:hover {
-	border-color: rgba(255,200,80,0.55);
-	color: rgba(255,215,130,1);
-	box-shadow: 0 0 2vw rgba(255,160,40,0.15);
+	border-color: rgba(255,200,80,0.8);
+	color: rgba(255,225,150,1);
+	box-shadow: 0 0 2.5vw rgba(255,160,40,0.3);
 }
 
 /* ----- main menu: split-screen hover reveal ----- */
