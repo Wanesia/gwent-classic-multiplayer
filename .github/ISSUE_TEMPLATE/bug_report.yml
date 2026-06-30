@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the game is broken or behaves unexpectedly
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug! Filling in the details below makes it much easier to reproduce and fix.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly.
+      placeholder: When I ..., the game ...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can this be triggered again?
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: false
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Where did it happen?
+      options:
+        - vs Computer
+        - vs Player (online)
+        - Deck builder / menu
+        - Not sure
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & device
+      placeholder: e.g. Chrome on Windows, Safari on iPhone
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag, paste, or attach any images that show the problem.
+    validations:
+      required: false

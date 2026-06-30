@@ -1,0 +1,15 @@
+name: Idea / improvement
+description: Suggest a new feature or an improvement
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Got an idea to improve Gwent Classic? Describe it below.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: What would you like to see added or changed? You can drag, paste, or attach images here if it helps explain.
+    validations:
+      required: true
