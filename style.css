@@ -134,7 +134,7 @@ html {
 }
 #toggle-music.deck-menu {
 	top: 45.3vw;
-	left: 46.7vw;
+	left: 43.65vw;
 	z-index: 86;
 }
 #toggle-music.lobby-menu {
@@ -151,7 +151,7 @@ html {
 }
 #toggle-sfx.deck-menu {
 	top: 45.3vw;
-	left: 50.1vw;
+	left: 47.05vw;
 	z-index: 86;
 }
 #toggle-sfx.lobby-menu {
@@ -167,7 +167,9 @@ html {
     left: 20vw;
 }
 #toggle-notifications.deck-menu {
-	display: none !important;
+	top: 45.3vw;
+	left: 50.45vw;
+	z-index: 86;
 }
 #toggle-notifications.lobby-menu {
 	position: fixed;
@@ -2476,7 +2478,7 @@ main { background-image: url('img/boardtest8.png'); }
 #toggle-feedback.deck-menu {
 	display: block;
 	top: 45.3vw;
-	left: 53.5vw;
+	left: 53.85vw;
 	z-index: 86;
 }
 #toggle-feedback.lobby-menu {
