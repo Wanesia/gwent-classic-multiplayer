@@ -2046,7 +2046,12 @@ class UI {
 		this.carousels = [];
 		this.notif_elem = document.getElementById("notification-bar");
 		document.getElementById('exit-game').addEventListener('click', ()=>game.exitGame(), false);
-		this.preview = document.getElementsByClassName("card-preview")[0];
+		this.preview = document.getElementsByClassName("card-preview")[0];		
+		[...document.getElementsByClassName("card-description-close")].forEach(btn =>
+			btn.addEventListener("click", e => {
+				e.stopPropagation();
+				btn.closest(".card-description").classList.add("hide");
+			}, false));
 		this.previewCard = null;
 		this.lastRow = null;
 		this.toggleSettings = [];

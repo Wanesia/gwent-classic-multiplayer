@@ -335,8 +335,38 @@ html {
 	left: 5%;
 	width: 90%;
 	height:50%;
-	
+
 	font-size: 0.9vw;
+}
+
+/* Temporarily dismiss a card's effect description so the cards behind it
+   (deck / carousel) are visible. The description re-appears the next time it
+   is shown for a card (e.g. navigating the carousel or opening a new preview),
+   so this is a per-view, non-persistent close. */
+.card-description > .card-description-close {
+	position: absolute;
+	top: 0.25vw;
+	right: 0.35vw;
+	width: 1.6vw;
+	height: 1.6vw;
+	padding: 0;
+	border: 0.1vw solid #ffffff57;
+	border-radius: 50%;
+	background-color: rgba(10,10,10,.6);
+	color: tan;
+	font-family: serif;
+	font-size: 1.2vw;
+	line-height: 1;
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color .15s, color .15s, box-shadow .15s;
+}
+.card-description > .card-description-close:hover {
+	background-color: rgba(35,30,15,.9);
+	color: #ffd700;
+	box-shadow: 0 0 .6vw goldenrod;
 }
 
 /* ------- carousel ------------- */
