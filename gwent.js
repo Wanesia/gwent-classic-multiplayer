@@ -4020,7 +4020,7 @@ class KeyboardControls {
 
 	targets() {
 		if (this.placing && ui.previewCard.name === "Decoy")
-			return [...document.querySelectorAll(".field-row.row-selectable .row-cards .card")]
+			return [...document.querySelectorAll(".row-selectable .card")]
 				.filter(el => !el.classList.contains("noclick"));
 		return [...document.querySelectorAll(".row-selectable")];
 	}

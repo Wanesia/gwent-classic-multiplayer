@@ -1222,8 +1222,10 @@ main { background-image: url('img/boardtest8.png'); }
 /* The hover highlight is unified with the keyboard cursor: hovering a card /
    row sets .kb-focus (see KeyboardControls.onHoverIn), so the visual lives in
    one place and the two inputs can never stack or leave a stuck highlight.
-   These :hover rules keep only the name tooltip, which is purely mouse-driven. */
-.card-selectable > .card:hover::after
+   These rules keep only the name tooltip, shown on mouse hover OR when the
+   keyboard cursor focuses the card, so both inputs reveal the card's name. */
+.card-selectable > .card:hover::after,
+.card-selectable > .card.kb-focus::after
 {
 	pointer-events: all;
 	bottom: -1.9vw;
@@ -1773,7 +1775,8 @@ main { background-image: url('img/boardtest8.png'); }
 
 /* ---------- tooltip -------------  */
 
-*[data-title]:hover::after{
+*[data-title]:hover::after,
+[data-title].kb-focus::after {
 	content: attr(data-title);
 	background-color: rgba(10,10,10,.95);
 	color: goldenrod;
