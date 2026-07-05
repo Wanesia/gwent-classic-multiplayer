@@ -82,6 +82,8 @@ function assert(cond, label) {
 	q1.sendJSON({ type: 'quickmatch' });
 	const qm1 = await q1.next();
 	assert(qm1.type === 'created' && /^[2-9A-HJKMNP-Z]{5}$/.test(qm1.code), 'first searcher waits, private rooms ignored');
+	const qst = await q1.next();
+	assert(qst.type === 'qm-status' && typeof qst.online === 'number' && qst.online >= 1, 'waiting searcher told the online count');
 
 	const q2 = await client();
 	q2.sendJSON({ type: 'quickmatch' });

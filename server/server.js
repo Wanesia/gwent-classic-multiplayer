@@ -20,7 +20,7 @@ const ROOM_TTL_MS = 30 * 60 * 1000;
 const MSG_RATE = 25;
 const MSG_BURST = 50;
 const MAX_BUFFER = 1024 * 1024;
-const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
+const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "mode-qm", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
 const EVENT_MAX_PER_IP = 60;
 const EVENT_MAX_IPS = 5000;
 const EVENT_WINDOW_MS = 60 * 1000;
@@ -223,6 +223,7 @@ wss.on("connection", (ws, req) => {
 					rooms.set(code, { code: code, host: ws, guest: null, quickmatch: true, startedAt: null, createdAt: Date.now(), messages: 0 });
 					ws.room = code;
 					send(ws, { type: "created", code: code });
+					send(ws, { type: "qm-status", online: wss.clients.size });
 					log("qm-waiting", { code });
 				}
 				break;
@@ -292,6 +293,9 @@ setInterval(() => {
 		ws.isAlive = false;
 		ws.ping();
 	}
+	for (const room of rooms.values())
+		if (room.quickmatch && !room.guest)
+			send(room.host, { type: "qm-status", online: wss.clients.size });
 }, 30000);
 
 setInterval(() => { eventHits = new Map(); }, EVENT_WINDOW_MS);
