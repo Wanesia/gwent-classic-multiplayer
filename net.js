@@ -58,6 +58,13 @@ var Net = {
 			this.sendRaw({ type: "join", code: code });
 		});
 	},
+	
+	quickMatch() {
+		return new Promise((resolve, reject) => {
+			this.pending = { resolve: resolve, reject: reject };
+			this.sendRaw({ type: "quickmatch" });
+		});
+	},
 
 	// Sends a payload to the peer through the relay
 	send(data) {

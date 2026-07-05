@@ -17,6 +17,7 @@ class Lobby {
 		this.codeElem = document.getElementById("room-code");
 		this.copyHint = document.getElementById("copy-hint");
 		this.createStatus = document.getElementById("create-status");
+		this.searchStatus = document.getElementById("search-status");
 		this.joinError = document.getElementById("join-error");
 		this.joinInput = document.getElementById("join-code");
 		this.joinSubtitle = document.getElementById("join-subtitle");
@@ -31,6 +32,7 @@ class Lobby {
 
 		document.getElementById("split-computer").addEventListener("click", () => this.startSinglePlayer());
 		document.getElementById("split-player").addEventListener("click", () => { Net.trackEvent("mode-mp"); this.showView("lobby-mp"); });
+		document.getElementById("lobby-quick-button").addEventListener("click", () => this.findOpponent());
 		document.getElementById("lobby-create-button").addEventListener("click", () => this.createGame());
 		document.getElementById("lobby-join-button").addEventListener("click", () => this.showJoin());
 		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
@@ -98,6 +100,26 @@ class Lobby {
 		this.joinInput.focus();
 		this._joinReady = false;
 		requestAnimationFrame(() => this._joinReady = true);
+	}
+
+	// Quick match
+	async findOpponent() {
+		this.showView("lobby-search");
+		this.searchStatus.textContent = "Connecting to server";
+		this.searchStatus.classList.remove("is-waiting");
+		try {
+			await Net.connect();
+			await Net.quickMatch();
+			if (Net.role === "guest") {
+				this.enterDeckSetup();
+			} else {
+				this.searchStatus.textContent = "Searching for an opponent";
+				this.searchStatus.classList.add("is-waiting");
+			}
+		} catch (e) {
+			this.searchStatus.textContent = this.errorText(e.message);
+			this.searchStatus.classList.remove("is-waiting");
+		}
 	}
 
 	async createGame() {
@@ -360,9 +382,11 @@ class Lobby {
 		if (this.inMultiplayer) {
 			this.endMultiplayerGame("Opponent Disconnected", "Your opponent has left the game.");
 		} else if (!this.elem.classList.contains("hide")) {
-			// connection or room died while waiting in the create view
-			this.createStatus.textContent = this.errorText("unreachable");
-			this.createStatus.classList.remove("is-waiting");
+			// connection or room died while waiting in the create or search view
+			for (const status of [this.createStatus, this.searchStatus]) {
+				status.textContent = this.errorText("unreachable");
+				status.classList.remove("is-waiting");
+			}
 		}
 	}
 
