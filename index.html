@@ -406,6 +406,12 @@
 	<div id="lobby-mp" class="lobby-view hide">
 		<div class="mp-subtitle">Online Multiplayer</div>
 		<div class="mp-options">
+			<button id="lobby-quick-button" class="mp-option">
+				<span class="mp-option-tag">Quick Match</span>
+				<span class="mp-option-heading">Find Opponent</span>
+				<span class="mp-option-desc">vs Random Player</span>
+			</button>
+			<div class="mp-options-divider"></div>
 			<button id="lobby-create-button" class="mp-option">
 				<span class="mp-option-tag">Host a Match</span>
 				<span class="mp-option-heading">Create Game</span>
@@ -425,6 +431,12 @@
 		<div id="room-code" data-title="Click to copy">·····</div>
 		<p id="copy-hint" class="lobby-hint"></p>
 		<p id="create-status" class="lobby-status"></p>
+		<button class="mp-back lobby-back" data-target="lobby-mp">Cancel</button>
+	</div>
+	<div id="lobby-search" class="lobby-view hide">
+		<div class="mp-subtitle">Quick Match</div>
+		<p id="search-hint" class="lobby-hint">You'll be matched with the next player who searches.</p>
+		<p id="search-status" class="lobby-status"></p>
 		<button class="mp-back lobby-back" data-target="lobby-mp">Cancel</button>
 	</div>
 	<div id="lobby-join" class="lobby-view hide">
