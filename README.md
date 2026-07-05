@@ -41,3 +41,6 @@ The gwent music tracks are streamed from YouTube and can be toggled by pressing 
 
 #### Sound effects
 Most sound effects for gameplay and menus have been added and integrated and can be toggled of via the speaker button. Courtesy of [RandomPianist](https://github.com/RandomPianist/gwent-classic-v3.1) for providing many of the sound effects that I have since edited for this version.
+
+#### Keybinds
+Keyboard controls have been added for simpler and quicker gameplay. You can view the full list of shortcuts by clicking the "?" icon in game. The controls let you navigate the game and quickly do things like play a card, use your leader, back out of a choice, or pass the round.
