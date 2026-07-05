@@ -18,6 +18,8 @@ class Lobby {
 		this.copyHint = document.getElementById("copy-hint");
 		this.createStatus = document.getElementById("create-status");
 		this.searchStatus = document.getElementById("search-status");
+		this.searchHint = document.getElementById("search-hint");
+		this.searchOnline = document.getElementById("search-online");
 		this.joinError = document.getElementById("join-error");
 		this.joinInput = document.getElementById("join-code");
 		this.joinSubtitle = document.getElementById("join-subtitle");
@@ -29,6 +31,8 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.searchHintTimer = null;
+		this.searchHintDelay = 75000; // "no one's around" fallback while searching
 
 		document.getElementById("split-computer").addEventListener("click", () => this.startSinglePlayer());
 		document.getElementById("split-player").addEventListener("click", () => { Net.trackEvent("mode-mp"); this.showView("lobby-mp"); });
@@ -68,6 +72,7 @@ class Lobby {
 	}
 
 	goBack(target) {
+		this.stopSearchExtras();
 		if (Net.code)
 			Net.leave(); // cancel a room we created and are waiting in
 		this.showView(target || "lobby-mode");
@@ -104,9 +109,13 @@ class Lobby {
 
 	// Quick match
 	async findOpponent() {
+		Net.trackEvent("mode-qm");
 		this.showView("lobby-search");
+		this.searchHint.textContent = "You'll be matched with the next player who searches.";
+		this.searchOnline.textContent = "";
 		this.searchStatus.textContent = "Connecting to server";
 		this.searchStatus.classList.remove("is-waiting");
+		Net.onQmStatus = n => this.showOnlineCount(n);
 		try {
 			await Net.connect();
 			await Net.quickMatch();
@@ -115,11 +124,27 @@ class Lobby {
 			} else {
 				this.searchStatus.textContent = "Searching for an opponent";
 				this.searchStatus.classList.add("is-waiting");
+				this.searchHintTimer = setTimeout(() => {
+					this.searchHint.textContent = "No one's around right now. Keep waiting, invite a friend with a code, or play vs Computer.";
+				}, this.searchHintDelay);
 			}
 		} catch (e) {
+			this.stopSearchExtras();
 			this.searchStatus.textContent = this.errorText(e.message);
 			this.searchStatus.classList.remove("is-waiting");
 		}
+	}
+
+	showOnlineCount(online) {
+		const others = Math.max(0, online - 1);
+		this.searchOnline.textContent = others === 0 ? "No other players online right now" :
+			others === 1 ? "1 other player online" : others + " other players online";
+	}
+
+	stopSearchExtras() {
+		clearTimeout(this.searchHintTimer);
+		this.searchHintTimer = null;
+		Net.onQmStatus = null;
 	}
 
 	async createGame() {
@@ -200,6 +225,7 @@ class Lobby {
 
 	// Both players are connected: drop into the deck builder in ready-up mode
 	enterDeckSetup() {
+		this.stopSearchExtras();
 		this.inMultiplayer = true;
 		this.localReady = false;
 		this.remoteReady = false;
@@ -383,6 +409,7 @@ class Lobby {
 			this.endMultiplayerGame("Opponent Disconnected", "Your opponent has left the game.");
 		} else if (!this.elem.classList.contains("hide")) {
 			// connection or room died while waiting in the create or search view
+			this.stopSearchExtras();
 			for (const status of [this.createStatus, this.searchStatus]) {
 				status.textContent = this.errorText("unreachable");
 				status.classList.remove("is-waiting");

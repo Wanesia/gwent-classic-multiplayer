@@ -15,6 +15,7 @@ var Net = {
 	onMessage: null, // cb(data) - game/lobby payloads from the peer
 	onPeerJoined: null, // cb() - a guest joined our room
 	onPeerLeft: null, // cb() - peer left, room destroyed, or relay connection lost
+	onQmStatus: null, // cb(online) - server player count while waiting in quickmatch
 
 	serverURL() {
 		const param = new URLSearchParams(window.location.search).get("server");
@@ -111,6 +112,10 @@ var Net = {
 			case "peer-joined":
 				if (this.onPeerJoined)
 					this.onPeerJoined();
+				break;
+			case "qm-status":
+				if (this.onQmStatus)
+					this.onQmStatus(msg.online);
 				break;
 			case "peer-left":
 				this.code = null;
