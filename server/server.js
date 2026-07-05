@@ -1,9 +1,9 @@
 "use strict"
 
 // Relay server for gwent-classic online multiplayer.
-// Pairs two clients by a short room code and forwards "msg" frames between
-// them verbatim. Holds no game logic and no persistent state; a room dies as
-// soon as either side leaves or disconnects.
+// Pairs two clients by a short room code — or automatically via quickmatch —
+// and forwards "msg" frames between them verbatim. Holds no game logic and no
+// persistent state; a room dies as soon as either side leaves or disconnects.
 
 const http = require("http");
 const { WebSocketServer } = require("ws");
@@ -195,10 +195,36 @@ wss.on("connection", (ws, req) => {
 				if (ws.room)
 					return send(ws, { type: "error", code: "already-in-room" });
 				const code = makeCode();
-				rooms.set(code, { code: code, host: ws, guest: null, startedAt: null, createdAt: Date.now(), messages: 0 });
+				rooms.set(code, { code: code, host: ws, guest: null, quickmatch: false, startedAt: null, createdAt: Date.now(), messages: 0 });
 				ws.room = code;
 				send(ws, { type: "created", code: code });
 				log("room-created", { code });
+				break;
+			}
+			case "quickmatch": {
+				if (ws.room)
+					return send(ws, { type: "error", code: "already-in-room" });
+				// Pair with the searcher who has been waiting the longest, if any.
+				// Skip hosts whose socket is closing but not yet reaped.
+				let match = null;
+				for (const room of rooms.values())
+					if (room.quickmatch && !room.guest && room.host.readyState === room.host.OPEN &&
+							(!match || room.createdAt < match.createdAt))
+						match = room;
+				if (match) {
+					match.guest = ws;
+					match.startedAt = Date.now();
+					ws.room = match.code;
+					send(ws, { type: "joined", code: match.code });
+					send(match.host, { type: "peer-joined" });
+					log("game-started", { code: match.code, mode: "quickmatch" });
+				} else {
+					const code = makeCode();
+					rooms.set(code, { code: code, host: ws, guest: null, quickmatch: true, startedAt: null, createdAt: Date.now(), messages: 0 });
+					ws.room = code;
+					send(ws, { type: "created", code: code });
+					log("qm-waiting", { code });
+				}
 				break;
 			}
 			case "join": {
