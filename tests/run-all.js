@@ -14,6 +14,7 @@ const SUITES = [
 	'relay-protocol.js',   // server: room create/join/relay
 	'e2e-singleplayer.js', // vs-AI
 	'e2e-multiplayer.js',  // full online match, checksums, disconnect
+	'e2e-quickmatch.js',   // find-opponent pairing, search screen, cancel
 	'e2e-rematch.js',      // re-ready + mid-game exit
 ];
 
