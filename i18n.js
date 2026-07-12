@@ -2,7 +2,7 @@
 
 var I18N = (function () {
 	const DEFAULT = "en";
-	const SUPPORTED = ["en", "pt-BR"];
+	const SUPPORTED = ["en", "pt-BR", "pl"];
 	const dicts = {};
 
 	function resolve() {
@@ -13,6 +13,8 @@ var I18N = (function () {
 		const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
 		if (nav.startsWith("pt"))
 			return "pt-BR";
+		if (nav.startsWith("pl"))
+			return "pl";
 		return DEFAULT;
 	}
 
