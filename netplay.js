@@ -204,12 +204,12 @@ class MPSession {
 		const opDeck = this.deckFromRaw(remoteRaw);
 		if (!meDeck || !opDeck) {
 			this.deactivate();
-			lobby.matchFailed("A deck failed validation. Returning to the deck builder.");
+			lobby.matchFailed(I18N.t("lobby.deckValidationFailed"));
 			return;
 		}
 		GameRNG.reset(seed);
-		player_me = new Player(0, "You", meDeck);
-		player_op = new Player(1, "Opponent", opDeck, true);
+		player_me = new Player(0, I18N.t("game.you"), meDeck);
+		player_op = new Player(1, I18N.t("game.opponent"), opDeck, true);
 		dm.elem.classList.add("hide");
 		game.startGame();
 	}
@@ -252,7 +252,7 @@ class MPSession {
 		if (!this.active)
 			return;
 		this.deactivate();
-		lobby.endMultiplayerGame("Game Desynced", "The two game states no longer match, so the match cannot continue. Sorry!");
+		lobby.endMultiplayerGame(I18N.t("lobby.desyncTitle"), I18N.t("lobby.desyncBody"));
 	}
 }
 

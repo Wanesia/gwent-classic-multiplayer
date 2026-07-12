@@ -480,8 +480,8 @@ class Player {
 		
 		this.name = name;
 		document.getElementById("name-" + this.tag).innerHTML = name;
-		
-		document.getElementById("deck-name-" +this.tag).innerHTML = factions[deck.faction].name;
+
+		document.getElementById("deck-name-" +this.tag).innerHTML = I18N.faction(deck.faction, "name", factions[deck.faction].name);
 		document.getElementById("stats-" + this.tag).getElementsByClassName("profile-img")[0].children[0].children[0];
 		let x = document.querySelector("#stats-" +this.tag+ " .profile-img > div > div");
 		x.style.backgroundImage = iconURL("deck_shield_" + deck.faction);
@@ -627,9 +627,9 @@ class Player {
 		this.elem_leader.children[1].classList.add("hide");
 		this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
 		this.elem_leader.addEventListener('mouseenter', CLICK_EVENT_SFX);
-		this.elem_leader.children[0].setAttribute('data-title', "View leader");
+		this.elem_leader.children[0].setAttribute('data-title', I18N.t("game.viewLeader"));
 	}
-	
+
 	// Enable access to leader ability and toggles leader visuals to on state
 	enableLeader() {
 		this.leaderAvailable = this.leader.activated.length > 0;
@@ -647,7 +647,7 @@ class Player {
 						mp.send({t: "leader"});
 					await this.activateLeader();
 		}	), false);
-			this.elem_leader.children[0].setAttribute('data-title', "Play leader");
+			this.elem_leader.children[0].setAttribute('data-title', I18N.t("game.playLeader"));
 		} else {
 			this.elem_leader.addEventListener("click", async () => await ui.viewCard(this.leader), false);
 		}
@@ -1557,7 +1557,7 @@ class Game {
 				ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
 					AudioManager.playSFX('redraw');
 					await player_me.deck.swap(c, c.cards[i]);
-				}, c => true, false, true, "Choose up to 2 cards to redraw.", true)
+				}, c => true, false, true, I18N.t("game.redrawTitle"), true)
 					.then(() => {
 						ui.enablePlayer(false); // no acting while the opponent finishes
 						// We are done but the opponent still is: tell the player why
@@ -1577,7 +1577,7 @@ class Game {
 			await ui.queueCarousel(player_me.hand, 2, async (c, i) => {
 				AudioManager.playSFX('redraw');
 				await player_me.deck.swap(c, c.cards[i]);
-			}, c => true, false, true, "Choose up to 2 cards to redraw.", true);
+			}, c => true, false, true, I18N.t("game.redrawTitle"), true);
 		}
 		ui.enablePlayer(false);
 	}
@@ -1756,13 +1756,11 @@ class Game {
 			status.textContent = "";
 			return;
 		}
-		const you = lobby.localReady ? "ready" : "not ready";
-		const opp = lobby.remoteCustomizing ? "customizing deck"
-			: lobby.remoteReady ? "ready" : "not ready";
 		const line1 = document.createElement("span");
-		line1.textContent = "You: " + you;
+		line1.textContent = lobby.localReady ? I18N.t("lobby.youReady") : I18N.t("lobby.youNotReady");
 		const line2 = document.createElement("span");
-		line2.textContent = "Opponent: " + opp;
+		line2.textContent = lobby.remoteCustomizing ? I18N.t("lobby.oppCustomizing")
+			: lobby.remoteReady ? I18N.t("lobby.oppReady") : I18N.t("lobby.oppNotReady");
 		status.replaceChildren(line1, line2);
 	}
 
@@ -1772,9 +1770,9 @@ class Game {
 		AudioManager.playSFX('warning');
 		const isMyTurn = this.currPlayer === player_me;
 		ui.popup(
-			"Resume", ()=>{ ui.enablePlayer(isMyTurn); },
-			"Exit", ()=>this.returnToCustomization(),
-			"Quit current game?" , "This will return you to the deck customization menu."
+			I18N.t("game.resume"), ()=>{ ui.enablePlayer(isMyTurn); },
+			I18N.t("game.exit"), ()=>this.returnToCustomization(),
+			I18N.t("game.quitTitle"), I18N.t("game.quitBody")
 		);
 	}
 	
@@ -1826,6 +1824,9 @@ class Card {
 
 	constructor(card_data, player) {
 		this.name = card_data.name;
+		// name stays the canonical (English) identity used by all game logic;
+		// displayName is what the UI shows and may be translated.
+		this.displayName = I18N.card(card_data.name);
 		this.basePower = this.power = Number(card_data.strength);
 		this.faction = card_data.deck;
 		this.abilities = (card_data.ability === "") ? [] : card_data.ability.split(" ");
@@ -1856,22 +1857,25 @@ class Card {
 		}
 		
 		if (this.row === "leader")
-			this.desc_name = "Leader Ability";
-		else if (this.abilities.length > 0)
-			this.desc_name = ability_dict[this.abilities[this.abilities.length-1]].name;
+			this.desc_name = I18N.t("game.leaderAbility");
+		else if (this.abilities.length > 0) {
+			const key = this.abilities[this.abilities.length-1];
+			this.desc_name = I18N.ability(key, "name", ability_dict[key].name);
+		}
 		else if (this.row==="agile")
-			this.desc_name = "agile";
+			this.desc_name = I18N.ability("agile", "name", "agile");
 		else if (this.hero)
-			this.desc_name = "hero";
+			this.desc_name = I18N.ability("hero", "name", "hero");
 		else
 			this.desc_name = "";
-		
-		this.desc = this.row ==="agile" ? ability_dict["agile"].description : "";
+
+		this.desc = this.row ==="agile" ? I18N.ability("agile", "description", ability_dict["agile"].description) : "";
 		for (let i=this.abilities.length-1; i>=0; --i) {
-			this.desc += ability_dict[this.abilities[i]].description;
+			const key = this.abilities[i];
+			this.desc += I18N.ability(key, "description", ability_dict[key].description);
 		}
 		if (this.hero)
-			this.desc += ability_dict["hero"].description;
+			this.desc += I18N.ability("hero", "description", ability_dict["hero"].description);
 		
 		this.elem = this.createCardElem(this);
 	}
@@ -1974,7 +1978,7 @@ class Card {
 		let elem = document.createElement("div");
 		elem.style.backgroundImage = smallURL(card.faction + "_" + card.filename);
 		elem.classList.add("card");
-		elem.setAttribute('data-title', card.name);
+		elem.setAttribute('data-title', card.displayName);
 		elem.addEventListener("click", () => ui.selectCard(card), false);
 		
 		if (card.row === "leader")
@@ -2322,6 +2326,7 @@ class UI {
 		const fadeSpeed = 150;
 		duration = Math.max(400, duration - 2*fadeSpeed);
 		this.notif_elem.children[0].id = "notif-" + name;
+		this.notif_elem.children[0].setAttribute("data-text", I18N.t("notif." + name));
 		await fadeIn(this.notif_elem, fadeSpeed);
 		await sleep(duration);
 		await fadeOut(this.notif_elem, fadeSpeed);
@@ -2334,6 +2339,7 @@ class UI {
 	// the player has that the game is waiting on the opponent rather than frozen.
 	async showNotification(name){
 		this.notif_elem.children[0].id = "notif-" + name;
+		this.notif_elem.children[0].setAttribute("data-text", I18N.t("notif." + name));
 		await fadeIn(this.notif_elem, 150);
 	}
 
@@ -2946,9 +2952,9 @@ class DeckMaker {
 			return;
 		if (!force && this.faction === faction_name)
 			return false;
-		this.elem.getElementsByTagName("h1")[0].innerHTML = factions[faction_name].name;
+		this.elem.getElementsByTagName("h1")[0].innerHTML = I18N.faction(faction_name, "name", factions[faction_name].name);
 		this.elem.getElementsByTagName("h1")[0].style.backgroundImage = iconURL("deck_shield_" + faction_name);
-		document.getElementById("faction-description").innerHTML = factions[faction_name].description;
+		document.getElementById("faction-description").innerHTML = I18N.faction(faction_name, "description", factions[faction_name].description);
 		
 		this.leaders = 
 			card_dict.map((c,i) => ({index: i, card:c}) )
@@ -3104,7 +3110,7 @@ class DeckMaker {
 	selectFaction() {
 		let container = new CardContainer();
 		container.cards = Object.keys(factions).map( f => {
-			return {abilities: [f], filename: f, desc_name: factions[f].name, desc: factions[f].description, faction: "faction"};
+			return {abilities: [f], filename: f, desc_name: I18N.faction(f, "name", factions[f].name), desc: I18N.faction(f, "description", factions[f].description), faction: "faction"};
 		});
 		let index = container.cards.reduce((a,c,i) => c.filename === this.faction ? i : a, 0);
 		ui.queueCarousel(container, 1, (c,i) => {
@@ -3159,9 +3165,9 @@ class DeckMaker {
 	startNewGame(){
 		let warning = "";
 		if (this.stats.units < 22)
-			warning += "Your deck must have at least 22 unit cards. \n";
+			warning += I18N.t("deck.warnMinUnits");
 		if (this.stats.special > 10)
-			warning += "Your deck must have no more than 10 special cards. \n";
+			warning += I18N.t("deck.warnMaxSpecial");
 		if (warning != "")
 		{
 			AudioManager.playSFX("warning");
@@ -3182,8 +3188,8 @@ class DeckMaker {
 		};
 		const op_deck = this.constructOpponentDeck(true);
 
-		player_me = new Player(0, "Player 1", me_deck);
-		player_op = new Player(1, "Player 2", op_deck);
+		player_me = new Player(0, I18N.t("game.player1"), me_deck);
+		player_op = new Player(1, I18N.t("game.player2"), op_deck);
 
 		this.elem.classList.add("hide");
 		game.startGame();
@@ -3242,7 +3248,7 @@ class DeckMaker {
 					callback(deck);
 				
 			} catch (e) {
-				alert("Uploaded deck is not formatted correctly!");
+				alert(I18N.t("deck.uploadBadFormat"));
 			}
 			finally
 			{
@@ -3271,7 +3277,7 @@ class DeckMaker {
 			return deck;
 		} catch (e) {
 			AudioManager.playSFX('warning');
-			alert("Uploaded deck is not parsable!");
+			alert(I18N.t("deck.uploadNotParsable"));
 			return;
 		}
 	}
@@ -3289,7 +3295,7 @@ class DeckMaker {
 		if (card_dict[deck.leader].row !== "leader")
 			warning += "'" + card_dict[deck.leader].name + "' is cannot be used as a leader\n";
 		if (deck.faction != card_dict[deck.leader].deck)
-			warning += "Leader '" + card_dict[deck.leader].name + "' doesn't match deck faction '" + deck.faction + "'.\n";
+			warning += I18N.t("deck.warnLeaderFaction", {leader: card_dict[deck.leader].name, faction: deck.faction});
 		// check if cards exist and have correct faction & count
 		const cards = deck.cards.filter( c => {
 			const card = card_dict[c[0]];
@@ -3302,7 +3308,7 @@ class DeckMaker {
 				return false;
 			}
 			if (card.count < c[1]) {
-				warning += "Deck contains " + c[1] + "/" + card.count + " available " + card_dict[c.index].name + " cards\n";
+				warning += I18N.t("deck.warnCardCount", {have: c[1], max: card.count, card: card_dict[c.index].name});
 				c[1] = card.count;
 				return true;
 			}
@@ -3365,7 +3371,7 @@ class DeckMaker {
 		const buttons = ['op-preview-clear', 'op-preview-open'].map(id=>document.getElementById(id));
 		if (isEmpty(this.opponentData))
 		{
-			leaderElem.children[1].innerHTML = "Random";
+			leaderElem.children[1].innerHTML = I18N.t("deck.random");
 			[factionElem, ...buttons].forEach(e=>e.classList.add('hide'));
 		}
 		else
@@ -3385,7 +3391,7 @@ class DeckMaker {
 		const container = new CardContainer();
 		//container.cards = [leader, ...Card.this.opponentData.cards];
 		container.cards = Card.getCardsFromIdCounts([leader, ...this.opponentData.cards]);
-		ui.queueCarousel(container, 1, ()=>{}, ()=>true, false, true, "Oponent's deck");
+		ui.queueCarousel(container, 1, ()=>{}, ()=>true, false, true, I18N.t("deck.opponentDeckTitle"));
 	}
 }
 
@@ -3933,7 +3939,7 @@ const fullscreenToggle = document.getElementById("fullscreen-toggle");
 if (fullscreenToggle) {
 	fullscreenToggle.addEventListener("click", toggleFullscreen, false);
 	document.addEventListener("fullscreenchange", () => {
-		fullscreenToggle.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen mode";
+		fullscreenToggle.textContent = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
 	});
 }
 

@@ -76,10 +76,10 @@
 
 	<section id="panel-left" class="panel">
 
-		<div id="exit-game" data-title="Exit game"></div>
+		<div id="exit-game" data-title="Exit game" data-i18n-datatitle="game.exitGame"></div>
 	
 		<div id="leader-op" class="leader-box">
-			<div class="leader-container center" data-title="View leader"> 
+			<div class="leader-container center" data-title="View leader" data-i18n-datatitle="game.viewLeader">
 			</div>
 			<div class="leader-active">
 				<div></div>
@@ -91,7 +91,7 @@
 				<div><div></div></div>
 			</div>
 			
-			<div id="name-op" class="name">Opponent</div>
+			<div id="name-op" class="name" data-i18n="game.opponent">Opponent</div>
 			<div id="deck-name-op" class="deck-name"></div>
 			
 			<div id="hand-count-op" class="hand-count">6</div>
@@ -101,7 +101,7 @@
 			
 			<div id="score-total-op" class="score-total"><div class="center">0</div></div>
 			
-			<div id="passed-op">Passed</div>
+			<div id="passed-op" data-i18n="game.passed">Passed</div>
 			
 		</section>
 		
@@ -112,7 +112,7 @@
 			<div class="profile-img">
 				<div><div></div></div>
 			</div>
-			<div id="passed-me">Passed</div>
+			<div id="passed-me" data-i18n="game.passed">Passed</div>
 			<div id="hand-count-me" class="hand-count">5</div>
 			
 			<div id="gem1-me" class="gem gem-on bg-contain"></div>
@@ -127,13 +127,13 @@
 		</section>
 		
 		<div id="leader-me" class="leader-box">
-			<div class="leader-container center" data-title="Play leader"></div>
+			<div class="leader-container center" data-title="Play leader" data-i18n-datatitle="game.playLeader"></div>
 			<div class="leader-active">
 				<div></div>
 			</div>
 		</div>
 		
-		<div id="pass-button" class="center" data-title="Pass round">Pass</div>
+		<div id="pass-button" class="center" data-title="Pass round" data-i18n-datatitle="game.passRound" data-i18n="game.pass">Pass</div>
 		
 	</section>
 	
@@ -187,12 +187,12 @@
 	</section>
 	
 	<section id="panel-right" class="panel">
-		<div id="grave-op" class="grave cardpile" data-title="View discards">
+		<div id="grave-op" class="grave cardpile" data-title="View discards" data-i18n-datatitle="game.viewDiscards">
 		</div>
 		<div id="deck-op" class="cardpile">
 		
 		</div>
-		<div id="grave-me" class="grave cardpile" data-title="View discards">
+		<div id="grave-me" class="grave cardpile" data-title="View discards" data-i18n-datatitle="game.viewDiscards">
 		</div>
 		<div id="deck-me" class="cardpile">
 		</div>
@@ -206,7 +206,7 @@
 			<div></div>
 			<h1></h1>
 			<p></p>
-			<button type="button" class="card-description-close" title="Hide description">&times;</button>
+			<button type="button" class="card-description-close" title="Hide description" data-i18n-title="game.hideDescription">&times;</button>
 		</div>
 	</section>
 	
@@ -222,7 +222,7 @@
 			<div></div>
 			<h1></h1>
 			<p></p>
-			<button type="button" class="card-description-close" title="Hide description">&times;</button>
+			<button type="button" class="card-description-close" title="Hide description" data-i18n-title="game.hideDescription">&times;</button>
 		</div>
 		<div></div>
 		<button type="button" class="carousel-arrow carousel-arrow-left">&#8249;</button>
@@ -259,9 +259,9 @@
 			<tbody>
 				<tr>
 					<th colspan="2"></th>
-					<th>Round 1</th>
-					<th>Round 2</th>
-					<th>Round 3</th>
+					<th data-i18n="game.round1">Round 1</th>
+					<th data-i18n="game.round2">Round 2</th>
+					<th data-i18n="game.round3">Round 3</th>
 				</tr>
 				<tr>
 					<th colspan="2">Geralt</th>
@@ -279,13 +279,13 @@
 		</table>
 		<div class="end-actions">
 			<div id="end-playagain-wrap" class="end-action-stack hide">
-				<button id="end-playagain">Play Again</button>
+				<button id="end-playagain" data-i18n="game.playAgain">Play Again</button>
 				<span id="rematch-status" class="hide"></span>
 			</div>
-			<button id="end-customize">Customize</button>
-			<button id="end-rematch">Rematch</button>
-			<button id="end-newgame">New Game</button>
-			<button id="end-leave" class="hide">Leave</button>
+			<button id="end-customize" data-i18n="game.customize">Customize</button>
+			<button id="end-rematch" data-i18n="game.rematch">Rematch</button>
+			<button id="end-newgame" data-i18n="game.newGame">New Game</button>
+			<button id="end-leave" class="hide" data-i18n="game.leave">Leave</button>
 		</div>
 	</section>
 	
@@ -294,23 +294,23 @@
 	</section>
 
 	<div id="fullscreen-hint" class="fs-hint hide">
-		<span class="fs-hint-text">Tip: play fullscreen for the best experience — click here</span>
-		<span class="fs-hint-close" title="Dismiss">&times;</span>
+		<span class="fs-hint-text" data-i18n="fsHint.text">Tip: play fullscreen for the best experience — click here</span>
+		<span class="fs-hint-close" title="Dismiss" data-i18n-title="fsHint.dismiss">&times;</span>
 	</div>
 
 	<section id="keybind-legend" class="hide">
 		<div class="kb-legend-panel">
-			<span class="kb-legend-close" title="Close">&times;</span>
-			<h2>Keyboard shortcuts</h2>
+			<span class="kb-legend-close" title="Close" data-i18n-title="kbd.close">&times;</span>
+			<h2 data-i18n="kbd.title">Keyboard shortcuts</h2>
 			<table>
-				<tr><td><kbd class="kb-arrow">&larr;</kbd> <kbd class="kb-arrow">&rarr;</kbd> / <kbd>A</kbd> <kbd>D</kbd></td><td>Move between cards in your hand</td></tr>
-				<tr><td><kbd>Enter</kbd> / <kbd>Space</kbd></td><td>Pick the focused card</td></tr>
-				<tr class="kb-sep"><td><kbd class="kb-arrow">&uarr;</kbd> <kbd class="kb-arrow">&darr;</kbd> <kbd class="kb-arrow">&larr;</kbd> <kbd class="kb-arrow">&rarr;</kbd> / <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td><td>Choose where to play it</td></tr>
-				<tr><td><kbd>Enter</kbd> / <kbd>Space</kbd></td><td>Play onto the highlighted row / target</td></tr>
-				<tr class="kb-sep"><td><kbd>P</kbd> / <kbd>F</kbd> <span class="kb-hold">(hold 1s)</span></td><td>Pass the round</td></tr>
-				<tr><td><kbd>L</kbd> / <kbd>E</kbd></td><td>View / use your Leader</td></tr>
-				<tr><td><kbd>Q</kbd> / <kbd>Backspace</kbd> / <kbd>Esc</kbd></td><td>Cancel / go back</td></tr>
-				<tr><td><kbd>H</kbd> / <kbd>?</kbd></td><td>Toggle this help</td></tr>
+				<tr><td><kbd class="kb-arrow">&larr;</kbd> <kbd class="kb-arrow">&rarr;</kbd> / <kbd>A</kbd> <kbd>D</kbd></td><td data-i18n="kbd.moveHand">Move between cards in your hand</td></tr>
+				<tr><td><kbd>Enter</kbd> / <kbd>Space</kbd></td><td data-i18n="kbd.pickCard">Pick the focused card</td></tr>
+				<tr class="kb-sep"><td><kbd class="kb-arrow">&uarr;</kbd> <kbd class="kb-arrow">&darr;</kbd> <kbd class="kb-arrow">&larr;</kbd> <kbd class="kb-arrow">&rarr;</kbd> / <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td><td data-i18n="kbd.chooseWhere">Choose where to play it</td></tr>
+				<tr><td><kbd>Enter</kbd> / <kbd>Space</kbd></td><td data-i18n="kbd.playRow">Play onto the highlighted row / target</td></tr>
+				<tr class="kb-sep"><td><kbd>P</kbd> / <kbd>F</kbd> <span class="kb-hold" data-i18n="kbd.hold1s">(hold 1s)</span></td><td data-i18n="kbd.passRound">Pass the round</td></tr>
+				<tr><td><kbd>L</kbd> / <kbd>E</kbd></td><td data-i18n="kbd.useLeader">View / use your Leader</td></tr>
+				<tr><td><kbd>Q</kbd> / <kbd>Backspace</kbd> / <kbd>Esc</kbd></td><td data-i18n="kbd.cancel">Cancel / go back</td></tr>
+				<tr><td><kbd>H</kbd> / <kbd>?</kbd></td><td data-i18n="kbd.toggleHelp">Toggle this help</td></tr>
 			</table>
 		</div>
 	</section>
@@ -319,60 +319,60 @@
 </main>
 
 <section id="deck-customization">
-	<a id="fullscreen-toggle">Fullscreen mode</a>
+	<a id="fullscreen-toggle" data-i18n="deck.fullscreenMode">Fullscreen mode</a>
 	<div id="faction-title" class="center">
 		<h1></h1>
 	</div>
 	<p id="faction-description"></p>
-	<a id="lobby-return">Leave game</a>
+	<a id="lobby-return" data-i18n="deck.leaveGame">Leave game</a>
 	<label id="upload-deck" class="deck-options">
 		<input type="file" id="add-file" value="Import" style="display:none;"/>
-		Upload Deck
+		<span data-i18n="deck.uploadDeck">Upload Deck</span>
 	</label>
-	
-	<a id="change-faction" class="deck-options">Change Faction</a>
-	
-	<a id="download-deck" class="deck-options">Download Deck</a>
+
+	<a id="change-faction" class="deck-options" data-i18n="deck.changeFaction">Change Faction</a>
+
+	<a id="download-deck" class="deck-options" data-i18n="deck.downloadDeck">Download Deck</a>
 	<a id="download-json" style="display:none;"></a>
-	
-	<h2 id="card-bank-title" class="card-contianer-title">Card Collection</h2>
-	<h2 id="card-deck-title" class="card-contianer-title">Cards in Deck</h2>
+
+	<h2 id="card-bank-title" class="card-contianer-title" data-i18n="deck.cardCollection">Card Collection</h2>
+	<h2 id="card-deck-title" class="card-contianer-title" data-i18n="deck.cardsInDeck">Cards in Deck</h2>
 	<div id="card-bank" class="card-array">
 	</div>
 	<div id="card-deck" class="card-array">
 	</div>
 	<div id="card-leader">
-		<p>Leader</p>
+		<p data-i18n="deck.leader">Leader</p>
 		<div></div>
 	</div>
 	<div id="deck-stats">
-		<p>Total cards in deck</p>
+		<p data-i18n="deck.totalCards">Total cards in deck</p>
 		<p>0</p>
-		<p>Number of Unit Cards</p>
+		<p data-i18n="deck.unitCards">Number of Unit Cards</p>
 		<p>0</p>
-		<p>Special Cards</p>
+		<p data-i18n="deck.specialCards">Special Cards</p>
 		<p>0/10</p>
-		<p>Total Unit Card Strength</p>
+		<p data-i18n="deck.totalStrength">Total Unit Card Strength</p>
 		<p>0</p>
-		<p>Hero Cards</p>
+		<p data-i18n="deck.heroCards">Hero Cards</p>
 		<p>0</p>
 	</div>
-	<button id="start-game">Start game</button>
+	<button id="start-game" data-i18n="deck.startGame">Start game</button>
 	<div id="mp-status" class="hide">
-		<span id="mp-opponent-state">Opponent: connected</span>
+		<span id="mp-opponent-state" data-i18n="lobby.opponentConnected">Opponent: connected</span>
 	</div>
 	<div id="opponent-preview" class="center">
 		<div>
-			<p>Oponent's Deck</p>
+			<p data-i18n="deck.opponentsDeck">Oponent's Deck</p>
 		</div>
 		<div class="center">
-			<button id="op-preview-open" class="hide" data-title="View opponent"></button>
+			<button id="op-preview-open" class="hide" data-title="View opponent" data-i18n-datatitle="game.viewOpponent"></button>
 			<div id="op-preview-faction" class="hide"></div>
-			<label id="op-preview-leader" for="add-opponent" data-title="Upload opponent">
+			<label id="op-preview-leader" for="add-opponent" data-title="Upload opponent" data-i18n-datatitle="game.uploadOpponent">
 				<input type="file" id="add-opponent" style="display:none;"/>
-				<p>Random</p>
+				<p data-i18n="deck.random">Random</p>
 			</label>
-			<button id="op-preview-clear" class="hide" data-title="Clear opponent"></button>
+			<button id="op-preview-clear" class="hide" data-title="Clear opponent" data-i18n-datatitle="game.clearOpponent"></button>
 		</div>
 	</div>
 </section>
@@ -385,9 +385,9 @@
 			<div class="split-image"></div>
 			<div class="split-vignette"></div>
 			<div class="split-label">
-				<span class="split-tag">Solo Challenge</span>
-				<h2 class="split-heading">vs Computer</h2>
-				<button class="split-play">Play Now</button>
+				<span class="split-tag" data-i18n="lobby.soloTag">Solo Challenge</span>
+				<h2 class="split-heading" data-i18n="lobby.soloHeading">vs Computer</h2>
+				<button class="split-play" data-i18n="lobby.playNow">Play Now</button>
 			</div>
 		</div>
 		<div class="split-divider">
@@ -397,74 +397,78 @@
 			<div class="split-image"></div>
 			<div class="split-vignette"></div>
 			<div class="split-label">
-				<span class="split-tag">Duel a Friend</span>
-				<h2 class="split-heading">vs Player</h2>
-				<button class="split-play">Play Now</button>
+				<span class="split-tag" data-i18n="lobby.duelTag">Duel a Friend</span>
+				<h2 class="split-heading" data-i18n="lobby.duelHeading">vs Player</h2>
+				<button class="split-play" data-i18n="lobby.playNow">Play Now</button>
 			</div>
 		</div>
 	</div>
 	<div id="lobby-mp" class="lobby-view hide">
-		<div class="mp-subtitle">Online Multiplayer</div>
+		<div class="mp-subtitle" data-i18n="lobby.mpSubtitle">Online Multiplayer</div>
 		<div class="mp-options">
 			<button id="lobby-quick-button" class="mp-option">
-				<span class="mp-option-tag">Quick Match</span>
-				<span class="mp-option-heading">Find Opponent</span>
-				<span class="mp-option-desc">vs Random Player</span>
+				<span class="mp-option-tag" data-i18n="lobby.quickTag">Quick Match</span>
+				<span class="mp-option-heading" data-i18n="lobby.quickHeading">Find Opponent</span>
+				<span class="mp-option-desc" data-i18n="lobby.quickDesc">vs Random Player</span>
 			</button>
 			<div class="mp-options-divider"></div>
 			<button id="lobby-create-button" class="mp-option">
-				<span class="mp-option-tag">Host a Match</span>
-				<span class="mp-option-heading">Create Game</span>
-				<span class="mp-option-desc">Generate a room code</span>
+				<span class="mp-option-tag" data-i18n="lobby.hostTag">Host a Match</span>
+				<span class="mp-option-heading" data-i18n="lobby.hostHeading">Create Game</span>
+				<span class="mp-option-desc" data-i18n="lobby.hostDesc">Generate a room code</span>
 			</button>
 			<div class="mp-options-divider"></div>
 			<button id="lobby-join-button" class="mp-option">
-				<span class="mp-option-tag">Enter a Code</span>
-				<span class="mp-option-heading">Join Game</span>
-				<span class="mp-option-desc">Connect to a session</span>
+				<span class="mp-option-tag" data-i18n="lobby.joinTag">Enter a Code</span>
+				<span class="mp-option-heading" data-i18n="lobby.joinHeading">Join Game</span>
+				<span class="mp-option-desc" data-i18n="lobby.joinDesc">Connect to a session</span>
 			</button>
 		</div>
-		<button class="mp-back lobby-back" data-target="lobby-mode"><span class="mp-back-icon"></span>Back to Menu</button>
+		<button class="mp-back lobby-back" data-target="lobby-mode"><span class="mp-back-icon"></span><span data-i18n="lobby.backToMenu">Back to Menu</span></button>
 	</div>
 	<div id="lobby-create" class="lobby-view hide">
-		<div class="mp-subtitle">Your room code</div>
-		<div id="room-code" data-title="Click to copy">·····</div>
+		<div class="mp-subtitle" data-i18n="lobby.roomCodeTitle">Your room code</div>
+		<div id="room-code" data-title="Click to copy" data-i18n-datatitle="lobby.copyTitle">·····</div>
 		<p id="copy-hint" class="lobby-hint"></p>
 		<p id="create-status" class="lobby-status"></p>
-		<button class="mp-back lobby-back" data-target="lobby-mp">Cancel</button>
+		<button class="mp-back lobby-back" data-target="lobby-mp" data-i18n="lobby.cancel">Cancel</button>
 	</div>
 	<div id="lobby-search" class="lobby-view hide">
-		<div class="mp-subtitle">Quick Match</div>
-		<p id="search-hint" class="lobby-hint">You'll be matched with the next player who searches.</p>
+		<div class="mp-subtitle" data-i18n="lobby.quickTag">Quick Match</div>
+		<p id="search-hint" class="lobby-hint" data-i18n="lobby.searchHintDefault">You'll be matched with the next player who searches.</p>
 		<p id="search-status" class="lobby-status"></p>
 		<p id="search-online" class="lobby-hint"></p>
-		<button class="mp-back lobby-back" data-target="lobby-mp">Cancel</button>
+		<button class="mp-back lobby-back" data-target="lobby-mp" data-i18n="lobby.cancel">Cancel</button>
 	</div>
 	<div id="lobby-join" class="lobby-view hide">
-		<div class="mp-subtitle" id="join-subtitle">Enter your friend's code</div>
+		<div class="mp-subtitle" id="join-subtitle" data-i18n="lobby.joinSubtitle">Enter your friend's code</div>
 		<input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" />
 		<p id="join-error" class="lobby-hint lobby-hint-error"></p>
-		<button id="join-button" class="mp-action-button">Join Game</button>
-		<button class="mp-back lobby-back" data-target="lobby-mp">Back</button>
+		<button id="join-button" class="mp-action-button" data-i18n="lobby.joinButton">Join Game</button>
+		<button class="mp-back lobby-back" data-target="lobby-mp" data-i18n="lobby.back">Back</button>
 	</div>
 </section>
 
-<div data-title="Toggle music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
-<div data-title="Toggle sound effects" id="toggle-sfx" class="center deck-menu settings-button"><img src="svg/sfx.svg"></img></div>
-<div data-title="Toggle game messages" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
-<div data-title="Keyboard shortcuts" id="toggle-keybinds" class="center deck-menu settings-button"><span>?</span></div>
-<div data-title="Feedback / report a bug" id="toggle-feedback" class="center deck-menu settings-button"><img src="svg/feedback.svg"></img></div>
+<div data-title="Toggle music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
+<div data-title="Toggle sound effects" data-i18n-datatitle="settings.sfx" id="toggle-sfx" class="center deck-menu settings-button"><img src="svg/sfx.svg"></img></div>
+<div data-title="Toggle game messages" data-i18n-datatitle="settings.notifications" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
+<div data-title="Keyboard shortcuts" data-i18n-datatitle="settings.keybinds" id="toggle-keybinds" class="center deck-menu settings-button"><span>?</span></div>
+<div data-title="Feedback / report a bug" data-i18n-datatitle="settings.feedback" id="toggle-feedback" class="center deck-menu settings-button"><img src="svg/feedback.svg"></img></div>
+<select data-title="Language" data-i18n-datatitle="settings.language" id="lang-select" class="center deck-menu settings-button" aria-label="Language">
+	<option value="en">EN</option>
+	<option value="pt-BR">PT</option>
+</select>
 
 <section id="feedback-modal" class="hide">
 	<div class="fb-panel">
-		<span class="fb-close" title="Close">&times;</span>
-		<h2>HELP THIS PROJECT IMPROVE</h2>
-		<p class="fb-intro">You can view the source code, report a bug, or suggest an idea. When reporting, please be as descriptive as possible. Clear details make issues much easier to fix. Buttons below open GitHub in a new tab.</p>
+		<span class="fb-close" title="Close" data-i18n-title="feedback.close">&times;</span>
+		<h2 data-i18n="feedback.title">HELP THIS PROJECT IMPROVE</h2>
+		<p class="fb-intro" data-i18n="feedback.intro">You can view the source code, report a bug, or suggest an idea. When reporting, please be as descriptive as possible. Clear details make issues much easier to fix. Buttons below open GitHub in a new tab.</p>
 		<div class="fb-actions">
-			<a class="fb-btn" target="_blank" rel="noopener" href="https://github.com/Wanesia/gwent-classic-multiplayer/issues/new?template=bug_report.yml">Report a bug</a>
-			<a class="fb-btn" target="_blank" rel="noopener" href="https://github.com/Wanesia/gwent-classic-multiplayer/issues/new?template=feature_request.yml">Suggest an idea</a>
+			<a class="fb-btn" target="_blank" rel="noopener" data-i18n="feedback.reportBug" href="https://github.com/Wanesia/gwent-classic-multiplayer/issues/new?template=bug_report.yml">Report a bug</a>
+			<a class="fb-btn" target="_blank" rel="noopener" data-i18n="feedback.suggestIdea" href="https://github.com/Wanesia/gwent-classic-multiplayer/issues/new?template=feature_request.yml">Suggest an idea</a>
 		</div>
-		<a class="fb-repo" target="_blank" rel="noopener" href="https://github.com/Wanesia/gwent-classic-multiplayer">View the project on GitHub</a>
+		<a class="fb-repo" target="_blank" rel="noopener" data-i18n="feedback.viewProject" href="https://github.com/Wanesia/gwent-classic-multiplayer">View the project on GitHub</a>
 	</div>
 </section>
 
@@ -474,6 +478,9 @@
 <script type="text/javascript" src="decks.js"></script>
 <script type="text/javascript" src="abilities.js"></script>
 <script type="text/javascript" src="factions.js"></script>
+<script type="text/javascript" src="i18n.js"></script>
+<script type="text/javascript" src="lang/en.js"></script>
+<script type="text/javascript" src="lang/pt-BR.js"></script>
 <script type="text/javascript" src="net.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="text/javascript" src="gwent.js"></script>

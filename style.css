@@ -208,7 +208,9 @@ html {
 	background-size: contain;
 	background-position: center;
 }
+
 #notification-bar > div::after {
+	content: attr(data-text);
 	position: absolute;
 	left: 100.5%;
 	top: 32.1%;
@@ -222,56 +224,22 @@ html {
 	align-items: center;
 }
 
-#notif-me-first::after { content:"You will go first"; }
-#notif-op-first::after { content:"Your opponent will go first"; }
-
 #notif-me-coin { background-image: url('img/icons/notif_me_coin.png'); }
-#notif-me-coin::after { content:"You will go first"; }
-
 #notif-op-coin { background-image: url('img/icons/notif_op_coin.png'); }
-#notif-op-coin::after { content:"Your opponent will go first"; }
-
 #notif-round-start { background-image: url('img/icons/notif_round_start.png'); }
-#notif-round-start::after { content:"Round Start"; }
-
 #notif-me-pass { background-image: url('img/icons/notif_round_passed.png'); }
-#notif-me-pass::after { content:"Round passed"; }
-
 #notif-op-pass { background-image: url('img/icons/notif_round_passed.png'); }
-#notif-op-pass::after { content:"Your opponent has passed"; }
-
-#notif-win-round { background-image: url('img/icons/notif_win_round.png'); } 
-#notif-win-round::after { content:"You won the round!"; }
-
+#notif-win-round { background-image: url('img/icons/notif_win_round.png'); }
 #notif-lose-round { background-image: url('img/icons/notif_lose_round.png'); }
-#notif-lose-round::after { content:"Your opponent won the round"; }
-
 #notif-draw-round { background-image: url('img/icons/notif_draw_round.png'); }
-#notif-draw-round::after {content:"The round ended in a draw"; }
-
-#notif-me-turn { background-image: url('img/icons/notif_me_turn.png'); } 
-#notif-me-turn::after { content:"Your turn!"; }
-
+#notif-me-turn { background-image: url('img/icons/notif_me_turn.png'); }
 #notif-op-turn { background-image: url('img/icons/notif_op_turn.png'); }
-#notif-op-turn::after { content:"Opponent's turn"; }
-
 #notif-op-redraw { background-image: url('img/icons/notif_op_turn.png'); }
-#notif-op-redraw::after { content:"Waiting for your opponent to redraw\2026"; }
-
 #notif-north { background-image: url('img/icons/notif_north.png'); }
-#notif-north::after { content:"Northern Realms faction ability triggered - North draws an additional card."; }
-
 #notif-monsters { background-image: url('img/icons/notif_monsters.png'); }
-#notif-monsters::after { content: "Monsters faction ability triggered - one randomly-chosen Monster Unit Card stays on the board"; }
-
 #notif-scoiatael { background-image: url('img/icons/notif_scoiatael.png'); }
-#notif-scoiatael::after { content: "Opponent used the Scoia'tael faction perk to go first."; }
-
 #notif-skellige-op{ background-image: url('img/icons/notif_skellige.png'); }
-#notif-skellige-op::after { content: "Opponent Skellige Ability Triggered!"; }
-
 #notif-skellige-me{ background-image: url('img/icons/notif_skellige.png'); }
-#notif-skellige-me::after { content: "Skellige Ability Triggered!"; }
 
 /* ------- card preview ------------- */
 
@@ -2489,6 +2457,37 @@ main { background-image: url('img/boardtest8.png'); }
 	right: 1.5vw;
 	left: auto;
 	z-index: 95;
+}
+
+/* Language selector: a native <select> kept fixed in the top-right corner so
+   it is reachable from the menu, the deck builder, and during a match. */
+#lang-select {
+	position: fixed;
+	top: 0.9vw;
+	right: 1.5vw;
+	left: auto;
+	bottom: auto;
+	width: auto;
+	height: auto;
+	z-index: 96;
+	padding: 0.2vw 0.4vw;
+	background: rgba(0, 0, 0, 0.55);
+	color: goldenrod;
+	border: 1px solid rgba(218, 165, 32, 0.5);
+	border-radius: 0.3vw;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 1.05vw;
+	font-weight: bold;
+	cursor: pointer;
+	filter: drop-shadow(0px 0px 2px black);
+}
+#lang-select:hover {
+	color: #ffd864;
+	border-color: goldenrod;
+}
+#lang-select option {
+	background: #0d0d0d;
+	color: goldenrod;
 }
 
 /* Shortcut legend overlay */
