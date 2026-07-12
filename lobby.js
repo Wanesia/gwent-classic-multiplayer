@@ -81,7 +81,7 @@ class Lobby {
 	startSinglePlayer() {
 		Net.trackEvent("mode-sp");
 		AudioManager.playSFX("menu_opening");
-		this.statusText.textContent = "vs Computer";
+		this.statusText.textContent = I18N.t("lobby.vsComputer");
 		this.statusElem.classList.remove("hide");
 		this.elem.classList.add("hide");
 		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
@@ -111,9 +111,9 @@ class Lobby {
 	async findOpponent() {
 		Net.trackEvent("mode-qm");
 		this.showView("lobby-search");
-		this.searchHint.textContent = "You'll be matched with the next player who searches.";
+		this.searchHint.textContent = I18N.t("lobby.searchHintDefault");
 		this.searchOnline.textContent = "";
-		this.searchStatus.textContent = "Connecting to server";
+		this.searchStatus.textContent = I18N.t("lobby.connecting");
 		this.searchStatus.classList.remove("is-waiting");
 		Net.onQmStatus = n => this.showOnlineCount(n);
 		try {
@@ -122,10 +122,10 @@ class Lobby {
 			if (Net.role === "guest") {
 				this.enterDeckSetup();
 			} else {
-				this.searchStatus.textContent = "Searching for an opponent";
+				this.searchStatus.textContent = I18N.t("lobby.searching");
 				this.searchStatus.classList.add("is-waiting");
 				this.searchHintTimer = setTimeout(() => {
-					this.searchHint.textContent = "No one's around right now. Keep waiting, invite a friend with a code, or play vs Computer.";
+					this.searchHint.textContent = I18N.t("lobby.searchNoOne");
 				}, this.searchHintDelay);
 			}
 		} catch (e) {
@@ -137,8 +137,8 @@ class Lobby {
 
 	showOnlineCount(online) {
 		const others = Math.max(0, online - 1);
-		this.searchOnline.textContent = others === 0 ? "No other players online right now" :
-			others === 1 ? "1 other player online" : others + " other players online";
+		this.searchOnline.textContent = others === 0 ? I18N.t("lobby.onlineNone") :
+			others === 1 ? I18N.t("lobby.onlineOne") : I18N.t("lobby.onlineMany", {n: others});
 	}
 
 	stopSearchExtras() {
@@ -151,14 +151,14 @@ class Lobby {
 		this.showView("lobby-create");
 		this.codeElem.textContent = "·····";
 		this.copyHint.textContent = "";
-		this.createStatus.textContent = "Connecting to server";
+		this.createStatus.textContent = I18N.t("lobby.connecting");
 		this.createStatus.classList.remove("is-waiting");
 		try {
 			await Net.connect();
 			const code = await Net.createRoom();
 			this.codeElem.textContent = code;
-			this.copyHint.textContent = "Click the code to copy it";
-			this.createStatus.textContent = "Waiting for opponent";
+			this.copyHint.textContent = I18N.t("lobby.clickToCopy");
+			this.createStatus.textContent = I18N.t("lobby.waitingOpponent");
 			this.createStatus.classList.add("is-waiting");
 		} catch (e) {
 			this.createStatus.textContent = this.errorText(e.message);
@@ -188,10 +188,10 @@ class Lobby {
 
 	errorText(code) {
 		switch (code) {
-			case "unreachable": return "Could not reach the game server.";
-			case "not-found": return "Game not found. Check the code and try again.";
-			case "full": return "That game already has two players.";
-			default: return "Something went wrong (" + code + ").";
+			case "unreachable": return I18N.t("lobby.errUnreachable");
+			case "not-found": return I18N.t("lobby.errNotFound");
+			case "full": return I18N.t("lobby.errFull");
+			default: return I18N.t("lobby.errGeneric", {code});
 		}
 	}
 
@@ -200,8 +200,8 @@ class Lobby {
 		if (!Net.code || code !== Net.code)
 			return;
 		const confirm = () => {
-			this.copyHint.textContent = "Copied!";
-			setTimeout(() => this.copyHint.textContent = "Click the code to copy it", 1500);
+			this.copyHint.textContent = I18N.t("lobby.copied");
+			setTimeout(() => this.copyHint.textContent = I18N.t("lobby.clickToCopy"), 1500);
 		};
 		if (navigator.clipboard) {
 			navigator.clipboard.writeText(code).then(confirm).catch(() => this.copyCodeFallback(code, confirm));
@@ -238,7 +238,7 @@ class Lobby {
 		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
 		this.statusElem.classList.remove("hide");
 		document.getElementById("opponent-preview").classList.add("hide");
-		this.startButton.textContent = "Ready";
+		this.startButton.textContent = I18N.t("lobby.ready");
 		this.updateStatus();
 		AudioManager.playSFX("menu_opening");
 	}
@@ -251,13 +251,13 @@ class Lobby {
 		if (!this.localReady) {
 			this.localReady = true;
 			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()) });
-			this.startButton.textContent = "Cancel";
+			this.startButton.textContent = I18N.t("lobby.cancelReady");
 			dm.elem.classList.add("mp-locked");
 			this.checkStart();
 		} else {
 			this.localReady = false;
 			Net.send({ t: "lobby-unready" });
-			this.startButton.textContent = "Ready";
+			this.startButton.textContent = I18N.t("lobby.ready");
 			dm.elem.classList.remove("mp-locked");
 		}
 		this.updateStatus();
@@ -317,7 +317,7 @@ class Lobby {
 		this.starting = true;
 		this.pendingSeed = GameRNG.randomSeed();
 		Net.send({ t: "lobby-start", seed: this.pendingSeed });
-		this.updateStatus("Starting game...");
+		this.updateStatus(I18N.t("lobby.startingGame"));
 	}
 
 	beginMatch(seed) {
@@ -340,15 +340,16 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
-		this.startButton.textContent = "Ready";
+		this.startButton.textContent = I18N.t("lobby.ready");
 		dm.elem.classList.remove("mp-locked");
 		this.updateStatus();
 	}
 
 	updateStatus(text) {
 		if (text === undefined)
-			text = "Opponent: " + (this.remoteReady ? "ready" : "connected") +
-				(this.localReady && !this.remoteReady ? " — waiting for them to ready up" : "");
+			text = this.remoteReady ? I18N.t("lobby.opponentReady")
+				: this.localReady ? I18N.t("lobby.waitingReadyUp")
+				: I18N.t("lobby.opponentConnected");
 		this.statusText.textContent = text;
 		// The same ready-up state drives the end-screen "Play Again" button
 		if (game.state === GameState.END_SCREEN)
@@ -406,7 +407,7 @@ class Lobby {
 
 	handlePeerLeft() {
 		if (this.inMultiplayer) {
-			this.endMultiplayerGame("Opponent Disconnected", "Your opponent has left the game.");
+			this.endMultiplayerGame(I18N.t("lobby.oppDisconnectedTitle"), I18N.t("lobby.oppDisconnectedBody"));
 		} else if (!this.elem.classList.contains("hide")) {
 			// connection or room died while waiting in the create or search view
 			this.stopSearchExtras();
@@ -426,7 +427,7 @@ class Lobby {
 		mp.deactivate();
 		Net.leave();
 		AudioManager.playSFX("warning");
-		ui.popup("Return to Menu", () => {
+		ui.popup(I18N.t("lobby.returnToMenu"), () => {
 			if (game.state !== GameState.CUSTOMIZE)
 				game.returnToCustomization();
 			this.exitMultiplayer();
@@ -437,8 +438,8 @@ class Lobby {
 	matchFailed(description) {
 		Net.onMessage = m => this.routeLobby(m);
 		AudioManager.playSFX("warning");
-		ui.popup("OK", () => {}, null, null, "Could Not Start Game",
-			description + " If this keeps happening, your versions of the game may differ.");
+		ui.popup(I18N.t("lobby.ok"), () => {}, null, null, I18N.t("lobby.couldNotStartTitle"),
+			description + I18N.t("lobby.couldNotStartSuffix"));
 	}
 
 	// Restores the single-player deck builder UI and shows the main menu
@@ -453,7 +454,7 @@ class Lobby {
 		Net.onMessage = null;
 		this.statusElem.classList.add("hide");
 		document.getElementById("opponent-preview").classList.remove("hide");
-		this.startButton.textContent = "Start game";
+		this.startButton.textContent = I18N.t("lobby.startGame");
 		dm.elem.classList.remove("mp-locked");
 		this.showMenu();
 	}
