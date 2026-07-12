@@ -2,7 +2,7 @@
 
 var I18N = (function () {
 	const DEFAULT = "en";
-	const SUPPORTED = ["en", "pt-BR", "pl", "ru", "de"];
+	const SUPPORTED = ["en", "pt-BR", "pl", "ru", "de", "fr"];
 	const dicts = {};
 
 	function resolve() {
@@ -19,6 +19,8 @@ var I18N = (function () {
 			return "ru";
 		if (nav.startsWith("de"))
 			return "de";
+		if (nav.startsWith("fr"))
+			return "fr";
 		return DEFAULT;
 	}
 
