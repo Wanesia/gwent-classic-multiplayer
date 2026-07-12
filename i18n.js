@@ -20,8 +20,12 @@ var I18N = (function () {
 
 	let current = resolve();
 
+	// Shallow-merges top-level keys so a language can be split across files
+	// (e.g. UI strings in lang/pl.js, card names in lang/cards.pl.js).
 	function register(code, dict) {
-		dicts[code] = dict;
+		const existing = dicts[code] || (dicts[code] = {});
+		for (const k in dict)
+			existing[k] = dict[k];
 	}
 
 	// Resolves a dotted key path ("a.b.c") against a dictionary object.
