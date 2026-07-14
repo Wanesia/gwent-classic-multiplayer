@@ -2,7 +2,7 @@
 
 var I18N = (function () {
 	const DEFAULT = "en";
-	const SUPPORTED = ["en", "pt-BR", "pl", "ru", "de", "fr", "es", "es-MX", "it", "cs", "hu", "tr", "ja", "ko", "zh-CN"];
+	const SUPPORTED = ["en", "pt-BR", "pl", "ru", "de", "fr", "es", "es-MX", "it", "cs", "hu", "tr", "ja", "ko", "zh-CN", "zh-TW"];
 	const dicts = {};
 
 	function resolve() {
@@ -37,6 +37,8 @@ var I18N = (function () {
 			return "ja";
 		if (nav.startsWith("ko"))
 			return "ko";
+		if (nav.startsWith("zh-tw") || nav.startsWith("zh-hant") || nav.startsWith("zh-hk") || nav.startsWith("zh-mo"))
+			return "zh-TW";
 		if (nav.startsWith("zh"))
 			return "zh-CN";
 		return DEFAULT;
