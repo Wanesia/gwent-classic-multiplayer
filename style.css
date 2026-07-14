@@ -2459,35 +2459,112 @@ main { background-image: url('img/boardtest8.png'); }
 	z-index: 95;
 }
 
-/* Language selector: a native <select> kept fixed in the top-right corner so
-   it is reachable from the menu, the deck builder, and during a match. */
+/* Language selector: a fully custom dropdown fixed in the top-right corner.
+   It is only shown on the main menu (the #lobby screen). */
 #lang-select {
+	display: none;
 	position: fixed;
 	top: 0.9vw;
 	right: 1.5vw;
-	left: auto;
-	bottom: auto;
-	width: auto;
-	height: auto;
 	z-index: 96;
-	padding: 0.2vw 0.4vw;
+	font-family: Arial Narrow, sans-serif;
+	font-weight: bold;
+}
+
+#lobby:not(.hide) ~ #lang-select {
+	display: block;
+}
+
+.lang-trigger {
+	display: flex;
+	align-items: center;
+	gap: 0.4vw;
+	min-width: 4vw;
+	padding: 0.3vw 0.5vw;
 	background: rgba(0, 0, 0, 0.55);
 	color: goldenrod;
 	border: 1px solid rgba(218, 165, 32, 0.5);
 	border-radius: 0.3vw;
-	font-family: Arial Narrow, sans-serif;
+	font: inherit;
 	font-size: 1.05vw;
-	font-weight: bold;
-	cursor: pointer;
 	filter: drop-shadow(0px 0px 2px black);
+	transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
 }
-#lang-select:hover {
+.lang-trigger:hover,
+#lang-select.open .lang-trigger {
 	color: #ffd864;
 	border-color: goldenrod;
+	background: rgba(0, 0, 0, 0.75);
 }
-#lang-select option {
+.lang-current {
+	flex: 1;
+	text-align: left;
+}
+.lang-arrow {
+	width: 0;
+	height: 0;
+	border-left: 0.35vw solid transparent;
+	border-right: 0.35vw solid transparent;
+	border-top: 0.4vw solid currentColor;
+	transition: transform 0.15s ease;
+}
+#lang-select.open .lang-arrow {
+	transform: rotate(180deg);
+}
+
+.lang-menu {
+	position: absolute;
+	top: calc(100% + 0.3vw);
+	right: 0;
+	min-width: 100%;
+	max-height: 60vh;
+	margin: 0;
+	padding: 0.2vw;
+	list-style: none;
+	overflow-y: auto;
 	background: #0d0d0d;
+	border: 1px solid rgba(218, 165, 32, 0.5);
+	border-radius: 0.3vw;
+	box-shadow: 0 0.3vw 0.8vw rgba(0, 0, 0, 0.7);
+	opacity: 0;
+	transform: translateY(-0.3vw);
+	pointer-events: none;
+	transition: opacity 0.12s ease, transform 0.12s ease;
+}
+#lang-select.open .lang-menu {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+.lang-menu > li {
+	padding: 0.3vw 0.6vw;
 	color: goldenrod;
+	font-size: 1vw;
+	white-space: nowrap;
+	border-radius: 0.2vw;
+	transition: background 0.1s ease, color 0.1s ease;
+}
+.lang-menu > li:hover,
+.lang-menu > li:focus {
+	background: rgba(218, 165, 32, 0.18);
+	color: #ffd864;
+	outline: none;
+}
+.lang-menu > li[aria-selected="true"] {
+	background: rgba(218, 165, 32, 0.3);
+	color: #fff2cc;
+}
+
+/* Slim, themed scrollbar for the language list */
+.lang-menu::-webkit-scrollbar {
+	width: 0.5vw;
+}
+.lang-menu::-webkit-scrollbar-thumb {
+	background: rgba(218, 165, 32, 0.4);
+	border-radius: 0.25vw;
+}
+.lang-menu::-webkit-scrollbar-track {
+	background: transparent;
 }
 
 /* Shortcut legend overlay */
