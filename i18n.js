@@ -126,14 +126,64 @@ var I18N = (function () {
 		wireSelector();
 	}
 
-	// Keeps the language <select> (if present) in sync and wired to setLang.
+	// Wires up the custom language dropdown
 	function wireSelector() {
-		const sel = document.getElementById("lang-select");
-		if (!sel || sel._i18nWired)
+		const root = document.getElementById("lang-select");
+		if (!root || root._i18nWired)
 			return;
-		sel.value = current;
-		sel.addEventListener("change", () => setLang(sel.value));
-		sel._i18nWired = true;
+		const trigger = root.querySelector(".lang-trigger");
+		const menu = root.querySelector(".lang-menu");
+		const label = root.querySelector(".lang-current");
+		const options = [...menu.querySelectorAll('[role="option"]')];
+		if (!trigger || !menu || !label || !options.length)
+			return;
+
+		const selected = options.find(o => o.dataset.value === current) || options[0];
+		label.textContent = selected.textContent;
+		selected.setAttribute("aria-selected", "true");
+
+		const close = () => {
+			root.classList.remove("open");
+			trigger.setAttribute("aria-expanded", "false");
+		};
+		const open = () => {
+			root.classList.add("open");
+			trigger.setAttribute("aria-expanded", "true");
+			selected.focus();
+		};
+		const toggle = () => root.classList.contains("open") ? close() : open();
+
+		trigger.addEventListener("click", e => { e.stopPropagation(); toggle(); });
+		options.forEach(opt =>
+			opt.addEventListener("click", () => setLang(opt.dataset.value)));
+
+		// Arrow-key navigation while the list is open.
+		menu.addEventListener("keydown", e => {
+			const i = options.indexOf(document.activeElement);
+			if (e.key === "ArrowDown") {
+				e.preventDefault();
+				options[Math.min(i + 1, options.length - 1)].focus();
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				options[Math.max(i - 1, 0)].focus();
+			} else if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				if (i >= 0) setLang(options[i].dataset.value);
+			}
+		});
+
+		// Close on outside click or Escape.
+		document.addEventListener("click", e => {
+			if (!root.contains(e.target)) close();
+		});
+		document.addEventListener("keydown", e => {
+			if (e.key === "Escape" && root.classList.contains("open")) {
+				close();
+				trigger.focus();
+			}
+		});
+
+		root._i18nWired = true;
 	}
 
 	if (document.readyState === "loading")

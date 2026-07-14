@@ -454,25 +454,31 @@
 <div data-title="Toggle game messages" data-i18n-datatitle="settings.notifications" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
 <div data-title="Keyboard shortcuts" data-i18n-datatitle="settings.keybinds" id="toggle-keybinds" class="center deck-menu settings-button"><span>?</span></div>
 <div data-title="Feedback / report a bug" data-i18n-datatitle="settings.feedback" id="toggle-feedback" class="center deck-menu settings-button"><img src="svg/feedback.svg"></img></div>
-<select data-title="Language" data-i18n-datatitle="settings.language" id="lang-select" class="center deck-menu settings-button" aria-label="Language">
-	<option value="en">EN</option>
-	<option value="pt-BR">PT-BR</option>
-	<option value="pl">PL</option>
-	<option value="ru">RU</option>
-	<option value="de">DE</option>
-	<option value="fr">FR</option>
-	<option value="es">ES</option>
-	<option value="es-MX">ES-MX</option>
-	<option value="it">IT</option>
-	<option value="cs">CS</option>
-	<option value="hu">HU</option>
-	<option value="tr">TR</option>
-	<option value="ja">JA</option>
-	<option value="ko">KO</option>
-	<option value="zh-CN">ZH-CN</option>
-	<option value="zh-TW">ZH-TW</option>
-	<option value="ar">AR</option>
-</select>
+<div id="lang-select">
+	<button type="button" class="lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+		<span class="lang-current">EN</span>
+		<span class="lang-arrow" aria-hidden="true"></span>
+	</button>
+	<ul class="lang-menu" role="listbox" aria-label="Language" tabindex="-1">
+		<li role="option" tabindex="-1" data-value="en">EN</li>
+		<li role="option" tabindex="-1" data-value="pt-BR">PT-BR</li>
+		<li role="option" tabindex="-1" data-value="pl">PL</li>
+		<li role="option" tabindex="-1" data-value="ru">RU</li>
+		<li role="option" tabindex="-1" data-value="de">DE</li>
+		<li role="option" tabindex="-1" data-value="fr">FR</li>
+		<li role="option" tabindex="-1" data-value="es">ES</li>
+		<li role="option" tabindex="-1" data-value="es-MX">ES-MX</li>
+		<li role="option" tabindex="-1" data-value="it">IT</li>
+		<li role="option" tabindex="-1" data-value="cs">CS</li>
+		<li role="option" tabindex="-1" data-value="hu">HU</li>
+		<li role="option" tabindex="-1" data-value="tr">TR</li>
+		<li role="option" tabindex="-1" data-value="ja">JA</li>
+		<li role="option" tabindex="-1" data-value="ko">KO</li>
+		<li role="option" tabindex="-1" data-value="zh-CN">ZH-CN</li>
+		<li role="option" tabindex="-1" data-value="zh-TW">ZH-TW</li>
+		<li role="option" tabindex="-1" data-value="ar">AR</li>
+	</ul>
+</div>
 
 <section id="feedback-modal" class="hide">
 	<div class="fb-panel">
