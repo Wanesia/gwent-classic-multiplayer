@@ -346,13 +346,19 @@ html {
 	background-color: rgba(10,10,10,.6);
 	color: tan;
 	font-family: serif;
-	font-size: 1.2vw;
+	font-size: 0;
 	line-height: 1;
 	pointer-events: auto;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	transition: background-color .15s, color .15s, box-shadow .15s;
+}
+.card-description > .card-description-close::before {
+	/* Replaces the hidden × text, nudged to its optical center. */
+	content: "\00d7";
+	font-size: 1.2vw;
+	transform: translateY(0.1vw);
 }
 .card-description > .card-description-close:hover {
 	background-color: rgba(35,30,15,.9);
@@ -742,7 +748,7 @@ html {
     border-radius: 2px;
     font-family: sans-serif;
     font-size: .8vw;
-    letter-spacing: 3px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: rgba(255,210,120,0.7);
     box-shadow: none;
@@ -772,7 +778,7 @@ html {
     line-height: 1.35;
     text-align: center;
     color: rgba(255,210,120,0.55);
-    letter-spacing: 1px;
+    letter-spacing: 0.07em;
 }
 
 #end-screen #rematch-status span { display: block; }
@@ -929,7 +935,7 @@ main { background-image: url('img/boardtest8.png'); }
 }
 
 .current-turn {
-	box-shadow: -3vw 0px 1vw 0.1vw goldenrod;
+	box-shadow: 0 0 1vw 0.15vw goldenrod;
 }
 
 #stats-op {
@@ -1589,11 +1595,14 @@ main { background-image: url('img/boardtest8.png'); }
 #start-game {
 	position: absolute;
 	top: 86%;
-	left: 46.65%;
-	width: 6%;
+	left: 50%;
+	transform: translateX(-50%);
+	min-width: 6%;
+	padding: 0 0.6%;
 	height: 3%;
 	font-size: 0.98vw;
 	white-space: nowrap;
+	text-align: center;
 	color: white;
 	background-color: rgb(20,20,20);
 	border: 0.1vw ridge rgb(30,30,30);
@@ -1796,7 +1805,37 @@ main { background-image: url('img/boardtest8.png'); }
 
 /* ---------- tooltip -------------  */
 
-*[data-title]:hover::after,
+/* Hover tooltips only show on real hover devices; touch has no hover-out
+   to close them. */
+@media (hover: hover) and (pointer: fine) {
+	*[data-title]:hover::after {
+		content: attr(data-title);
+		background-color: rgba(10,10,10,.95);
+		color: goldenrod;
+		font-family: Arial Narrow, sans-serif;
+		font-size: 1.2vw;
+		position: absolute;
+		padding: 1px 5px 2px 5px;
+		bottom: -2vw;
+		left: var(--title-left);
+		white-space: nowrap;
+		box-shadow: 1px 1px 4px #242424;
+		text-shadow: none;
+		border: 1px solid #1b1b1b;
+		z-index: 9999999;
+		pointer-events: none;
+	}
+
+	.lobby-menu[data-title]:hover::after {
+		bottom: 3vw;
+	}
+
+	#toggle-feedback.lobby-menu[data-title]:hover::after {
+		left: auto;
+		right: 0;
+	}
+}
+
 [data-title].kb-focus::after {
 	content: attr(data-title);
 	background-color: rgba(10,10,10,.95);
@@ -1813,15 +1852,6 @@ main { background-image: url('img/boardtest8.png'); }
 	border: 1px solid #1b1b1b;
 	z-index: 9999999;
 	pointer-events: none;
-}
-
-.lobby-menu[data-title]:hover::after {
-	bottom: 3vw;
-}
-
-#toggle-feedback.lobby-menu[data-title]:hover::after {
-	left: auto;
-	right: 0;
 }
 
 
