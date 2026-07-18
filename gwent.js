@@ -3943,6 +3943,15 @@ if (fullscreenToggle) {
 	});
 }
 
+const matchFullscreenToggle = document.getElementById("match-fullscreen-toggle");
+if (matchFullscreenToggle) {
+	matchFullscreenToggle.addEventListener("click", toggleFullscreen, false);
+	document.addEventListener("fullscreenchange", () => {
+		matchFullscreenToggle.title = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
+		matchFullscreenToggle.setAttribute("data-title", matchFullscreenToggle.title);
+	});
+}
+
 
 document.addEventListener('click', () => userInteracted = true, { once: true });
 class KeyboardControls {

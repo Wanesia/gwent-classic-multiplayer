@@ -119,6 +119,27 @@ html {
 	opacity: 100%;
 }
 
+#match-fullscreen-toggle
+{
+	top: 1.4vw;
+	right: 1vw;
+	position: absolute;
+	width: 2vw;
+	height: 2vw;
+	background-image: url("svg/fullscreen.svg");
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity: 20%;
+	transition: opacity 0.3s;
+	pointer-events: auto;
+	cursor: pointer;
+	z-index: 90;
+}
+#match-fullscreen-toggle:hover {
+	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
+	opacity: 100%;
+}
+
 /* ----------- settings & media player ------------------ */
 
 #youtube {
