@@ -10,6 +10,10 @@
 	var CANVAS_H = 1080;
 	var RATIO = CANVAS_H / CANVAS_W; // 0.5625
 
+	// Require a real ultrawide window (2560px+, 15%+ overshoot) before
+	// pillarboxing on mouse/trackpad; touch keeps the tight check.
+	var isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+
 	function fit() {
 		var wrap = document.getElementById("screen-scale");
 		if (!wrap)
@@ -30,7 +34,7 @@
 			var tx = vw / 2 + (sP * canvasH) / 2;
 			var ty = vh / 2 - (sP * vw) / 2;
 			transform = "translate(" + tx + "px, " + ty + "px) rotate(90deg) scale(" + sP + ")";
-		} else if (canvasH > vh + 1) {
+		} else if (isTouch ? (canvasH > vh + 1) : (vw >= 2560 && canvasH > vh * 1.15)) {
 			// Landscape wider than 16:9: scale down to fit height, pillarbox sides.
 			var sL = vh / canvasH;
 			var txL = (vw - vw * sL) / 2;
