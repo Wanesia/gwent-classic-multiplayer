@@ -52,6 +52,8 @@ main {
 	height: calc(100vw * 1080 / 1920);
 	transform-origin: 0 0;
 	/* transform is set inline by fit-screen.js */
+	/* Clip so off-canvas elements (e.g. #hand-op) stay hidden once transformed. */
+	overflow: hidden;
 }
 /* While fitting, suppress scrollbars so the letter/pillarbox bars are clean. */
 body.fit-active {

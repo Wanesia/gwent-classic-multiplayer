@@ -1,7 +1,7 @@
 /*
  * fit-screen.js — scales the fixed 1920x1080 (16:9) canvas to fit viewports
- * that aren't ~16:9-16:10: pillarbox scale-down when wider, rotate+scale
- * when portrait. No-op (display:contents) otherwise.
+ * that aren't ~16:9-16:10: pillarbox scale-down when wider, center when
+ * portrait. No-op (display:contents) otherwise.
  */
 (function () {
 	"use strict";
@@ -29,11 +29,10 @@
 		var transform = null;
 
 		if (vh >= vw) {
-			// Portrait: rotate 90deg and scale to fill the tall screen.
-			var sP = Math.min(vw / canvasH, vh / vw);
-			var tx = vw / 2 + (sP * canvasH) / 2;
-			var ty = vh / 2 - (sP * vw) / 2;
-			transform = "translate(" + tx + "px, " + ty + "px) rotate(90deg) scale(" + sP + ")";
+			// Portrait: no rotation, just center vertically (canvas is
+			// always shorter than the viewport here).
+			var extraV = vh - canvasH;
+			transform = extraV > 1 ? "translateY(" + (extraV / 2) + "px)" : null;
 		} else if (isTouch ? (canvasH > vh + 1) : (vw >= 2560 && canvasH > vh * 1.15)) {
 			// Landscape wider than 16:9: scale down to fit height, pillarbox sides.
 			var sL = vh / canvasH;
