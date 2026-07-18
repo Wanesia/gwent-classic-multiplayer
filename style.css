@@ -2155,6 +2155,7 @@ main { background-image: url('img/boardtest8.png'); }
 /* ----- main menu: split-screen hover reveal ----- */
 
 #lobby-mode.lobby-split:not(.hide) {
+	/* Always fills the true viewport, independent of the 16:9 canvas. */
 	position: fixed;
 	inset: 0;
 	margin: 0;
@@ -2163,6 +2164,14 @@ main { background-image: url('img/boardtest8.png'); }
 	height: 100vh;
 	overflow: hidden;
 	background-color: #000;
+}
+
+/* Canvas-relative sizing only while #screen-scale is transformed, to avoid
+   a transform/vw mismatch on ultrawide/mobile. */
+body.fit-active #lobby-mode.lobby-split:not(.hide) {
+	position: absolute;
+	width: 100%;
+	height: 100%;
 }
 
 /* the split screen carries its own faint title; hide the large gold one,
