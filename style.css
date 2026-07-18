@@ -37,6 +37,27 @@ main {
 	background-repeat: no-repeat;
 }
 
+/* ---------------- responsive fit wrapper ----------------
+   No-op (display:contents) until fit-screen.js activates .fit-active for
+   viewports that don't fit the 16:9 canvas. */
+#screen-scale {
+	display: contents;
+}
+#screen-scale.fit-active {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: calc(100vw * 1080 / 1920);
+	transform-origin: 0 0;
+	/* transform is set inline by fit-screen.js */
+}
+/* While fitting, suppress scrollbars so the letter/pillarbox bars are clean. */
+body.fit-active {
+	overflow: hidden;
+}
+
 /* makes text seleciton and highlighting invisible */
 ::selection { background: transparent; }		/* WebKit/Blink Browsers */
 ::-moz-selection { background: transparent; }	/* Gecko Browsers */
