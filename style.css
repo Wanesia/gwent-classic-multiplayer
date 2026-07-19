@@ -183,11 +183,8 @@ html {
     top: 48.9vw;
     left: 14vw;
 }
-#toggle-music.deck-menu {
-	top: 45.3vw;
-	left: 43.65vw;
-	z-index: 86;
-}
+/* Reuse the lobby's fixed bottom-left cluster instead of the old inline position. */
+#toggle-music.deck-menu,
 #toggle-music.lobby-menu {
 	position: fixed;
 	bottom: 2vh;
@@ -200,11 +197,7 @@ html {
 	top: 48.9vw;
     left: 17.2vw;
 }
-#toggle-sfx.deck-menu {
-	top: 45.3vw;
-	left: 47.05vw;
-	z-index: 86;
-}
+#toggle-sfx.deck-menu,
 #toggle-sfx.lobby-menu {
 	position: fixed;
 	bottom: 2vh;
@@ -217,11 +210,7 @@ html {
 	top: 48.9vw;
     left: 20vw;
 }
-#toggle-notifications.deck-menu {
-	top: 45.3vw;
-	left: 50.45vw;
-	z-index: 86;
-}
+#toggle-notifications.deck-menu,
 #toggle-notifications.lobby-menu {
 	position: fixed;
 	bottom: 2vh;
@@ -2533,12 +2522,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 #toggle-feedback {
 	display: none;
 }
-#toggle-feedback.deck-menu {
-	display: block;
-	top: 45.3vw;
-	left: 53.85vw;
-	z-index: 86;
-}
+#toggle-feedback.deck-menu,
 #toggle-feedback.lobby-menu {
 	display: block;
 	position: fixed;
