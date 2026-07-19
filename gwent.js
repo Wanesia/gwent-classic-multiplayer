@@ -3946,10 +3946,25 @@ if (fullscreenToggle) {
 const matchFullscreenToggle = document.getElementById("match-fullscreen-toggle");
 if (matchFullscreenToggle) {
 	matchFullscreenToggle.addEventListener("click", toggleFullscreen, false);
-	document.addEventListener("fullscreenchange", () => {
+	const syncMatchFullscreenToggle = () => {
 		matchFullscreenToggle.title = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
 		matchFullscreenToggle.setAttribute("data-title", matchFullscreenToggle.title);
-	});
+		matchFullscreenToggle.classList.toggle("is-fullscreen", isFullscreen());
+	};
+	document.addEventListener("fullscreenchange", syncMatchFullscreenToggle);
+	syncMatchFullscreenToggle();
+}
+
+const lobbyFullscreenToggle = document.getElementById("lobby-fullscreen-toggle");
+if (lobbyFullscreenToggle) {
+	lobbyFullscreenToggle.addEventListener("click", toggleFullscreen, false);
+	const syncLobbyFullscreenToggle = () => {
+		lobbyFullscreenToggle.title = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
+		lobbyFullscreenToggle.setAttribute("data-title", lobbyFullscreenToggle.title);
+		lobbyFullscreenToggle.classList.toggle("fade", !isFullscreen());
+	};
+	document.addEventListener("fullscreenchange", syncLobbyFullscreenToggle);
+	syncLobbyFullscreenToggle();
 }
 
 

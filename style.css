@@ -126,16 +126,19 @@ html {
 	position: absolute;
 	width: 2vw;
 	height: 2vw;
-	background-image: url("svg/fullscreen.svg");
+	background-image: url("svg/fullscreen-gold.svg");
 	background-repeat: no-repeat;
 	background-size: contain;
 	opacity: 20%;
 	transition: opacity 0.3s;
 	pointer-events: auto;
 	cursor: pointer;
-	z-index: 90;
 }
 #match-fullscreen-toggle:hover {
+	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
+	opacity: 100%;
+}
+#match-fullscreen-toggle.is-fullscreen {
 	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
 	opacity: 100%;
 }
@@ -1305,6 +1308,10 @@ main { background-image: url('img/boardtest8.png'); }
 	pointer-events: none;
 }
 
+#grave-op, #grave-me {
+	z-index: 2;
+}
+
 #grave-op {
 	top: 6.5%;
 	left: 6.5%;
@@ -1842,11 +1849,19 @@ main { background-image: url('img/boardtest8.png'); }
 		pointer-events: none;
 	}
 
-	.lobby-menu[data-title]:hover::after {
+	.lobby-menu[data-title]:hover::after,
+	.deck-menu[data-title]:hover::after {
 		bottom: 3vw;
 	}
 
-	#toggle-feedback.lobby-menu[data-title]:hover::after {
+	#toggle-feedback.lobby-menu[data-title]:hover::after,
+	#toggle-feedback.deck-menu[data-title]:hover::after {
+		left: auto;
+		right: 0;
+	}
+
+	#lobby-fullscreen-toggle[data-title]:hover::after,
+	#match-fullscreen-toggle[data-title]:hover::after {
 		left: auto;
 		right: 0;
 	}
@@ -2533,19 +2548,30 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	z-index: 95;
 }
 
-/* Language selector: a fully custom dropdown fixed in the top-right corner.
-   It is only shown on the main menu (the #lobby screen). */
 #lang-select {
 	display: none;
 	position: fixed;
 	top: 0.9vw;
-	right: 1.5vw;
+	right: 4.5vw;
 	z-index: 96;
 	font-family: Arial Narrow, sans-serif;
 	font-weight: bold;
 }
 
 #lobby:not(.hide) ~ #lang-select {
+	display: block;
+}
+
+#lobby-fullscreen-toggle {
+	display: none;
+	position: fixed;
+	top: 0.9vw;
+	right: 1.5vw;
+	z-index: 96;
+	cursor: pointer;
+}
+
+#lobby:not(.hide) ~ #lobby-fullscreen-toggle {
 	display: block;
 }
 
