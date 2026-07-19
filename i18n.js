@@ -2,7 +2,8 @@
 
 var I18N = (function () {
 	const DEFAULT = "en";
-	const SUPPORTED = ["en", "pt-BR", "pl", "ru", "de", "fr", "es", "es-MX", "it", "cs", "hu", "tr", "ja", "ko", "zh-CN", "zh-TW", "ar"];
+	// Ordered by Witcher/Gwent regional relevance, not alphabetically.
+	const SUPPORTED = ["en", "pl", "ru", "cs", "hu", "de", "fr", "it", "pt-BR", "es", "es-MX", "tr", "zh-CN", "zh-TW", "ja", "ko", "ar"];
 	const dicts = {};
 
 	function resolve() {
