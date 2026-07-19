@@ -2287,8 +2287,10 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 .split-tag {
 	display: block;
 	font-family: sans-serif;
-	font-size: 10px;
-	letter-spacing: 4px;
+	/* Clamp instead of fixed size so long translations shrink instead of wrapping. */
+	font-size: clamp(7px, 2.1vw, 10px);
+	/* Clamp letter-spacing too, same reason. */
+	letter-spacing: clamp(1px, 0.6vw, 4px);
 	text-transform: uppercase;
 	color: rgba(255,255,255,0.35);
 	margin-bottom: 10px;
@@ -2299,7 +2301,8 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	margin: 0;
 	font-family: Georgia, serif;
 	font-weight: 400;
-	font-size: 26px;
+	/* Clamp heading size too, same reason. */
+	font-size: clamp(15px, 5vw, 26px);
 	letter-spacing: 2px;
 	color: rgba(255,255,255,0.3);
 	transition: color .5s ease, text-shadow .5s ease, letter-spacing .5s ease;
