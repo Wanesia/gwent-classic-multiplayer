@@ -153,7 +153,7 @@ html {
 	position: fixed;
 	height: 10px;
 	width: 10px;
-	display: hidden;
+	display: none;
 	z-index: -100;
 }
 
