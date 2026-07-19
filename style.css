@@ -140,6 +140,13 @@ html {
 	opacity: 100%;
 }
 
+/* Touch has no hover, so give these a visible baseline opacity instead of 20%. */
+@media (hover: none) {
+	#exit-game, #match-fullscreen-toggle {
+		opacity: 55%;
+	}
+}
+
 /* ----------- settings & media player ------------------ */
 
 #youtube {
