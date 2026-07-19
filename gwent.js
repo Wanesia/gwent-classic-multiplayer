@@ -4132,9 +4132,14 @@ class KeyboardControls {
 	}
 
 	cancel() {
-		if (this.placing)
+		if (this.placing) {
 			ui.cancel();
+			this.clearFocus();
+			return;
+		}
+		// Nothing left to cancel at this level -- exit the match.
 		this.clearFocus();
+		game.exitGame();
 	}
 	startPassHold() {
 		if (!this.passBtn || this.passBtn.classList.contains("noclick") || this.passHeld)
