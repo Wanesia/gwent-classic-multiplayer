@@ -2607,7 +2607,9 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	top: calc(100% + 0.3vw);
 	right: 0;
 	min-width: 100%;
-	max-height: 60vh;
+	/* vw not vh: stays consistent with the canvas's frame once
+	   #screen-scale is transformed. */
+	max-height: 34vw;
 	margin: 0;
 	padding: 0.2vw;
 	list-style: none;
