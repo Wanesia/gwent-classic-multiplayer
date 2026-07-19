@@ -1427,26 +1427,23 @@ main { background-image: url('img/boardtest8.png'); }
 	text-align: center;
 }
 
-.deck-options{
+/* Flex row with a gap so longer translations don't overlap. */
+.deck-actions-row {
 	position: absolute;
+	top: 15%;
+	left: 40%;
+	display: flex;
+	align-items: baseline;
+	gap: 2vw;
+}
+
+.deck-options{
 	font-size: 1vw;
 	color: white;
-	top: 15%;
+	white-space: nowrap;
 }
 .deck-options:hover {
 	text-decoration: underline;
-}
-
-#download-deck {
-	left: 55%;
-}
-
-#upload-deck {
-	left: 40%;
-}
-
-#change-faction {
-	left: 47%;
 }
 
 #lobby-return {
