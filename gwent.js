@@ -1894,14 +1894,20 @@ class Game {
 
 	exitGame()
 	{
-		if (Popup.curr) return;
+		// The end screen has its own Customize/Rematch/Leave buttons
+		if (Popup.curr || this.state === GameState.END_SCREEN) return;
 		AudioManager.playSFX('warning');
-		const isMyTurn = this.currPlayer === player_me;
 		ui.popup(
-			I18N.t("game.resume"), ()=>{ ui.enablePlayer(isMyTurn); },
+			// Decided on close, not open: the turn may have changed meanwhile
+			I18N.t("game.resume"), ()=>{ ui.enablePlayer(this.playerCanAct()); },
 			I18N.t("game.exit"), ()=>this.returnToCustomization(),
 			I18N.t("game.quitTitle"), I18N.t("game.quitBody")
 		);
+	}
+	
+	// Whether the local player should currently be able to click the board
+	playerCanAct() {
+		return (this.currPlayer === player_me && player_me.awaitingAction) || !!Carousel.curr || this.placedEffectsActive;
 	}
 	
 	// Returns the client to the deck customization screen
@@ -2998,7 +3004,7 @@ class Carousel {
 
 		document.addEventListener("keydown", e => {
 			const c = Carousel.curr;
-			if (!c) return;
+			if (!c || Popup.curr) return;
 			// Lowercase single-character keys so q works Caps Lock;
 			const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 			switch (k) {
@@ -3025,7 +3031,19 @@ class Popup {
 			Popup.bound = true;
 			main.children[2].children[0].addEventListener("click", () => Popup.curr?.selectYes());
 			main.children[2].children[1].addEventListener("click", () => Popup.curr?.selectNo());
+			// Enter/Escape pick the first button (Resume, OK). Skip the key press
+			// that opened the popup (e.g. Escape opening the quit popup).
+			document.addEventListener("keydown", e => {
+				const p = Popup.curr;
+				// e.repeat: holding Escape would close and reopen the quit popup
+				if (!p || e.repeat || e.timeStamp <= p.openedAt || (e.key !== "Enter" && e.key !== "Escape"))
+					return;
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				p.selectYes();
+			});
 		}
+		this.openedAt = performance.now();
 		main.children[0].innerHTML = header ? header : "";
 		main.children[1].innerHTML = description ? description : "";
 		main.children[2].children[0].innerHTML = (yesName) ? yesName : "Yes";
@@ -4255,7 +4273,7 @@ class KeyboardControls {
 	}
 
 	get active() {
-		if (!this.inGame || Carousel.curr || Popup.curr)
+		if (!this.inGame || Carousel.curr || Popup.curr || game.state === GameState.END_SCREEN)
 			return false;
 		return this.main && !this.main.classList.contains("noclick");
 	}
@@ -4279,6 +4297,9 @@ class KeyboardControls {
 			return;
 		}
 		if (this.legendOpen()) {
+			// The legend sits on top: keep keys from reaching the carousel's
+			// own handler underneath (e.g. Escape cancelling the redraw)
+			e.stopImmediatePropagation();
 			if (k === "Escape" || k === "q" || k === "Backspace") {
 				e.preventDefault();
 				this.hideLegend();
@@ -4398,6 +4419,10 @@ class KeyboardControls {
 
 	cancel() {
 		if (this.placing) {
+			// A forced row choice (agile medic revive, Skellige round 3) can't
+			// be backed out of; the mouse doesn't allow closing it either
+			if (game.placedEffectsActive)
+				return;
 			ui.cancel();
 			this.clearFocus();
 			return;
@@ -4407,14 +4432,15 @@ class KeyboardControls {
 		game.exitGame();
 	}
 	startPassHold() {
-		if (!this.passBtn || this.passBtn.classList.contains("noclick") || this.passHeld)
+		// Like the mouse, can't pass while a card is selected for placing
+		if (!this.passBtn || this.passBtn.classList.contains("noclick") || this.passHeld || this.placing)
 			return;
 		this.passHeld = true;
 		this.passBtn.classList.add("kb-pass-hold");   // the 1s fill animation
 		this.passTimer = setTimeout(() => {
 			this.passTimer = null;
 			this.endPassHold();
-			if (this.active) {
+			if (this.active && !this.placing) {
 				this.clearFocus();
 				this.passBtn.click();
 			}
