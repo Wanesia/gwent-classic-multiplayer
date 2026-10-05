@@ -2259,7 +2259,7 @@ class UI {
 	initYouTube(){
 		this.youtube = new YT.Player('youtube', {
 			videoId: "UE9fPWy1_o4",
-			playerVars:  { "autoplay" : 1, "controls" : 0, "loop" : 1, "playlist" : "UE9fPWy1_o4", "rel" : 0, "version" : 3, "modestbranding" : 1 },
+			playerVars:  { "autoplay" : Settings.music.isEnabled() ? 1 : 0, "controls" : 0, "loop" : 1, "playlist" : "UE9fPWy1_o4", "rel" : 0, "version" : 3, "modestbranding" : 1 },
 			events: { 'onStateChange': initButton }
 		});
 		
@@ -2267,6 +2267,10 @@ class UI {
 			if (ui.ytActive !== undefined)
 				return;
 			ui.ytActive = true;
+			// Music off: don't start it just to pause it again (an audible blip);
+			// toggleMusic() starts playback if the player turns it on
+			if (!Settings.music.isEnabled())
+				return;
 			ui.youtube.playVideo();
 			let timer = setInterval( () => {
 				if (ui.youtube.getPlayerState() !== YT.PlayerState.PLAYING)
@@ -2274,10 +2278,6 @@ class UI {
 				else {
 					clearInterval(timer);
 					ui.toggleMusic_elem.classList.remove("fade");
-					if (!Settings.music.isEnabled())
-					{
-						setTimeout(()=>ui.toggleMusic(), 10);
-					}
 				}
 			}, 500);
 		}
@@ -2285,7 +2285,14 @@ class UI {
 	
 	// Called when client toggles the music
 	toggleMusic(){
-		const isPlaying = this.youtube?.getPlayerState() === YT.PlayerState.PLAYING;
+		// The YouTube API may be blocked (adblock, offline) or not ready yet:
+		// still flip the setting and the icon instead of throwing
+		if (typeof YT === "undefined" || typeof this.youtube?.getPlayerState !== "function") {
+			Settings.music.toggle();
+			this.toggleMusic_elem.classList.toggle("fade", !Settings.music.isEnabled());
+			return;
+		}
+		const isPlaying = this.youtube.getPlayerState() === YT.PlayerState.PLAYING;
 		if (isPlaying) {
 			this.youtube?.pauseVideo();
 			this.toggleMusic_elem.classList.add("fade");
@@ -4206,20 +4213,27 @@ EventManager.gameOpened.bind(showGameFullscreenHint);
 const fullscreenToggle = document.getElementById("fullscreen-toggle");
 if (fullscreenToggle) {
 	fullscreenToggle.addEventListener("click", toggleFullscreen, false);
-	document.addEventListener("fullscreenchange", () => {
-		fullscreenToggle.textContent = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
-	});
+	const syncFullscreenToggle = () => {
+		fullscreenToggle.textContent = isFullscreen() ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
+	};
+	// F11 fullscreen fires resize, not fullscreenchange
+	document.addEventListener("fullscreenchange", syncFullscreenToggle);
+	window.addEventListener("resize", syncFullscreenToggle);
+	// After the page-load translation pass, which resets the label
+	document.addEventListener("DOMContentLoaded", syncFullscreenToggle);
 }
 
 const matchFullscreenToggle = document.getElementById("match-fullscreen-toggle");
 if (matchFullscreenToggle) {
 	matchFullscreenToggle.addEventListener("click", toggleFullscreen, false);
 	const syncMatchFullscreenToggle = () => {
-		matchFullscreenToggle.title = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
+		matchFullscreenToggle.title = isFullscreen() ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
 		matchFullscreenToggle.setAttribute("data-title", matchFullscreenToggle.title);
 		matchFullscreenToggle.classList.toggle("is-fullscreen", isFullscreen());
 	};
 	document.addEventListener("fullscreenchange", syncMatchFullscreenToggle);
+	window.addEventListener("resize", syncMatchFullscreenToggle);
+	document.addEventListener("DOMContentLoaded", syncMatchFullscreenToggle);
 	syncMatchFullscreenToggle();
 }
 
@@ -4227,11 +4241,13 @@ const lobbyFullscreenToggle = document.getElementById("lobby-fullscreen-toggle")
 if (lobbyFullscreenToggle) {
 	lobbyFullscreenToggle.addEventListener("click", toggleFullscreen, false);
 	const syncLobbyFullscreenToggle = () => {
-		lobbyFullscreenToggle.title = document.fullscreenElement ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
+		lobbyFullscreenToggle.title = isFullscreen() ? I18N.t("deck.exitFullscreen") : I18N.t("deck.fullscreenMode");
 		lobbyFullscreenToggle.setAttribute("data-title", lobbyFullscreenToggle.title);
 		lobbyFullscreenToggle.classList.toggle("fade", !isFullscreen());
 	};
 	document.addEventListener("fullscreenchange", syncLobbyFullscreenToggle);
+	window.addEventListener("resize", syncLobbyFullscreenToggle);
+	document.addEventListener("DOMContentLoaded", syncLobbyFullscreenToggle);
 	syncLobbyFullscreenToggle();
 }
 

@@ -281,6 +281,8 @@ html {
 #notif-north { background-image: url('img/icons/notif_north.png'); }
 #notif-monsters { background-image: url('img/icons/notif_monsters.png'); }
 #notif-scoiatael { background-image: url('img/icons/notif_scoiatael.png'); }
+#notif-me-first { background-image: url('img/icons/notif_scoiatael.png'); }
+#notif-op-first { background-image: url('img/icons/notif_scoiatael.png'); }
 #notif-skellige-op{ background-image: url('img/icons/notif_skellige.png'); }
 #notif-skellige-me{ background-image: url('img/icons/notif_skellige.png'); }
 
@@ -2414,44 +2416,50 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 @media (min-width: 1600px) and (min-aspect-ratio: 2/1) {
+	/* These px sizes are tuned for 21:9, where the canvas is scaled to ~0.75.
+	   Wider screens (32:9) scale it further down, so boost the text to keep
+	   the same on-screen size. */
+	:root {
+		--uw-boost: max(1, calc(0.75 / var(--fit-scale, 1)));
+	}
 	.split-title {
-		font-size: 13px;
+		font-size: calc(13px * var(--uw-boost));
 	}
 	.split-tag {
-		font-size: clamp(10px, 2.1vw, 14px);
+		font-size: calc(clamp(10px, 2.1vw, 14px) * var(--uw-boost));
 	}
 	.split-heading {
-		font-size: clamp(20px, 5vw, 34px);
+		font-size: calc(clamp(20px, 5vw, 34px) * var(--uw-boost));
 	}
 	.split-play {
-		font-size: 13px;
+		font-size: calc(13px * var(--uw-boost));
 		padding: 13px 40px;
 	}
 	.split-badge {
 		width: 64px;
 		height: 64px;
-		font-size: 26px;
+		font-size: calc(26px * var(--uw-boost));
 	}
 	.mp-subtitle {
-		font-size: 18px;
+		font-size: calc(18px * var(--uw-boost));
 	}
 	.mp-option-tag {
-		font-size: 16px;
+		font-size: calc(16px * var(--uw-boost));
 	}
 	.mp-option-desc {
-		font-size: 18px;
+		font-size: calc(18px * var(--uw-boost));
 	}
 	.mp-back {
-		font-size: 15px;
+		font-size: calc(15px * var(--uw-boost));
 	}
 	.lobby-hint {
-		font-size: 15px;
+		font-size: calc(15px * var(--uw-boost));
 	}
 	.lobby-status {
-		font-size: 15px;
+		font-size: calc(15px * var(--uw-boost));
 	}
 	.mp-action-button {
-		font-size: 15px;
+		font-size: calc(15px * var(--uw-boost));
 	}
 }
 
@@ -2918,4 +2926,35 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 :lang(ar) body *::before,
 :lang(ar) body *::after {
 	unicode-bidi: plaintext;
+}
+/* ...but keep the player and faction names next to the profile picture:
+   right-aligned they ran under the score badge. */
+:lang(ar) .name,
+:lang(ar) .deck-name {
+	text-align: left;
+}
+
+/* Translated labels that are longer than the English ones: keep the Pass
+   label on one line (CJK used to wrap vertically) and shrink the longer
+   European words so they stay inside the button. */
+#pass-button {
+	white-space: nowrap;
+}
+:lang(de) #pass-button, :lang(fr) #pass-button, :lang(it) #pass-button,
+:lang(pt-BR) #pass-button, :lang(hu) #pass-button, :lang(es) #pass-button,
+:lang(es-MX) #pass-button, :lang(pl) #pass-button, :lang(cs) #pass-button {
+	font-size: 1.6vw;
+}
+:lang(de) #pass-button {
+	font-size: 1.45vw; /* "Passen" is the widest */
+}
+/* "Kartensammlung", "Kártyagyűjtemény" etc. overflowed or wrapped onto the
+   cards below; there is free space to the right of this title. */
+#card-bank-title {
+	white-space: nowrap;
+}
+/* Long ability texts (agile units with an ability) overflowed the fixed-height
+   description box by a few pixels. */
+.card-description > p {
+	line-height: 1.1;
 }
