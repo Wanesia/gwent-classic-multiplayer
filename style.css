@@ -2608,7 +2608,10 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	font-weight: bold;
 }
 
-#lobby:not(.hide) ~ #lang-select {
+/* Main menu only: changing language reloads the page, which would drop a
+   hosted room or Quick Match search, and from any multiplayer screen it
+   lands back on the main menu anyway */
+#lobby:not(.hide):has(#lobby-mode:not(.hide)) ~ #lang-select {
 	display: block;
 }
 
@@ -2906,4 +2909,13 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 #pass-button.kb-pass-hold::before {
 	width: 100%;
 	transition: width 1s linear;
+}
+
+/* Arabic: order each block of text right-to-left (so punctuation and numbers
+   land on the correct side) without mirroring the board layout, which a
+   global dir="rtl" would do. */
+:lang(ar) body *,
+:lang(ar) body *::before,
+:lang(ar) body *::after {
+	unicode-bidi: plaintext;
 }
