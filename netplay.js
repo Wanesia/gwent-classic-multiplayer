@@ -52,10 +52,12 @@ class ControllerRemote {
 				player.passRound();
 				break;
 			case "leader":
+				if (!player.leaderAvailable)
+					return desync();
 				await player.activateLeader();
 				break;
 			case "scorch":
-				if (!validCard)
+				if (!validCard || player.hand.cards[m.i].name !== "Scorch")
 					return desync();
 				await player.playScorch(player.hand.cards[m.i]);
 				break;
@@ -63,7 +65,10 @@ class ControllerRemote {
 				const row = mp.destFromWire(m.d);
 				if (!validCard || !row)
 					return desync();
-				await player.playCardToRow(player.hand.cards[m.i], row);
+				const card = player.hand.cards[m.i];
+				if (card.name === "Scorch" || card.name === "Decoy" || !mp.legalDests(card, player).includes(row))
+					return desync();
+				await player.playCardToRow(card, row);
 				break;
 			}
 			case "decoy": {
@@ -73,6 +78,8 @@ class ControllerRemote {
 				// mirrors the execution order of the sender's ui.selectCard
 				const card = player.hand.cards[m.i];
 				const target = row.cards[m.j];
+				if (card.name !== "Decoy" || !mp.legalDests(card, player).includes(row) || !target.isUnit())
+					return desync();
 				board.toHand(target, row);
 				await board.moveTo(card, row, player.hand);
 				player.endTurn();
@@ -116,7 +123,11 @@ class MPSession {
 	// (e.g. the opponent readying up again while we are still on the end
 	// screen) are forwarded so they are not swallowed by the game queue.
 	route(msg) {
-		if (msg && typeof msg.t === "string" && msg.t.startsWith("lobby-"))
+		// The peer is untrusted: anything that isn't a well-formed message is
+		// treated as a desync instead of crashing the game loop
+		if (!msg || typeof msg !== "object" || typeof msg.t !== "string")
+			return this.desync();
+		if (msg.t.startsWith("lobby-"))
 			return lobby.routeLobby(msg);
 		this.queue.push(msg);
 		const w = this.waiter;
@@ -174,6 +185,21 @@ class MPSession {
 		return this.active && player && player.controller instanceof ControllerRemote;
 	}
 
+	// Destinations the player may legally play the card to, mirroring
+	// UI.setSelectable from that player's side of the board
+	legalDests(card, player) {
+		if (card.faction === "weather")
+			return [weather];
+		const own = board.playerRows(player);
+		if (card.isSpecial())
+			return own.filter(r => r.special === null);
+		if (card.name === "Decoy")
+			return own.filter(r => r.cards.some(c => c.isUnit()));
+		if (card.row === "agile")
+			return [board.getRow(card, "close", player), board.getRow(card, "ranged", player)];
+		return [board.getRow(card, card.row, player)];
+	}
+
 	// Row|Weather -> wire reference
 	destToWire(dest) {
 		if (dest === weather)
@@ -227,14 +253,16 @@ class MPSession {
 
 	// ---- desync safety net ----
 
-	// Cheap state fingerprint exchanged after every turn. Graves are left out
-	// on purpose: the avenger ability prunes its summon from the grave on a
-	// wall-clock timer, which could straddle the checksum point on one client.
+	// Cheap state fingerprint exchanged after every turn. Hands are included in
+	// order (actions reference hand indices); graves are compared as a sorted
+	// name list, since cards scorched together can land in either order.
 	checksum() {
 		const parts = [];
 		for (const role of ["host", "guest"]) {
 			const p = this.playerOf(role);
 			parts.push(p.total, p.health, p.passed ? 1 : 0, p.hand.cards.length, p.deck.cards.length);
+			parts.push(p.hand.cards.map(c => c.name).join("|"));
+			parts.push(p.grave.cards.map(c => c.name).sort().join("|"));
 			for (const row of board.playerRows(p))
 				parts.push(row.total, row.cards.length, row.special ? 1 : 0);
 		}

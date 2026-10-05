@@ -8,6 +8,7 @@ var Net = {
 
 	socket: null,
 	connected: false,
+	connecting: null, // in-flight connect() promise
 	role: null, // "host" | "guest" | null
 	code: null,
 	pending: null, // resolver of the in-flight create/join request
@@ -25,7 +26,11 @@ var Net = {
 	connect(url) {
 		if (this.connected)
 			return Promise.resolve();
-		return new Promise((resolve, reject) => {
+		// Reuse a connection that's still opening rather than opening a second
+		// socket (e.g. Quick Match -> Back -> Quick Match on a slow network)
+		if (this.connecting)
+			return this.connecting;
+		this.connecting = new Promise((resolve, reject) => {
 			let socket;
 			try {
 				socket = new WebSocket(url || this.serverURL());
@@ -43,7 +48,8 @@ var Net = {
 			};
 			socket.onclose = () => this.handleClose();
 			socket.onmessage = e => this.route(e.data);
-		});
+		}).finally(() => this.connecting = null);
+		return this.connecting;
 	},
 
 	createRoom() {
@@ -110,7 +116,8 @@ var Net = {
 					this.onMessage(msg.data);
 				break;
 			case "peer-joined":
-				if (this.onPeerJoined)
+				// Ignore a join that raced our own leave: the room is gone
+				if (this.code && this.onPeerJoined)
 					this.onPeerJoined();
 				break;
 			case "qm-status":

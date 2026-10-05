@@ -31,6 +31,8 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.issuedSeeds = new Set(); // every seed offered since the last match started
+		this.attempt = 0; // bumped by Back so a still-pending create/join/search is dropped
 		this.searchHintTimer = null;
 		this.searchHintDelay = 75000; // "no one's around" fallback while searching
 
@@ -72,6 +74,7 @@ class Lobby {
 	}
 
 	goBack(target) {
+		this.attempt++;
 		this.stopSearchExtras();
 		if (Net.code)
 			Net.leave(); // cancel a room we created and are waiting in
@@ -116,9 +119,14 @@ class Lobby {
 		this.searchStatus.textContent = I18N.t("lobby.connecting");
 		this.searchStatus.classList.remove("is-waiting");
 		Net.onQmStatus = n => this.showOnlineCount(n);
+		const attempt = ++this.attempt;
 		try {
 			await Net.connect();
+			if (this.abandoned(attempt))
+				return;
 			await Net.quickMatch();
+			if (this.abandoned(attempt))
+				return;
 			if (Net.role === "guest") {
 				this.enterDeckSetup();
 			} else {
@@ -129,6 +137,8 @@ class Lobby {
 				}, this.searchHintDelay);
 			}
 		} catch (e) {
+			if (attempt !== this.attempt)
+				return;
 			this.stopSearchExtras();
 			this.searchStatus.textContent = this.errorText(e.message);
 			this.searchStatus.classList.remove("is-waiting");
@@ -153,14 +163,21 @@ class Lobby {
 		this.copyHint.textContent = "";
 		this.createStatus.textContent = I18N.t("lobby.connecting");
 		this.createStatus.classList.remove("is-waiting");
+		const attempt = ++this.attempt;
 		try {
 			await Net.connect();
+			if (this.abandoned(attempt))
+				return;
 			const code = await Net.createRoom();
+			if (this.abandoned(attempt))
+				return;
 			this.codeElem.textContent = code;
 			this.copyHint.textContent = I18N.t("lobby.clickToCopy");
 			this.createStatus.textContent = I18N.t("lobby.waitingOpponent");
 			this.createStatus.classList.add("is-waiting");
 		} catch (e) {
+			if (attempt !== this.attempt)
+				return;
 			this.createStatus.textContent = this.errorText(e.message);
 			this.createStatus.classList.remove("is-waiting");
 		}
@@ -177,13 +194,29 @@ class Lobby {
 			return;
 		}
 		this.joinError.textContent = "";
+		const attempt = ++this.attempt;
 		try {
 			await Net.connect();
+			if (this.abandoned(attempt))
+				return;
 			await Net.joinRoom(code);
+			if (this.abandoned(attempt))
+				return;
 			this.enterDeckSetup();
 		} catch (e) {
-			this.joinError.textContent = this.errorText(e.message);
+			if (attempt === this.attempt)
+				this.joinError.textContent = this.errorText(e.message);
 		}
+	}
+
+	// True if the player navigated away while this create/join/search was
+	// pending; leaves any room it ended up in.
+	abandoned(attempt) {
+		if (attempt === this.attempt)
+			return false;
+		if (Net.code)
+			Net.leave();
+		return true;
 	}
 
 	errorText(code) {
@@ -296,12 +329,17 @@ class Lobby {
 					Net.send({ t: "lobby-unready" });
 					break;
 				}
-				Net.send({ t: "lobby-start-ack" });
+				Net.send({ t: "lobby-start-ack", seed: m.seed });
 				this.beginMatch(m.seed);
 				break;
 			case "lobby-start-ack":
-				if (this.starting && this.pendingSeed !== null)
+				// Start on the seed the guest actually started with: if they
+				// re-readied mid-handshake it can be an earlier offer than ours.
+				// A guest on an older version acks without a seed: use ours.
+				if (m.seed === undefined && this.starting && this.pendingSeed !== null)
 					this.beginMatch(this.pendingSeed);
+				else if (this.localReady && this.issuedSeeds.has(m.seed))
+					this.beginMatch(m.seed); // an invalid deck is refused by mp.startMatch
 				break;
 		}
 	}
@@ -316,6 +354,7 @@ class Lobby {
 			return; // the guest waits for the host's lobby-start
 		this.starting = true;
 		this.pendingSeed = GameRNG.randomSeed();
+		this.issuedSeeds.add(this.pendingSeed);
 		Net.send({ t: "lobby-start", seed: this.pendingSeed });
 		this.updateStatus(I18N.t("lobby.startingGame"));
 	}
@@ -330,6 +369,7 @@ class Lobby {
 			game.endScreen.classList.add("hide");
 		}
 		this.resetReadyState();
+		this.issuedSeeds.clear();
 		mp.startMatch(seed, localRaw, remoteRaw);
 	}
 

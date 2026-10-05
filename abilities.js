@@ -241,11 +241,7 @@ var ability_dict = {
 		description: "When this card is removed from the battlefield, it summons a powerful new Unit Card to take its place. ",
 		removed: async (card) => {
 			let bdf = new Card(card_dict[21], card.holder);
-			bdf.removed.push( () => setTimeout( () => {
-				// Not in the grave if a Decoy returned it to hand
-				if (game.isPlaying() && bdf.holder.grave.cards.includes(bdf))
-					bdf.holder.grave.removeCard(bdf);
-			}, 1001) );
+			bdf.isToken = true; // never enters a grave, see Grave.addCard
 			await board.addCardToRow(bdf, "close", card.holder);
 		},
 		weight: () => 50
@@ -255,11 +251,7 @@ var ability_dict = {
 		description: "When this card is removed from the battlefield, it summons a powerful new Unit Card to take its place. ",
 		removed: async card => {
 			let bdf = new Card(card_dict[196], card.holder);
-			bdf.removed.push( () => setTimeout( () => {
-				// Not in the grave if a Decoy returned it to hand
-				if (game.isPlaying() && bdf.holder.grave.cards.includes(bdf))
-					bdf.holder.grave.removeCard(bdf);
-			}, 1001) );
+			bdf.isToken = true; // never enters a grave, see Grave.addCard
 			await board.addCardToRow(bdf, "close", card.holder);
 		},
 		weight: () => 50

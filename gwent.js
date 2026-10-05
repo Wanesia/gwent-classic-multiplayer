@@ -857,6 +857,11 @@ class Grave extends CardContainer {
 	
 	// Override
 	addCard(card){
+		// Summoned Avenger tokens vanish instead of going to the grave, so they
+		// can't be revived. Done synchronously: a timed cleanup ran at different
+		// moments on each client and desynced online games.
+		if (card?.isToken)
+			return;
 		this.setCardOffset(card, this.cards.length);
 		if (card && this.cards.length === 0)
 		{
@@ -2097,7 +2102,9 @@ class Card {
 		dif = a.basePower - b.basePower;
 		if (dif && dif !== 0)
 			return dif;
-		return a.name.localeCompare(b.name);
+		// Not localeCompare: its order depends on the browser's locale, and online
+		// play sends hand/row indices, so both clients must sort identically.
+		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
 		
 		function factionRank(c){ return c.faction === "special" ? -2 : (c.faction === "weather") ? -1 : 0; }
 	}
@@ -2539,10 +2546,15 @@ class UI {
 	// queueCarousel.
 	async queueSyncedCarousel(chooser, container, count, action, predicate, bSort, bQuit, title, bRedraw){
 		if (mp.isRemote(chooser)) {
-			while (true) {
+			for (let picks = 0; ; picks++) {
 				const m = await mp.next("pick", "pickEnd");
 				if (!mp.active || m.t === "pickEnd")
 					return;
+				const card = Number.isInteger(m.i) ? container.cards[m.i] : undefined;
+				if (picks >= count || !card || (predicate && !predicate(card))) {
+					mp.desync();
+					return abandon();
+				}
 				await action(container, m.i);
 			}
 		}
@@ -2650,7 +2662,12 @@ class UI {
 			const m = await mp.next("row");
 			if (!mp.active)
 				return null;
-			return m.d ? mp.destFromWire(m.d) : null;
+			const row = m.d ? mp.destFromWire(m.d) : null;
+			if (m.d && !mp.legalDests(card, chooser).includes(row)) {
+				mp.desync();
+				return abandon();
+			}
+			return row;
 		}
 		game.placedEffectsActive = true;
 		ui.setSelectable(null, false);
