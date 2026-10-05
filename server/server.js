@@ -26,6 +26,17 @@ const EVENT_MAX_IPS = 5000;
 const EVENT_WINDOW_MS = 60 * 1000;
 const ALLOWED_ORIGINS = new Set(["https://gwent-classic-multiplayer.pages.dev"]);
 
+// Local development pages (any port). Parsed rather than prefix-matched:
+// "http://localhost.evil.example" must not pass.
+function isLocalOrigin(origin) {
+	try {
+		const url = new URL(origin);
+		return url.protocol === "http:" && url.hostname === "localhost";
+	} catch (e) {
+		return false;
+	}
+}
+
 const ipCounts = new Map();
 let lastOverloadLog = 0;
 let refusedSinceLog = 0;
@@ -80,7 +91,7 @@ const wss = new WebSocketServer({
 	maxPayload: 32 * 1024,
 	perMessageDeflate: false,
 	verifyClient: ({ origin }, cb) => {
-		const ok = !origin || origin.startsWith("http://localhost") || ALLOWED_ORIGINS.has(origin);
+		const ok = !origin || isLocalOrigin(origin) || ALLOWED_ORIGINS.has(origin);
 		cb(ok, 403, "forbidden");
 	}
 });
@@ -180,6 +191,9 @@ wss.on("connection", (ws, req) => {
 	ws.tokens = MSG_BURST;
 	ws.lastRefill = Date.now();
 	ws.on("pong", () => ws.isAlive = true);
+	// Oversized or invalid-UTF-8 frames surface as 'error'; unhandled, it
+	// would crash the whole process.
+	ws.on("error", () => ws.terminate());
 
 	ws.on("message", raw => {
 		if (!allowMessage(ws))
@@ -190,6 +204,8 @@ wss.on("connection", (ws, req) => {
 		} catch (e) {
 			return send(ws, { type: "error", code: "bad-request" });
 		}
+		if (!msg || typeof msg !== "object" || Array.isArray(msg))
+			return send(ws, { type: "error", code: "bad-request" });
 		switch (msg.type) {
 			case "create": {
 				if (ws.room)
@@ -231,7 +247,7 @@ wss.on("connection", (ws, req) => {
 			case "join": {
 				if (ws.room)
 					return send(ws, { type: "error", code: "already-in-room" });
-				const code = String(msg.code || "").trim().toUpperCase();
+				const code = typeof msg.code === "string" ? msg.code.trim().toUpperCase() : "";
 				const room = rooms.get(code);
 				if (!room)
 					return send(ws, { type: "error", code: "not-found" });
