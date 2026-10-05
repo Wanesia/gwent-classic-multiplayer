@@ -313,10 +313,8 @@ var ability_dict = {
 			Carousel.curr?.cancel();
 			await ui.viewCardsInContainer(container);
 		},
-		weight: card => {
-			let count = card.holder.opponent().hand.cards.length;
-			return count === 0 ? 0 : Math.max(10, 10 * (8 - count));
-		}
+		// Only reveals cards to a human player; for the AI it would waste a turn
+		weight: () => 0
 	},
 	emhyr_whiteflame: {
 		description: "Cancel your opponent's Leader Ability."
@@ -455,10 +453,7 @@ var ability_dict = {
 			const solution = ability_dict["francesca_hope"].helper(card);
 			await Promise.all(solution.cards.map(async p => await board.moveTo(p.card, p.row === close ? ranged : close, p.row) ) );
 		},
-		weight: card => {
-			const {score, cards} = ability_dict["francesca_hope"].helper(card);
-			return score;
-		},
+		weight: card => ability_dict["francesca_hope"].helper(card).gain,
 		helper: card => {
 			const close = board.getRow(card, "close");
 			const ranged = board.getRow(card, "ranged");
@@ -467,9 +462,12 @@ var ability_dict = {
 			const closeNorm = close.getVirtualCopy(notAgilePred);
 			const rangedNorm = ranged.getVirtualCopy(notAgilePred);
 			const {score, pattern} = findBest(closeNorm, rangedNorm, agileCards);
+			// what the agile units contribute where they stand now
+			const current = close.calcScore() + ranged.calcScore() - (closeNorm.calcScore() + rangedNorm.calcScore());
 			// filter for only cards that need to change row and return
 			return {
 				score: score,
+				gain: score - current,
 				cards: agileCards.map((c)=> { return {card: c, row: close.cards.includes(c) ? close : ranged}; })
 				.filter((pair, i) => (pair.row === close) !== (pattern[i]===0))
 			};

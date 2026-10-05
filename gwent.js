@@ -23,8 +23,9 @@ class ControllerAI {
 	
 	// Collects data and weighs options before taking a weighted random action
 	async startTurn(player){
+		// Nilfgaard wins ties, except against another Nilfgaard deck (a draw)
 		if (player.opponent().passed && (player.winning || 
-				player.deck.faction === "nilfgaard" && player.total === player.opponent().total) ){
+				player.deck.faction === "nilfgaard" && player.opponent().deck.faction !== "nilfgaard" && player.total === player.opponent().total) ){
 			await player.passRound();
 			return;
 		}
@@ -35,6 +36,9 @@ class ControllerAI {
 		if (player.leaderAvailable)
 			weights.push( {weight: this.weightLeader(player.leader, data_max, data_board), action: async () => await player.activateLeader()} );
 		weights.push( {weight: this.weightPass(), action: async () => await player.passRound()} );
+		// Some leaders weigh -1 when useless; a negative total would make the
+		// pick below run past the end of the list or land on a 0-weight card.
+		weights.forEach(w => w.weight = Math.max(0, w.weight));
 		let weightTotal = weights.reduce( (a,c) => a + c.weight, 0);
 		if (weightTotal === 0){
 			for (let i=0; i<player.hand.cards.length; ++i) {
@@ -207,7 +211,7 @@ class ControllerAI {
 			let min = data.spy.reduce( (a,c) => Math.min(a, c.power), Number.MAX_VALUE);
 			targ = data.spy.filter(c => c.power === min)[0];
 		} else if (data.medic.length) {
-			let max = data.medic.reduce( (a,c) => Math.max(a, c.power), Number.MIN_VALUE);
+			let max = data.medic.reduce( (a,c) => Math.max(a, c.power), -Infinity);
 			targ = data.medic.filter(c => c.power === max)[0];
 		} else if (data.scorch.length) {
 			targ = data.scorch[randomInt(data.scorch.length)];
@@ -275,7 +279,7 @@ class ControllerAI {
 		let dif = this.player.opponent().total - this.player.total;
 		if (dif > 30)
 			return 100;
-		if (dif < -30 && this.player.opponent().handsize - this.player.handsize > 2)
+		if (dif < -30 && this.player.opponent().hand.cards.length - this.player.hand.cards.length > 2)
 			return 100;
 		return Math.floor(Math.abs(dif));
 	}
@@ -373,7 +377,7 @@ class ControllerAI {
 			if (!row.effects.mardroeme)
 				n = row.cards.filter(c => c.name === "Young Berserker").length;
 			else
-				n = row.cards.filter(c => "Transformed Young Vildkaarl").length;
+				n = row.cards.filter(c => c.name === "Transformed Young Vildkaarl").length;
 			score = 8*((n+1)*(n+1) - n*n) + n*score;
 		}
 		return Math.max(1, score);
@@ -496,7 +500,6 @@ class Player {
 		
 		this.health = 2;
 		this.total = 0;
-		this.handsize = 10;
 		this.awaitingAction = false;
 	
 		this.enableLeader();
