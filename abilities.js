@@ -242,7 +242,8 @@ var ability_dict = {
 		removed: async (card) => {
 			let bdf = new Card(card_dict[21], card.holder);
 			bdf.removed.push( () => setTimeout( () => {
-				if (game.isPlaying())
+				// Not in the grave if a Decoy returned it to hand
+				if (game.isPlaying() && bdf.holder.grave.cards.includes(bdf))
 					bdf.holder.grave.removeCard(bdf);
 			}, 1001) );
 			await board.addCardToRow(bdf, "close", card.holder);
@@ -255,8 +256,9 @@ var ability_dict = {
 		removed: async card => {
 			let bdf = new Card(card_dict[196], card.holder);
 			bdf.removed.push( () => setTimeout( () => {
-				if (game.isPlaying())
-					bdf.holder.grave.removeCard(bdf); 
+				// Not in the grave if a Decoy returned it to hand
+				if (game.isPlaying() && bdf.holder.grave.cards.includes(bdf))
+					bdf.holder.grave.removeCard(bdf);
 			}, 1001) );
 			await board.addCardToRow(bdf, "close", card.holder);
 		},
@@ -373,7 +375,8 @@ var ability_dict = {
 			if (card.holder.controller instanceof ControllerAI) {
 				let cards = card.holder.controller.discardOrder(card).splice(0,2).filter(c => c.basePower < 7);
 				await Promise.all(cards.map(async c => await board.toGrave(c, card.holder.hand)));
-				card.holder.deck.draw(card.holder.hand);
+				if (card.holder.deck.cards.length > 0)
+					await card.holder.deck.draw(card.holder.hand);
 				return;
 			} else
 				Carousel.curr?.exit();
