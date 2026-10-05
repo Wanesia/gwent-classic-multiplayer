@@ -474,7 +474,7 @@ class Player {
 		
 		this.leader = new Card(deck.leader, this);
 		this.elem_leader = document.getElementById("leader-" + this.tag);
-		this.elem_leader.children[0].appendChild( this.leader.elem );
+		this.elem_leader.children[0].replaceChildren( this.leader.elem );
 
 		this.reset();
 		
@@ -496,13 +496,12 @@ class Player {
 		
 		this.health = 2;
 		this.total = 0;
-		this.passed = false;
 		this.handsize = 10;
-		this.winning = false;
 		this.awaitingAction = false;
 	
 		this.enableLeader();
 		this.setPassed(false);
+		this.setWinning(false);
 		document.getElementById("gem1-" +this.tag).classList.add("gem-on");
 		document.getElementById("gem2-" +this.tag).classList.add("gem-on");
 	}
@@ -521,20 +520,19 @@ class Player {
 	
 	// Puts the player in the winning state
 	setWinning(isWinning) {
-		if (this.winning ^ isWinning)
-			document.getElementById("score-total-" + this.tag).classList.toggle("score-leader");
+		document.getElementById("score-total-" + this.tag).classList.toggle("score-leader", isWinning);
 		this.winning = isWinning;
 	}
 	
 	// Puts the player in the passed state
 	setPassed(hasPassed) {
-		if (this.passed ^ hasPassed)
-			document.getElementById("passed-" + this.tag).classList.toggle("passed");
+		document.getElementById("passed-" + this.tag).classList.toggle("passed", hasPassed);
 		this.passed = hasPassed;
 	}
 	
 	// Sets up board for turn
 	async startTurn(){
+		this.turnSession = game.session;
 		document.getElementById("stats-" + this.tag).classList.add("current-turn");
 		if (this.leaderAvailable)
 			this.elem_leader.children[1].classList.remove("hide");
@@ -584,8 +582,11 @@ class Player {
 	
 	// Shows a preview of the card being played, plays it to the board and ends the turn
 	async playCardAction(card, action){
+		const session = game.session;
 		ui.showPreviewVisuals(card);
 		await sleep(1000);
+		if (session !== game.session)
+			return abandon();
 		ui.hidePreview(card);
 		await action();
 		this.endTurn();
@@ -593,6 +594,10 @@ class Player {
 	
 	// Handles end of turn visuals and behavior the notifies the game
 	endTurn(){
+		// An action from a game that has since been left must not end a turn
+		// in the next one
+		if (this.turnSession !== game.session)
+			return;
 		if (!this.passed && !this.canPlay())
 			this.setPassed(true);
 		if (this === player_me){
@@ -622,8 +627,11 @@ class Player {
 	
 	// Use a leader's Activate ability, then disable the leader
 	async activateLeader() {
+		const session = game.session;
 		ui.showPreviewVisuals(this.leader);
 		await sleep(1500);
+		if (session !== game.session)
+			return abandon();
 		ui.hidePreview(this.leader);
 		await this.leader.activated[0](this.leader, this);
 		this.disableLeader();
@@ -740,7 +748,11 @@ class CardContainer {
 	removeCard(card, index){
 		if (this.cards.length === 0)
 			throw "Cannot draw from empty " + this.constructor.name;
-		card = this.cards.splice( isNumber(card)? card : this.cards.indexOf(card) , 1)[0];
+		const i = isNumber(card) ? card : this.cards.indexOf(card);
+		// splice(-1) would silently remove the last card instead
+		if (i < 0 || i >= this.cards.length)
+			return undefined;
+		card = this.cards.splice(i, 1)[0];
 		this.removeCardElement(card, index?index:0);
 		this.resize();
 		return card;
@@ -835,7 +847,9 @@ class CardContainer {
 class Grave extends CardContainer {
 	constructor(elem) {
 		super(elem)
-		elem.addEventListener("click", () => ui.viewCardsInContainer(this), false);
+		// Assigned, not added: each game creates a new Grave on the same element,
+		// and an added listener would keep opening previous games' graves
+		elem.onclick = () => ui.viewCardsInContainer(this);
 	}
 	
 	// Override
@@ -917,7 +931,10 @@ class Deck extends CardContainer {
 		if (hand === player_op.hand) {
 			hand.addCard(card);
 		} else {
+			const session = game.session;
 			await translateTo(card, this, hand);
+			if (session !== game.session)
+				return abandon();
 			hand.addCard(card);
 		}
 	}
@@ -1030,6 +1047,7 @@ class Row extends CardContainer {
 	
 	// Override
 	async addCard(card) {
+		const session = game.session;
 		if (card.isSpecial()) {
 			this.special = card;
 			this.elem_special.appendChild(card.elem);
@@ -1038,14 +1056,23 @@ class Row extends CardContainer {
 			this.addCardElement(card, index);
 			this.resize();
 			await this.playPlacementAudio(card);
+			if (session !== game.session)
+				return abandon();
 		}
 		this.updateState(card, true);
 		game.placedEffectsActive = true;
-		for (let x of card.placed) 
+		for (let x of card.placed) {
 			await x(card, this);
+			// a placed ability (muster, spy draws...) must not run on, or score,
+			// the next game's board if this one was left meanwhile
+			if (session !== game.session)
+				return abandon();
+		}
 		game.placedEffectsActive = false;
 		card.elem.classList.add("noclick");
 		await sleep(600);
+		if (session !== game.session)
+			return abandon();
 		this.updateScore();
 	}
 
@@ -1089,7 +1116,8 @@ class Row extends CardContainer {
 			this.special = null;
 			this.elem_special.removeChild(card.elem);
 		} else {
-			super.removeCard(card);
+			if (!super.removeCard(card))
+				return;
 			card.resetPower();
 		}
 		this.updateState(card, false);
@@ -1271,7 +1299,10 @@ class Weather extends CardContainer {
 		card.elem.classList.add("noclick");
 		if (card.name === "Clear Weather"){
 			// TODO Sunlight animation
+			const session = game.session;
 			await sleep(500);
+			if (session !== game.session)
+				return abandon();
 			this.clearWeather();
 		} else {
 			this.changeWeather(card, x => ++this.types[x].count === 1, (r,t) => r.addOverlay(t.name));
@@ -1287,6 +1318,8 @@ class Weather extends CardContainer {
 	// Override
 	removeCard(card){
 		card = super.removeCard(card);
+		if (!card)
+			return card;
 		card.elem.classList.remove("noclick");
 		this.changeWeather(card, x => --this.types[x].count === 0, (r,t) => r.removeOverlay(t.name));
 		return card;
@@ -1378,14 +1411,21 @@ class Board {
 	async moveTo(card, dest, source) {
 		if (isString(dest))
 			dest = this.getRow(card, dest);
+		const session = game.session;
 		await translateTo(card, source ? source : null, dest);
+		// the game was left mid-animation: don't move cards on the next game's board
+		if (session !== game.session)
+			return abandon();
 		await dest.addCard(source ? source.removeCard(card) : card);
 	}
 	
 	// Sends and translates a card from the source to a row name associated with the passed player
 	async addCardToRow(card, row_name, player, source) {
 		let row = this.getRow(card, row_name, player);
+		const session = game.session;
 		await translateTo(card, source, row);
+		if (session !== game.session)
+			return abandon();
 		await row.addCard(card);
 	}
 	
@@ -1479,6 +1519,19 @@ class Game {
 		this.doubleSpyPower = false;
 
 		this.placedEffectsActive = false; //TODO replace with propper game state
+
+		// Anything still waiting on the previous game (open or queued card
+		// pickers, a row choice, the AI's turn) checks this and is abandoned.
+		if (this.session !== undefined) {
+			ui.carousels = [];
+			if (Carousel.curr) {
+				Carousel.curr.cancelled = true;
+				Carousel.curr.exit();
+			}
+			if (ui.previewCard)
+				ui.hidePreview();
+		}
+		this.session = (this.session || 0) + 1;
 		
 		weather.reset();
 		board.row.forEach(r => r.reset());
@@ -1535,20 +1588,29 @@ class Game {
 	
 	// Sets initializes player abilities, player hands and redraw
 	async startGame() {
+		const session = this.session;
 		EventManager.gameOpened.dispatch();
 		if (!mp.active) Net.trackEvent("sp-game-started");
 		this.initPlayers(player_me, player_op);
 		this.setState(GameState.PLAYING);
 		AudioManager.playSFX('game_opening');
 		await this.runEffects(this.gameStart);
+		if (session !== this.session)
+			return;
 		await this.coinToss();
+		if (session !== this.session)
+			return;
 		AudioManager.playSFX('redraw');
 		await Promise.all([...Array(10).keys()].map( async () => {
 			await player_me.deck.draw(player_me.hand);
 			await player_op.deck.draw(player_op.hand);
 		}));
+		if (session !== this.session)
+			return;
 		AudioManager.playSFX("game_start");
 		await this.initialRedraw();
+		if (session !== this.session)
+			return;
 		this.currPlayer = this.firstPlayer;
 		this.startRound();
 	}
@@ -1599,6 +1661,7 @@ class Game {
 	
 	// Initiates a new round of the game
 	async startRound(){
+		const session = this.session;
 		this.firstPlayer = this.currPlayer;
 		this.roundCount++;
 		EventManager.roundStarted.dispatch(this.roundCount, this.currPlayer);
@@ -1618,23 +1681,33 @@ class Game {
 			this.currPlayer = this.currPlayer.opponent();
 		
 		await ui.notification("round-start", 1200);
+		if (session !== this.session)
+			return;
 		AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
 		await ui.notification(this.currPlayer.tag + "-turn", 1200);
+		if (session !== this.session)
+			return;
 		this.startTurn();
 	}
 	
 	// Starts a new turn. Enables client interraction in client's turn.
 	async startTurn() {
+		const session = this.session;
 		await this.runEffects(this.turnStart);
+		if (session !== this.session)
+			return;
 		ui.enablePlayer(this.currPlayer === player_me);
 		this.currPlayer.startTurn();
 	}
 	
 	// Ends the current turn and may end round. Disables client interraction in client's turn.
 	async endTurn() {
+		const session = this.session;
 		if (this.currPlayer === player_me)
 			ui.enablePlayer(false);
 		await this.runEffects(this.turnEnd);
+		if (session !== this.session)
+			return;
 		// Desync safety net: the player who just acted sends a state checksum,
 		// the other client verifies it against its own simulation
 		if (mp.active) {
@@ -1650,6 +1723,8 @@ class Game {
 		}
 		if (this.currPlayer.passed)
 			await ui.notification(this.currPlayer.tag + "-pass", 1200);
+		if (session !== this.session)
+			return;
 		if (player_op.passed && player_me.passed)
 			this.endRound();
 		else
@@ -1659,6 +1734,8 @@ class Game {
 				this.currPlayer = this.currPlayer.opponent();
 				AudioManager.playSFX(this.currPlayer === player_me ? "turn_me" : "turn_op");
 				await ui.notification(this.currPlayer.tag + "-turn", 1200);
+				if (session !== this.session)
+					return;
 			}
 			await this.startTurn();
 		}
@@ -1666,6 +1743,7 @@ class Game {
 	
 	// Ends the round and may end the game. Determines final scores and the round winner.
 	async endRound() {
+		const session = this.session;
 		let dif = player_me.total - player_op.total;
 		if (dif === 0) {
 			let nilf_me = player_me.deck.faction === "nilfgaard", nilf_op = player_op.deck.faction === "nilfgaard";
@@ -1676,6 +1754,8 @@ class Game {
 		this.roundHistory.push(verdict);
 		
 		await this.runEffects(this.roundEnd);
+		if (session !== this.session)
+			return;
 		
 		player_me.endRound( dif > 0);
 		player_op.endRound( dif < 0);
@@ -1701,6 +1781,8 @@ class Game {
 			await board.clearRound(),
 			await ui.notification(notificationKey, 1200)
 		]);
+		if (session !== this.session)
+			return;
 
 		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
 		if (player_me.health === 0 || player_op.health === 0)
@@ -1808,7 +1890,7 @@ class Game {
 		this.reset();
 		GameRNG.reset(GameRNG.randomSeed());
 		player_me.reset();
-		player_op = new Player('op', 'Player 2', dm.constructOpponentDeck(false));
+		player_op = new Player(1, I18N.t("game.player2"), dm.constructOpponentDeck(false));
 		this.endScreen.classList.add("hide");
 		this.startGame();
 	}
@@ -1924,6 +2006,7 @@ class Card {
 	
 	// Animates an ability effect
 	async animate(name, bFade = true, bExpand = true) {
+		const session = game.session;
 		AudioManager.playSFX(name);
 		if (name === "scorch") {
 			return await this.scorch(name);
@@ -1944,6 +2027,10 @@ class Card {
 		await sleep(300);
 		
 		anim.style.backgroundImage = "";
+		// Callers act on the board right after an animation (spy draws, scorch
+		// kills): stop them if the game was left meanwhile
+		if (session !== game.session)
+			return abandon();
 	}
 	
 	// Animates the scorch effect
@@ -2404,7 +2491,10 @@ class UI {
 			this.carousels.push(carousel);
 			return;
 		}
-		await sleepUntil( () => this.carousels.length === 0 && !Carousel.curr, 100);
+		const session = game.session;
+		await sleepUntil( () => (this.carousels.length === 0 && !Carousel.curr) || session !== game.session, 100);
+		if (session !== game.session)
+			return abandon();
 	}
 	
 	// Starts the next queued Carousel
@@ -2548,9 +2638,12 @@ class UI {
 		};
 		EventManager.rowSelected.bind(rowSelect);
 		EventManager.previewCancelled.bind(rowSelect);
-		await sleepUntil(() => bRowSelected === true);
+		const session = game.session;
+		await sleepUntil(() => bRowSelected === true || session !== game.session);
 		EventManager.rowSelected.unbind(rowSelect);
 		EventManager.previewCancelled.unbind(rowSelect);
+		if (session !== game.session)
+			return abandon();
 		ui.hidePreview();
 		// the play that triggered this is still resolving: no input until the next turn
 		ui.enablePlayer(false);
@@ -2656,6 +2749,11 @@ class Carousel {
 	// Called by client to perform action on the middle card in focus
 	async select(event) {
 		(event || window.event).stopPropagation();
+		// Ignore double-clicks / repeated Enter while the previous pick's async
+		// action is still running, or after the last pick was made.
+		if (this.selecting || this.isLastSelection())
+			return;
+		this.selecting = true;
 		if (this.bRedraw)
 			this.discardEffect(this.previews[2]);
 		--this.count;
@@ -2663,7 +2761,16 @@ class Carousel {
 			this.elem.classList.add("hide");
 		if (this.count <= 0)
 			ui.enablePlayer(false);
-		await this.action(this.container, this.indices[this.index]);
+		try {
+			await this.action(this.container, this.indices[this.index]);
+		} catch (e) {
+			// Close rather than leave a hidden carousel that blocks the game
+			console.error(e);
+			this.selecting = false;
+			return this.exit();
+		} finally {
+			this.selecting = false;
+		}
 		if (this.isLastSelection() && !this.cancelled)
 			return this.exit();
 		this.update();
@@ -3884,6 +3991,12 @@ function sleep(ms) {
 }
 
 // Suspends execution until the predicate condition is met, checking every ms milliseconds
+// Never settles: awaiting it abandons a coroutine whose game has been reset,
+// so it can't act on the next game.
+function abandon() {
+	return new Promise(() => {});
+}
+
 function sleepUntil(predicate, ms) {
 	return new Promise(resolve => {
 		let timer = setInterval( function () {
