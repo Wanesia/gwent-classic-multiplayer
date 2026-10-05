@@ -59,6 +59,10 @@ var factions = {
 				const m = await mp.next("first");
 				if (!mp.active)
 					return true;
+				if (m.who !== "host" && m.who !== "guest") {
+					mp.desync();
+					return true;
+				}
 				game.firstPlayer = mp.playerOf(m.who);
 				notif = game.firstPlayer.tag + "-first";
 			}
