@@ -87,7 +87,11 @@ I18N.register("tr", {
 		warnMinUnits: "Desten en az 22 birim kartı içermeli. \n",
 		warnMaxSpecial: "Destende en fazla 10 özel kart olabilir. \n",
 		warnLeaderFaction: "«{leader}» lideri, «{faction}» deste fraksiyonuyla eşleşmiyor.\n",
-		warnCardCount: "Deste {have}/{max} mevcut {card} kartı içeriyor\n"
+		warnCardCount: "Deste {have}/{max} mevcut {card} kartı içeriyor\n",
+		warnUnknownCard: "{id} kimliği hiçbir karta karşılık gelmiyor.\n",
+		warnWrongFaction: "«{card}» bu fraksiyonun destesinde kullanılamaz: {faction}.\n",
+		warnInvalidCount: "«{card}» geçersiz bir adede sahip ({count}).\n",
+		confirmImport: "Destenin içe aktarılmasına devam edilsin mi?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("tr", {
 		customize: "Özelleştir",
 		rematch: "Rövanş",
 		newGame: "Yeni Oyun",
-		leave: "Ayrıl"
+		leave: "Ayrıl",
+		goFirst: "Ben başlayayım",
+		letOpponentStart: "Rakip başlasın",
+		goFirstTitle: "İlk sen mi başlamak istersin?",
+		goFirstBody: "Scoia'tael fraksiyon yeteneği, kimin önce başlayacağına karar vermeni sağlar."
 	},
 
 	fsHint: {

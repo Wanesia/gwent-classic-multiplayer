@@ -87,7 +87,11 @@ I18N.register("de", {
 		warnMinUnits: "Dein Deck muss mindestens 22 Einheitenkarten enthalten. \n",
 		warnMaxSpecial: "Dein Deck darf höchstens 10 Spezialkarten enthalten. \n",
 		warnLeaderFaction: "Anführer „{leader}“ passt nicht zur Deck-Fraktion „{faction}“.\n",
-		warnCardCount: "Deck enthält {have}/{max} verfügbare {card}-Karten\n"
+		warnCardCount: "Deck enthält {have}/{max} verfügbare {card}-Karten\n",
+		warnUnknownCard: "ID {id} gehört zu keiner Karte.\n",
+		warnWrongFaction: "'{card}' kann nicht in einem Deck dieser Fraktion verwendet werden: {faction}.\n",
+		warnInvalidCount: "'{card}' hat eine ungültige Anzahl ({count}).\n",
+		confirmImport: "Mit dem Import des Decks fortfahren?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("de", {
 		customize: "Anpassen",
 		rematch: "Revanche",
 		newGame: "Neues Spiel",
-		leave: "Verlassen"
+		leave: "Verlassen",
+		goFirst: "Selbst beginnen",
+		letOpponentStart: "Gegner beginnen lassen",
+		goFirstTitle: "Möchtest du beginnen?",
+		goFirstBody: "Die Fraktionsfähigkeit der Scoia'tael lässt dich entscheiden, wer beginnt."
 	},
 
 	fsHint: {

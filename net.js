@@ -20,7 +20,7 @@ var Net = {
 
 	serverURL() {
 		const param = new URLSearchParams(window.location.search).get("server");
-		return param || localStorage?.getItem("gc-server-url") || this.DEFAULT_URL;
+		return param || safeStorage.get("gc-server-url") || this.DEFAULT_URL;
 	},
 
 	connect(url) {

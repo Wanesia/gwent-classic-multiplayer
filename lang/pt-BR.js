@@ -87,7 +87,11 @@ I18N.register("pt-BR", {
 		warnMinUnits: "Seu baralho deve ter pelo menos 22 cartas de unidade. \n",
 		warnMaxSpecial: "Seu baralho não pode ter mais de 10 cartas especiais. \n",
 		warnLeaderFaction: "O líder '{leader}' não corresponde à facção do baralho '{faction}'.\n",
-		warnCardCount: "O baralho contém {have}/{max} cartas {card} disponíveis\n"
+		warnCardCount: "O baralho contém {have}/{max} cartas {card} disponíveis\n",
+		warnUnknownCard: "O ID {id} não corresponde a nenhuma carta.\n",
+		warnWrongFaction: "'{card}' não pode ser usada em um baralho desta facção: {faction}.\n",
+		warnInvalidCount: "'{card}' tem uma quantidade inválida ({count}).\n",
+		confirmImport: "Continuar importando o baralho?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("pt-BR", {
 		customize: "Personalizar",
 		rematch: "Revanche",
 		newGame: "Novo Jogo",
-		leave: "Sair"
+		leave: "Sair",
+		goFirst: "Começar",
+		letOpponentStart: "Deixar o oponente começar",
+		goFirstTitle: "Deseja jogar primeiro?",
+		goFirstBody: "A vantagem da facção Scoia'tael permite que você decida quem joga primeiro."
 	},
 
 	fsHint: {

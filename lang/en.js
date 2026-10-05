@@ -88,7 +88,11 @@ I18N.register("en", {
 		warnMinUnits: "Your deck must have at least 22 unit cards. \n",
 		warnMaxSpecial: "Your deck must have no more than 10 special cards. \n",
 		warnLeaderFaction: "Leader '{leader}' doesn't match deck faction '{faction}'.\n",
-		warnCardCount: "Deck contains {have}/{max} available {card} cards\n"
+		warnCardCount: "Deck contains {have}/{max} available {card} cards\n",
+		warnUnknownCard: "ID {id} does not correspond to a card.\n",
+		warnWrongFaction: "'{card}' cannot be used in a deck of this faction: {faction}.\n",
+		warnInvalidCount: "'{card}' has an invalid count ({count}).\n",
+		confirmImport: "Continue importing deck?"
 	},
 
 	game: {
@@ -120,7 +124,11 @@ I18N.register("en", {
 		customize: "Customize",
 		rematch: "Rematch",
 		newGame: "New Game",
-		leave: "Leave"
+		leave: "Leave",
+		goFirst: "Go First",
+		letOpponentStart: "Let Opponent Start",
+		goFirstTitle: "Would you like to go first?",
+		goFirstBody: "The Scoia'tael faction perk allows you to decide who will get to go first."
 	},
 
 	fsHint: {

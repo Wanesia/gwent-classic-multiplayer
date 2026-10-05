@@ -3079,7 +3079,8 @@ class DeckMaker {
 		this.leader_elem = document.getElementById("card-leader");
 		this.leader_elem.children[1].addEventListener("click", () => this.selectLeader(), false);
 		this.leader_elem.children[1].addEventListener('mouseenter', CLICK_EVENT_SFX);
-		this.loadFactionDeck(Settings.lastFaction.get(), true);
+		const lastFaction = Settings.lastFaction.get();
+		this.loadFactionDeck(this.isValidFaction(lastFaction) ? lastFaction : "realms", true);
 
 		this.opponentData = Settings.opponentDeckCustom.get();
 		this.updatedCustomOpponent();
@@ -3418,7 +3419,9 @@ class DeckMaker {
 		fr.onload = e => {
 			try {
 				const deck = this.deckFromJSON(e.target.result);
-				if (deck)
+				// undefined: not parsable (already reported); anything else,
+				// even null or 0, goes to validation which explains what's wrong
+				if (deck !== undefined)
 					callback(deck);
 				
 			} catch (e) {
@@ -3456,39 +3459,66 @@ class DeckMaker {
 		}
 	}
 
-	loadDeck(deck, silent = true)
+	// Validates a raw {faction, leader, cards:[[index,count]]} deck. Problems that
+	// can be fixed up (unknown or off-faction cards, too many copies) are listed
+	// and the user may import anyway; a bad faction or leader rejects the deck.
+	// enforceSize also requires a playable deck (22+ units, at most 10 specials),
+	// for decks that go straight into a match: the custom opponent and the
+	// online opponent's deck.
+	loadDeck(deck, silent = true, enforceSize = false)
 	{
-		if (!deck)
+		const reject = message => {
+			if (!silent) {
+				AudioManager.playSFX('warning');
+				alert(message);
+			}
 			return null;
-		if (!Array.isArray(deck.cards) || deck.cards.length > 100 || !card_dict[deck.leader])
-			return null;
-		const seen = new Set();
-		deck.cards = deck.cards.filter(c => Array.isArray(c) && !seen.has(c[0]) && seen.add(c[0]));
+		};
+		if (!deck || typeof deck !== "object" || !Array.isArray(deck.cards) || deck.cards.length > 100)
+			return reject(I18N.t("deck.uploadBadFormat"));
+		const leaderIndex = Number(deck.leader);
+		const leader = Number.isInteger(leaderIndex) ? card_dict[leaderIndex] : undefined;
+		if (!this.isValidFaction(deck.faction) || !leader || leader.row !== "leader")
+			return reject(I18N.t("deck.uploadBadFormat"));
+		const factionName = I18N.faction(deck.faction, "name", factions[deck.faction].name);
+		if (leader.deck !== deck.faction)
+			return reject(I18N.t("deck.warnLeaderFaction", {leader: I18N.card(leader.name), faction: factionName}));
+
 		let warning = "";
-		// verify that leader card is actually a leader and that it's faction matches the deck faction
-		if (card_dict[deck.leader].row !== "leader")
-			warning += "'" + card_dict[deck.leader].name + "' is cannot be used as a leader\n";
-		if (deck.faction != card_dict[deck.leader].deck)
-			warning += I18N.t("deck.warnLeaderFaction", {leader: card_dict[deck.leader].name, faction: deck.faction});
-		// check if cards exist and have correct faction & count
-		const cards = deck.cards.filter( c => {
-			const card = card_dict[c[0]];
-			if (!card) {
-				warning += "ID " + c[0] + " does not correspond to a card.\n";
-				return false
+		const seen = new Set();
+		const cards = [];
+		for (const c of deck.cards) {
+			if (!Array.isArray(c))
+				continue;
+			// ids and counts may arrive as strings; normalise so "8" and 8 dedupe
+			const index = Number(c[0]), count = Number(c[1]);
+			const card = Number.isInteger(index) ? card_dict[index] : undefined;
+			if (!card || card.row === "leader") {
+				warning += I18N.t("deck.warnUnknownCard", {id: c[0]});
+				continue;
+			}
+			if (seen.has(index) || count === 0)
+				continue;
+			seen.add(index);
+			if (!Number.isInteger(count) || count < 0) {
+				warning += I18N.t("deck.warnInvalidCount", {card: I18N.card(card.name), count: c[1]});
+				continue;
 			}
 			if (![deck.faction, "neutral", "special", "weather"].includes(card.deck)) {
-				warning += "'" + card.name + "' cannot be used in a deck of faction type '" + deck.faction +"'\n";
-				return false;
+				warning += I18N.t("deck.warnWrongFaction", {card: I18N.card(card.name), faction: factionName});
+				continue;
 			}
-			if (card.count < c[1]) {
-				warning += I18N.t("deck.warnCardCount", {have: c[1], max: card.count, card: card_dict[c.index].name});
-				c[1] = card.count;
-				return true;
-			}
-			return true;
-		})
-		.map(c => ({index:c[0], count:Math.min(c[1], card_dict[c[0]].count)}) );
+			const max = Number(card.count);
+			if (count > max)
+				warning += I18N.t("deck.warnCardCount", {have: count, max: max, card: I18N.card(card.name)});
+			cards.push({index: index, count: Math.min(count, max)});
+		}
+		if (enforceSize) {
+			const special = cards.filter(c => ["special", "weather"].includes(card_dict[c.index].deck)).reduce((a, c) => a + c.count, 0);
+			const units = cards.reduce((a, c) => a + c.count, 0) - special;
+			if (units < 22 || special > 10)
+				return reject((units < 22 ? I18N.t("deck.warnMinUnits") : "") + (special > 10 ? I18N.t("deck.warnMaxSpecial") : ""));
+		}
 		// prompt warning if necessary
 		if (warning)
 		{
@@ -3497,12 +3527,12 @@ class DeckMaker {
 				return null;
 			}
 			AudioManager.playSFX('warning');
-			if (confirm(warning + "\n\n\Continue importing deck?"))
+			if (!confirm(warning + "\n" + I18N.t("deck.confirmImport")))
 			{
 				return null;
 			}
 		}
-		return {faction: deck.faction, leader: deck.leader, cards: cards};
+		return {faction: deck.faction, leader: leaderIndex, cards: cards};
 	}
 
 	loadPlayerDeck(deck, silent = true)
@@ -3513,17 +3543,15 @@ class DeckMaker {
 		
 		// Use deck to update current player faction and cards in deck maker
 		this.setFaction(loadedDeck.faction, true);
-		if (card_dict[loadedDeck.leader].row === "leader" && loadedDeck.faction === card_dict[loadedDeck.leader].deck){
-			this.leader = this.leaders.filter(c => c.index === loadedDeck.leader)[0];
-			this.leader_elem.children[1].style.backgroundImage = largeURL(this.leader.card.deck + "_" + this.leader.card.filename);
-		}
-		this.makeBank(deck.faction, loadedDeck.cards);
+		this.setLeader(loadedDeck.leader);
+		this.makeBank(loadedDeck.faction, loadedDeck.cards);
+		Settings.getFactionSettings(loadedDeck.faction).set(loadedDeck);
 		this.update();
 	}
 
 	loadOpponentDeck(deck, silent = true)
 	{
-		const loadedDeck = this.loadDeck(deck, silent);
+		const loadedDeck = this.loadDeck(deck, silent, true);
 		if (!loadedDeck)
 			return;
 		this.opponentData = loadedDeck;
@@ -3543,15 +3571,19 @@ class DeckMaker {
 		const factionElem = document.getElementById('op-preview-faction');
 		const leaderElem = document.getElementById('op-preview-leader');
 		const buttons = ['op-preview-clear', 'op-preview-open'].map(id=>document.getElementById(id));
+		// The label carries data-i18n="deck.random" for the static markup; drop it
+		// while a leader is shown, or the page-load translation pass resets it
 		if (isEmpty(this.opponentData))
 		{
+			leaderElem.children[1].setAttribute("data-i18n", "deck.random");
 			leaderElem.children[1].innerHTML = I18N.t("deck.random");
 			[factionElem, ...buttons].forEach(e=>e.classList.add('hide'));
 		}
 		else
 		{
 			factionElem.style.setProperty('background-image', iconURL('deck_shield_' + this.opponentData.faction));
-			leaderElem.children[1].innerHTML = card_dict[this.opponentData.leader].name;
+			leaderElem.children[1].removeAttribute("data-i18n");
+			leaderElem.children[1].innerHTML = I18N.card(card_dict[this.opponentData.leader].name);
 			[factionElem, ...buttons].forEach(e=>e.classList.remove('hide'));
 		}
 	}
@@ -3654,7 +3686,7 @@ class ToggleOption
 	constructor(key, enableByDefault = true, action = ()=>{})
 	{
 		this.key = key;
-		const saved = localStorage?.getItem(this.key);
+		const saved = safeStorage.get(this.key);
 		this.enabled = (saved !== null && saved !== undefined) ? saved==="true" : enableByDefault;
 		this.action = action;
 	}
@@ -3666,10 +3698,7 @@ class ToggleOption
 			return;
 		}
 		this.enabled = enable;
-		if (localStorage)
-		{
-			localStorage.setItem(this.key, this.enabled);
-		}
+		safeStorage.set(this.key, this.enabled);
 		this.action(this.enabled);
 	}
 	enable() { this.setEnabled(true); }
@@ -3679,13 +3708,23 @@ class ToggleOption
 
 class SavedObject
 {
-	constructor(key, defaultValue = {}, action = ()=>{})
+	constructor(key, defaultValue = {}, action = ()=>{}, isValid = () => true)
 	{
 		this.key = key;
-		const saved = localStorage?.getItem(this.key);
 		if (typeof defaultValue === "string" || defaultValue instanceof String)
 			defaultValue = JSON.parse(defaultValue);
-		this.obj = (saved !== null && saved !== undefined) ? JSON.parse(saved) : defaultValue;
+		// Corrupt or invalid saved data falls back to the default instead of
+		// breaking the app on every load.
+		const raw = safeStorage.get(this.key);
+		let saved = null;
+		if (raw !== null) {
+			try { saved = JSON.parse(raw); } catch (e) {}
+			if (saved === null || !isValid(saved)) {
+				saved = null;
+				safeStorage.remove(this.key);
+			}
+		}
+		this.obj = saved !== null ? saved : defaultValue;
 		this.action = action;
 	}
 	get()
@@ -3702,22 +3741,53 @@ class SavedObject
 		{
 			newObj = {};
 		}
-		localStorage?.setItem(this.key, JSON.stringify(newObj));
+		this.obj = newObj;
+		safeStorage.set(this.key, JSON.stringify(newObj));
 		if (this.action)
 			this.action(this.obj);
 	}
 	clear()
 	{
 		this.obj = {};
-		localStorage?.removeItem(this.key);
+		safeStorage.remove(this.key);
 	}
 }
 
 class SavedDeck extends SavedObject
 {
-	constructor(key, defaultValue = {}, action = ()=>{})
+	// faction: the faction this deck must belong to, or null for a deck of any
+	// faction that may also be empty (the custom opponent deck).
+	constructor(key, defaultValue = {}, faction = null)
 	{
-		super(key, defaultValue, action);
+		super(key, defaultValue, ()=>{}, deck => SavedDeck.isValid(deck, faction));
+	}
+
+	static isValid(deck, faction)
+	{
+		if (!deck || typeof deck !== "object" || Array.isArray(deck))
+			return false;
+		if (!faction && isEmpty(deck))
+			return true;
+		if (!DeckMaker.prototype.isValidFaction(deck.faction) || (faction && deck.faction !== faction))
+			return false;
+		const leader = card_dict[deck.leader];
+		if (!leader || leader.row !== "leader" || leader.deck !== deck.faction)
+			return false;
+		const cardsValid = Array.isArray(deck.cards) && deck.cards.every(c => {
+			const card = Array.isArray(c) && card_dict[c[0]];
+			return card && card.row !== "leader" && [deck.faction, "neutral", "weather", "special"].includes(card.deck) &&
+				Number.isInteger(Number(c[1])) && c[1] >= 0 && c[1] <= Number(card.count);
+		});
+		if (!cardsValid)
+			return false;
+		// The custom opponent goes straight into a match, so it must be playable
+		// (a player's own deck may be saved unfinished; Start game checks it)
+		if (!faction) {
+			const special = deck.cards.filter(c => ["special", "weather"].includes(card_dict[c[0]].deck)).reduce((a, c) => a + Number(c[1]), 0);
+			const units = deck.cards.reduce((a, c) => a + Number(c[1]), 0) - special;
+			return units >= 22 && special <= 10;
+		}
+		return true;
 	}
 	get()
 	{
@@ -3753,7 +3823,7 @@ class SavedString
 	constructor(key, defaultValue = "", action = ()=>{})
 	{
 		this.key = key;
-		let saved = localStorage?.getItem(this.key);
+		let saved = safeStorage.get(this.key);
 		if (saved === null || saved === undefined)
 			saved = defaultValue;
 		this.value = saved;
@@ -3765,7 +3835,7 @@ class SavedString
 		if (this.value === newValue)
 			return;
 		this.value = newValue;
-		localStorage?.setItem(this.key, newValue);
+		safeStorage.set(this.key, newValue);
 		if (this.action)
 			this.action(this.value);
 	}
@@ -3777,11 +3847,11 @@ class Settings
 	static notifications = new ToggleOption("gc-notifications", true);
 	static soundEffects = new ToggleOption("gc-sound-effects", false);
 	static lastFaction = new SavedString("gc-last-faction", "realms"); 
-	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0]);
-	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2]);
-	static monstersDeck = new SavedDeck("gc-deck-monsters", premade_deck[4]);
-	static scoiataelDeck = new SavedDeck("gc-deck-scoiatael", premade_deck[6]);
-	static skelligesDeck = new SavedDeck("gc-deck-skellige", premade_deck[8]);
+	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0], "realms");
+	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2], "nilfgaard");
+	static monstersDeck = new SavedDeck("gc-deck-monsters", premade_deck[4], "monsters");
+	static scoiataelDeck = new SavedDeck("gc-deck-scoiatael", premade_deck[6], "scoiatael");
+	static skelligesDeck = new SavedDeck("gc-deck-skellige", premade_deck[8], "skellige");
 	static opponentDeckCustom = new SavedDeck("gc-deck-opponent-custom");
 	
 	static getFactionSettings(factionName)

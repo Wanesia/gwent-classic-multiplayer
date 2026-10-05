@@ -87,7 +87,11 @@ I18N.register("fr", {
 		warnMinUnits: "Votre deck doit contenir au moins 22 cartes d'unité. \n",
 		warnMaxSpecial: "Votre deck ne doit pas contenir plus de 10 cartes spéciales. \n",
 		warnLeaderFaction: "Le chef « {leader} » ne correspond pas à la faction du deck « {faction} ».\n",
-		warnCardCount: "Le deck contient {have}/{max} cartes {card} disponibles\n"
+		warnCardCount: "Le deck contient {have}/{max} cartes {card} disponibles\n",
+		warnUnknownCard: "L'ID {id} ne correspond à aucune carte.\n",
+		warnWrongFaction: "'{card}' ne peut pas être utilisée dans un deck de cette faction : {faction}.\n",
+		warnInvalidCount: "'{card}' a une quantité invalide ({count}).\n",
+		confirmImport: "Continuer l'importation du deck ?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("fr", {
 		customize: "Personnaliser",
 		rematch: "Revanche",
 		newGame: "Nouvelle partie",
-		leave: "Quitter"
+		leave: "Quitter",
+		goFirst: "Commencer",
+		letOpponentStart: "Laisser l'adversaire commencer",
+		goFirstTitle: "Voulez-vous commencer ?",
+		goFirstBody: "L'avantage de faction des Scoia'tael vous permet de décider qui commence."
 	},
 
 	fsHint: {

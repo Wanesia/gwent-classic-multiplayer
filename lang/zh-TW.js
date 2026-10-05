@@ -87,7 +87,11 @@ I18N.register("zh-TW", {
 		warnMinUnits: "你的牌組至少需要 22 張單位卡。 \n",
 		warnMaxSpecial: "你的牌組特殊卡不能超過 10 張。 \n",
 		warnLeaderFaction: "領袖「{leader}」與牌組陣營「{faction}」不相符。\n",
-		warnCardCount: "牌組包含 {have}/{max} 張可用的 {card} 卡\n"
+		warnCardCount: "牌組包含 {have}/{max} 張可用的 {card} 卡\n",
+		warnUnknownCard: "ID {id} 不對應任何卡牌。\n",
+		warnWrongFaction: "「{card}」不能用於該陣營的牌組：{faction}。\n",
+		warnInvalidCount: "「{card}」的數量無效（{count}）。\n",
+		confirmImport: "繼續匯入牌組嗎？"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("zh-TW", {
 		customize: "自訂",
 		rematch: "再戰",
 		newGame: "新遊戲",
-		leave: "離開"
+		leave: "離開",
+		goFirst: "我先手",
+		letOpponentStart: "讓對手先手",
+		goFirstTitle: "你想先手嗎？",
+		goFirstBody: "松鼠黨的陣營能力讓你決定由誰先手。"
 	},
 
 	fsHint: {

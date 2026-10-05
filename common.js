@@ -7,6 +7,15 @@ Array.prototype.remove = function(elem)
 		this.splice(index, 1);
 }
 
+// localStorage wrapper that never throws: merely touching localStorage throws
+// when storage is blocked (cookies disabled, sandboxed iframes), and writes
+// throw when over quota.
+const safeStorage = {
+	get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+	set(key, value) { try { localStorage.setItem(key, value); } catch (e) {} },
+	remove(key) { try { localStorage.removeItem(key); } catch (e) {} },
+};
+
 function isEmpty(obj)
 {
 	for (const property in obj)
