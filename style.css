@@ -2544,6 +2544,14 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 .card.kb-focus {
 	margin-bottom: 1vw;
 }
+.card.kb-focus::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 100%;
+	height: 1.9vw;
+}
 
 /* "?" shortcut-legend toggle: sits flush against the exit button (top-left).
    Exit is at left:1vw width:2vw (ends at ~3vw); this 3vw button butts right up
