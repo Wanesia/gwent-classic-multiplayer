@@ -87,7 +87,11 @@ I18N.register("cs", {
 		warnMinUnits: "Váš balíček musí mít alespoň 22 karet jednotek. \n",
 		warnMaxSpecial: "Váš balíček nesmí mít více než 10 speciálních karet. \n",
 		warnLeaderFaction: "Vůdce „{leader}“ neodpovídá frakci balíčku „{faction}“.\n",
-		warnCardCount: "Balíček obsahuje {have}/{max} dostupných karet {card}\n"
+		warnCardCount: "Balíček obsahuje {have}/{max} dostupných karet {card}\n",
+		warnUnknownCard: "ID {id} neodpovídá žádné kartě.\n",
+		warnWrongFaction: "Kartu '{card}' nelze použít v balíčku této frakce: {faction}.\n",
+		warnInvalidCount: "Karta '{card}' má neplatný počet ({count}).\n",
+		confirmImport: "Pokračovat v importu balíčku?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("cs", {
 		customize: "Upravit",
 		rematch: "Odveta",
 		newGame: "Nová hra",
-		leave: "Opustit"
+		leave: "Opustit",
+		goFirst: "Začít",
+		letOpponentStart: "Nechat začít soupeře",
+		goFirstTitle: "Chcete začínat?",
+		goFirstBody: "Schopnost frakce Scoia'tael vám umožňuje rozhodnout, kdo bude začínat."
 	},
 
 	fsHint: {

@@ -87,7 +87,11 @@ I18N.register("ko", {
 		warnMinUnits: "덱에는 유닛 카드가 최소 22장 있어야 합니다. \n",
 		warnMaxSpecial: "덱의 특수 카드는 10장을 넘을 수 없습니다. \n",
 		warnLeaderFaction: "리더 '{leader}'이(가) 덱 진영 '{faction}'과(와) 일치하지 않습니다.\n",
-		warnCardCount: "덱에 사용 가능한 {card} 카드가 {have}/{max}장 포함되어 있습니다\n"
+		warnCardCount: "덱에 사용 가능한 {card} 카드가 {have}/{max}장 포함되어 있습니다\n",
+		warnUnknownCard: "ID {id}에 해당하는 카드가 없습니다.\n",
+		warnWrongFaction: "'{card}' 카드는 이 세력의 덱에서 사용할 수 없습니다: {faction}.\n",
+		warnInvalidCount: "'{card}' 카드의 수량이 올바르지 않습니다 ({count}).\n",
+		confirmImport: "덱 가져오기를 계속하시겠습니까?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("ko", {
 		customize: "커스터마이즈",
 		rematch: "재대결",
 		newGame: "새 게임",
-		leave: "나가기"
+		leave: "나가기",
+		goFirst: "먼저 시작",
+		letOpponentStart: "상대가 먼저 시작",
+		goFirstTitle: "먼저 시작하시겠습니까?",
+		goFirstBody: "스코이아텔 세력 능력으로 누가 먼저 시작할지 정할 수 있습니다."
 	},
 
 	fsHint: {

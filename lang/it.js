@@ -87,7 +87,11 @@ I18N.register("it", {
 		warnMinUnits: "Il tuo mazzo deve avere almeno 22 carte unità. \n",
 		warnMaxSpecial: "Il tuo mazzo non può avere più di 10 carte speciali. \n",
 		warnLeaderFaction: "Il comandante «{leader}» non corrisponde alla fazione del mazzo «{faction}».\n",
-		warnCardCount: "Il mazzo contiene {have}/{max} carte {card} disponibili\n"
+		warnCardCount: "Il mazzo contiene {have}/{max} carte {card} disponibili\n",
+		warnUnknownCard: "L'ID {id} non corrisponde a nessuna carta.\n",
+		warnWrongFaction: "'{card}' non può essere usata in un mazzo di questa fazione: {faction}.\n",
+		warnInvalidCount: "'{card}' ha una quantità non valida ({count}).\n",
+		confirmImport: "Continuare l'importazione del mazzo?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("it", {
 		customize: "Personalizza",
 		rematch: "Rivincita",
 		newGame: "Nuova partita",
-		leave: "Abbandona"
+		leave: "Abbandona",
+		goFirst: "Inizia tu",
+		letOpponentStart: "Lascia iniziare l'avversario",
+		goFirstTitle: "Vuoi iniziare per primo?",
+		goFirstBody: "L'abilità di fazione degli Scoia'tael ti permette di decidere chi inizia per primo."
 	},
 
 	fsHint: {

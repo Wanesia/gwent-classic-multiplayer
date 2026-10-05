@@ -87,7 +87,11 @@ I18N.register("ja", {
 		warnMinUnits: "デッキには少なくとも22枚のユニットカードが必要です。 \n",
 		warnMaxSpecial: "デッキのスペシャルカードは10枚までです。 \n",
 		warnLeaderFaction: "リーダー「{leader}」がデッキの勢力「{faction}」と一致しません。\n",
-		warnCardCount: "デッキには利用可能な{card}カードが{have}/{max}枚含まれています\n"
+		warnCardCount: "デッキには利用可能な{card}カードが{have}/{max}枚含まれています\n",
+		warnUnknownCard: "ID {id} に対応するカードはありません。\n",
+		warnWrongFaction: "「{card}」はこの勢力のデッキでは使用できません：{faction}。\n",
+		warnInvalidCount: "「{card}」の枚数が無効です（{count}）。\n",
+		confirmImport: "デッキのインポートを続けますか？"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("ja", {
 		customize: "カスタマイズ",
 		rematch: "再戦",
 		newGame: "新しいゲーム",
-		leave: "退出"
+		leave: "退出",
+		goFirst: "先攻を取る",
+		letOpponentStart: "相手に先攻を譲る",
+		goFirstTitle: "先攻を取りますか？",
+		goFirstBody: "スコイア＝タエルの勢力能力により、どちらが先攻かを決められます。"
 	},
 
 	fsHint: {

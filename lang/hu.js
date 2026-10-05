@@ -87,7 +87,11 @@ I18N.register("hu", {
 		warnMinUnits: "A paklidban legalább 22 egységkártyának kell lennie. \n",
 		warnMaxSpecial: "A paklidban legfeljebb 10 speciális kártya lehet. \n",
 		warnLeaderFaction: "A(z) „{leader}” vezér nem egyezik a pakli frakciójával: „{faction}”.\n",
-		warnCardCount: "A pakli {have}/{max} elérhető {card} kártyát tartalmaz\n"
+		warnCardCount: "A pakli {have}/{max} elérhető {card} kártyát tartalmaz\n",
+		warnUnknownCard: "A(z) {id} azonosító egyik kártyához sem tartozik.\n",
+		warnWrongFaction: "A(z) '{card}' nem használható ennek a frakciónak a paklijában: {faction}.\n",
+		warnInvalidCount: "A(z) '{card}' darabszáma érvénytelen ({count}).\n",
+		confirmImport: "Folytatod a pakli importálását?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("hu", {
 		customize: "Testreszabás",
 		rematch: "Visszavágó",
 		newGame: "Új játék",
-		leave: "Kilépés"
+		leave: "Kilépés",
+		goFirst: "Én kezdek",
+		letOpponentStart: "Kezdjen az ellenfél",
+		goFirstTitle: "Szeretnél te kezdeni?",
+		goFirstBody: "A Scoia'tael frakció képessége lehetővé teszi, hogy eldöntsd, ki kezd."
 	},
 
 	fsHint: {

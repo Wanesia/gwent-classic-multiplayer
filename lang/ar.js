@@ -87,7 +87,11 @@ I18N.register("ar", {
 		warnMinUnits: "يجب أن تحتوي مجموعتك على 22 بطاقة وحدة على الأقل. \n",
 		warnMaxSpecial: "يجب ألا تحتوي مجموعتك على أكثر من 10 بطاقات خاصة. \n",
 		warnLeaderFaction: "القائد «{leader}» لا يطابق فصيل المجموعة «{faction}».\n",
-		warnCardCount: "تحتوي المجموعة على {have}/{max} من بطاقات {card} المتاحة\n"
+		warnCardCount: "تحتوي المجموعة على {have}/{max} من بطاقات {card} المتاحة\n",
+		warnUnknownCard: "المعرّف {id} لا يطابق أي بطاقة.\n",
+		warnWrongFaction: "لا يمكن استخدام '{card}' في مجموعة هذا الفصيل: {faction}.\n",
+		warnInvalidCount: "'{card}' لديها عدد غير صالح ({count}).\n",
+		confirmImport: "هل تريد متابعة استيراد المجموعة؟"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("ar", {
 		customize: "تخصيص",
 		rematch: "مباراة جديدة",
 		newGame: "لعبة جديدة",
-		leave: "مغادرة"
+		leave: "مغادرة",
+		goFirst: "ابدأ أولاً",
+		letOpponentStart: "دع الخصم يبدأ",
+		goFirstTitle: "هل تريد أن تبدأ أولاً؟",
+		goFirstBody: "تتيح لك ميزة فصيل سكويا'تيل أن تقرر من سيبدأ أولاً."
 	},
 
 	fsHint: {

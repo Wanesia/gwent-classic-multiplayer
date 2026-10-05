@@ -87,7 +87,11 @@ I18N.register("pl", {
 		warnMinUnits: "Twoja talia musi mieć co najmniej 22 karty jednostek. \n",
 		warnMaxSpecial: "Twoja talia nie może mieć więcej niż 10 kart specjalnych. \n",
 		warnLeaderFaction: "Dowódca '{leader}' nie pasuje do frakcji talii '{faction}'.\n",
-		warnCardCount: "Talia zawiera {have}/{max} dostępnych kart {card}\n"
+		warnCardCount: "Talia zawiera {have}/{max} dostępnych kart {card}\n",
+		warnUnknownCard: "ID {id} nie odpowiada żadnej karcie.\n",
+		warnWrongFaction: "Karty '{card}' nie można użyć w talii tej frakcji: {faction}.\n",
+		warnInvalidCount: "Karta '{card}' ma nieprawidłową liczbę ({count}).\n",
+		confirmImport: "Kontynuować import talii?"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("pl", {
 		customize: "Dostosuj",
 		rematch: "Rewanż",
 		newGame: "Nowa gra",
-		leave: "Opuść"
+		leave: "Opuść",
+		goFirst: "Zacznij pierwszy",
+		letOpponentStart: "Niech zacznie przeciwnik",
+		goFirstTitle: "Czy chcesz zacząć pierwszy?",
+		goFirstBody: "Zdolność frakcji Scoia'tael pozwala ci zdecydować, kto zacznie pierwszy."
 	},
 
 	fsHint: {

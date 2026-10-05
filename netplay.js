@@ -242,7 +242,7 @@ class MPSession {
 
 	deckFromRaw(raw) {
 		try {
-			const checked = dm.loadDeck(raw, true);
+			const checked = dm.loadDeck(raw, true, true);
 			if (!checked)
 				return null;
 			return { faction: checked.faction, leader: card_dict[checked.leader], cards: checked.cards };

@@ -88,7 +88,11 @@ I18N.register("ru", {
 		warnMinUnits: "В колоде должно быть не менее 22 карт отрядов. \n",
 		warnMaxSpecial: "В колоде должно быть не более 10 специальных карт. \n",
 		warnLeaderFaction: "Лидер «{leader}» не соответствует фракции колоды «{faction}».\n",
-		warnCardCount: "Колода содержит {have}/{max} доступных карт «{card}»\n"
+		warnCardCount: "Колода содержит {have}/{max} доступных карт «{card}»\n",
+		warnUnknownCard: "ID {id} не соответствует ни одной карте.\n",
+		warnWrongFaction: "Карту «{card}» нельзя использовать в колоде этой фракции: {faction}.\n",
+		warnInvalidCount: "У карты «{card}» неверное количество ({count}).\n",
+		confirmImport: "Продолжить импорт колоды?"
 	},
 
 	game: {
@@ -120,7 +124,11 @@ I18N.register("ru", {
 		customize: "Настроить",
 		rematch: "Реванш",
 		newGame: "Новая игра",
-		leave: "Покинуть"
+		leave: "Покинуть",
+		goFirst: "Ходить первым",
+		letOpponentStart: "Пусть начнёт противник",
+		goFirstTitle: "Хотите ходить первым?",
+		goFirstBody: "Особенность фракции Скоя'таэль позволяет вам решить, кто будет ходить первым."
 	},
 
 	fsHint: {

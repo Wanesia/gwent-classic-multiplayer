@@ -42,7 +42,7 @@ var factions = {
 		factionAbility: player => game.gameStart.push( async () => {
 			let notif = "";
 			if (player === player_me) {
-				await ui.popup("Go First", () => game.firstPlayer = player, "Let Opponent Start", () => game.firstPlayer = player.opponent(), "Would you like to go first?", "The Scoia'tael faction perk allows you to decide who will get to go first.", 0.55);
+				await ui.popup(I18N.t("game.goFirst"), () => game.firstPlayer = player, I18N.t("game.letOpponentStart"), () => game.firstPlayer = player.opponent(), I18N.t("game.goFirstTitle"), I18N.t("game.goFirstBody"), 0.55);
 				if (mp.active)
 					mp.send({t: "first", who: mp.roleOf(game.firstPlayer)});
 				notif = game.firstPlayer.tag + "-first";

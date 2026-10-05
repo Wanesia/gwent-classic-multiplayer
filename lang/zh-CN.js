@@ -87,7 +87,11 @@ I18N.register("zh-CN", {
 		warnMinUnits: "你的卡组至少需要 22 张单位卡。 \n",
 		warnMaxSpecial: "你的卡组特殊卡不能超过 10 张。 \n",
 		warnLeaderFaction: "领袖“{leader}”与卡组阵营“{faction}”不匹配。\n",
-		warnCardCount: "卡组包含 {have}/{max} 张可用的 {card} 卡\n"
+		warnCardCount: "卡组包含 {have}/{max} 张可用的 {card} 卡\n",
+		warnUnknownCard: "ID {id} 不对应任何卡牌。\n",
+		warnWrongFaction: "“{card}”不能用于该阵营的卡组：{faction}。\n",
+		warnInvalidCount: "“{card}”的数量无效（{count}）。\n",
+		confirmImport: "继续导入卡组吗？"
 	},
 
 	game: {
@@ -119,7 +123,11 @@ I18N.register("zh-CN", {
 		customize: "自定义",
 		rematch: "再战",
 		newGame: "新游戏",
-		leave: "离开"
+		leave: "离开",
+		goFirst: "我先手",
+		letOpponentStart: "让对手先手",
+		goFirstTitle: "你想先手吗？",
+		goFirstBody: "松鼠党的阵营能力让你决定由谁先手。"
 	},
 
 	fsHint: {
