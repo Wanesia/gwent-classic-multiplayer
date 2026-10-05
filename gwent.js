@@ -1121,8 +1121,14 @@ class Row extends CardContainer {
 			card.resetPower();
 		}
 		this.updateState(card, false);
-		for (let x of card.removed)
-			x(card);
+		// Clearing the board between games isn't a card leaving the battlefield:
+		// Avengers would summon their tokens onto the next game's board
+		if (!this.resetting)
+			for (let x of card.removed) {
+				const p = x(card);
+				if (p instanceof Promise)
+					game.pendingRemovals.push(p);
+			}
 		this.updateScore();
 		return card;
 	}
@@ -1200,14 +1206,15 @@ class Row extends CardContainer {
 	
 	// Calculates the current power of a card affected by row affects
 	calcCardScore(card) {
-		if (card.name === "decoy")
+		if (card.abilities.includes("decoy"))
 			return 0;
 		let total = card.basePower;
 		if (card.hero)
 			return total;
 		if (this.effects.weather)
 		{
-			const weatherMin = this.effects.halfWeather ? Math.floor(total/2) : 1;
+			// King Bran halves weather's effect; it must never be harsher than normal weather (1)
+			const weatherMin = this.effects.halfWeather ? Math.max(1, Math.floor(total/2)) : 1;
 			total = Math.min(weatherMin, total);
 		}
 		if (game.doubleSpyPower && card.abilities.includes("spy"))
@@ -1264,12 +1271,15 @@ class Row extends CardContainer {
 	
 	// Override
 	reset(){
+		this.resetting = true;
 		super.reset();
 		while(this.special)
 			this.removeCard(this.special);
+		this.resetting = false;
 		while(this.elem_special.firstChild)
 			this.elem_special.removeChild(this.elem_special.firstChild);
 		this.total = 0;
+		this.elem_parent.getElementsByClassName("row-score")[0].innerHTML = 0;
 		//["rain","fog","frost"].forEach( w => this.removeOverlay(w) );
 		this.effects = {weather:false, bond: {}, morale: 0, horn: 0, mardroeme: 0};
 	}
@@ -1416,7 +1426,10 @@ class Board {
 		// the game was left mid-animation: don't move cards on the next game's board
 		if (session !== game.session)
 			return abandon();
-		await dest.addCard(source ? source.removeCard(card) : card);
+		const moved = source ? source.removeCard(card) : card;
+		if (!moved)
+			return console.error("moveTo: " + card.name + " is no longer in its source");
+		await dest.addCard(moved);
 	}
 	
 	// Sends and translates a card from the source to a row name associated with the passed player
@@ -1471,6 +1484,7 @@ class Board {
 			await weather.clearWeather(),
 			...this.orderedRows().map(async row => await row.clear())
 		]);
+		await game.settleRemovals();
 	}
 }
 
@@ -1519,6 +1533,7 @@ class Game {
 		this.doubleSpyPower = false;
 
 		this.placedEffectsActive = false; //TODO replace with propper game state
+		this.pendingRemovals = []; // in-flight 'removed' effects, e.g. Avenger summons
 
 		// Anything still waiting on the previous game (open or queued card
 		// pickers, a row choice, the AI's turn) checks this and is abandoned.
@@ -1574,7 +1589,7 @@ class Game {
 
 	isPlaying()
 	{
-		return this.state === GameState.END_SCREEN;
+		return this.state === GameState.PLAYING;
 	}
 
 	setState(newState)
@@ -1700,12 +1715,20 @@ class Game {
 		this.currPlayer.startTurn();
 	}
 	
+	// Waits for 'removed' effects (Avenger summons) that are still resolving
+	async settleRemovals() {
+		while (this.pendingRemovals.length)
+			await Promise.all(this.pendingRemovals.splice(0));
+	}
+
 	// Ends the current turn and may end round. Disables client interraction in client's turn.
 	async endTurn() {
 		const session = this.session;
 		if (this.currPlayer === player_me)
 			ui.enablePlayer(false);
 		await this.runEffects(this.turnEnd);
+		// Online, the state checksum below must include the summoned token
+		await this.settleRemovals();
 		if (session !== this.session)
 			return;
 		// Desync safety net: the player who just acted sends a state checksum,
@@ -1969,7 +1992,8 @@ class Card {
 		this.desc = this.row ==="agile" ? I18N.ability("agile", "description", ability_dict["agile"].description) : "";
 		for (let i=this.abilities.length-1; i>=0; --i) {
 			const key = this.abilities[i];
-			this.desc += I18N.ability(key, "description", ability_dict[key].description);
+			// internal markers like "vildkarrl" have no description
+			this.desc += I18N.ability(key, "description", ability_dict[key].description) || "";
 		}
 		if (this.hero)
 			this.desc += I18N.ability("hero", "description", ability_dict["hero"].description);

@@ -4,8 +4,10 @@ var factions = {
 	realms: {
 		name: "Northern Realms",
 		factionAbility: player => game.roundStart.push( async () => {
-			if (game.roundCount > 1 && game.roundHistory[game.roundCount-2].winner === player) {
-				player.deck.draw(player.hand);
+			if (game.roundCount > 1 && game.roundHistory[game.roundCount-2].winner === player && player.deck.cards.length > 0) {
+				// Awaited: online, the other client adds the card instantly, so
+				// acting before it lands here would send a stale hand index
+				await player.deck.draw(player.hand);
 				await ui.notification("north", 1200);
 			}
 			return false;
@@ -75,7 +77,14 @@ var factions = {
 			await ui.notification("skellige-" + player.tag, 1200);
 			if (player.controller instanceof ControllerAI)
 			{
-				await Promise.all(player.grave.findCardsRandom(c => c.isUnit(), 2).map(c => board.toRow(c, player.grave)));
+				// One at a time, like the human path: a revived medic picks from
+				// the grave, and could pick the other card still being revived
+				for (let i = 0; i < 2; i++) {
+					const units = player.grave.findCardsRandom(c => c.isUnit(), 1);
+					if (units.length === 0)
+						break;
+					await board.toRow(units[0], player.grave);
+				}
 			}
 			else
 			{
