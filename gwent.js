@@ -2214,7 +2214,7 @@ class UI {
 		this.ytActive;
 		this.toggleMusic_elem = document.getElementById("toggle-music");
 		this.toggleSettings.push(this.toggleMusic_elem);
-		this.toggleMusic_elem.classList.add("fade");
+		this.toggleMusic_elem.classList.toggle("fade", !Settings.music.isEnabled());
 		this.toggleMusic_elem.addEventListener("click", () => this.toggleMusic(), false);
 		this.toggleNotifications_elem = document.getElementById("toggle-notifications");
 		this.toggleSettings.push(this.toggleNotifications_elem);
@@ -2257,50 +2257,45 @@ class UI {
 	
 	// Initializes the youtube background music object
 	initYouTube(){
+		if (this.youtube)
+			return; // already created
 		this.youtube = new YT.Player('youtube', {
 			videoId: "UE9fPWy1_o4",
 			playerVars:  { "autoplay" : Settings.music.isEnabled() ? 1 : 0, "controls" : 0, "loop" : 1, "playlist" : "UE9fPWy1_o4", "rel" : 0, "version" : 3, "modestbranding" : 1 },
-			events: { 'onStateChange': initButton }
+			events: { 'onReady': () => this.applyMusicSetting() }
 		});
-		
-		function initButton(){
-			if (ui.ytActive !== undefined)
-				return;
-			ui.ytActive = true;
-			// Music off: don't start it just to pause it again (an audible blip);
-			// toggleMusic() starts playback if the player turns it on
-			if (!Settings.music.isEnabled())
-				return;
-			ui.youtube.playVideo();
-			let timer = setInterval( () => {
-				if (ui.youtube.getPlayerState() !== YT.PlayerState.PLAYING)
-					ui.youtube.playVideo();
-				else {
-					clearInterval(timer);
-					ui.toggleMusic_elem.classList.remove("fade");
-				}
-			}, 500);
-		}
 	}
 	
 	// Called when client toggles the music
 	toggleMusic(){
-		// The YouTube API may be blocked (adblock, offline) or not ready yet:
-		// still flip the setting and the icon instead of throwing
-		if (typeof YT === "undefined" || typeof this.youtube?.getPlayerState !== "function") {
-			Settings.music.toggle();
-			this.toggleMusic_elem.classList.toggle("fade", !Settings.music.isEnabled());
+		Settings.music.toggle();
+		this.applyMusicSetting();
+	}
+
+	// The saved setting is the single source of truth: the icon shows it and the
+	// player is told to follow it. (Deciding from the player's state instead
+	// misread clicks while the video was buffering or failed to start, so the
+	// button could get stuck "on" with no music.)
+	applyMusicSetting(){
+		const enabled = Settings.music.isEnabled();
+		this.toggleMusic_elem.classList.toggle("fade", !enabled);
+		clearInterval(this.musicRetry);
+		// YouTube blocked (adblock, offline) or not ready yet: onReady applies it later
+		if (typeof YT === "undefined" || typeof this.youtube?.playVideo !== "function")
+			return;
+		if (!enabled) {
+			this.youtube.pauseVideo();
 			return;
 		}
-		const isPlaying = this.youtube.getPlayerState() === YT.PlayerState.PLAYING;
-		if (isPlaying) {
-			this.youtube?.pauseVideo();
-			this.toggleMusic_elem.classList.add("fade");
-		} else {
-			this.youtube?.playVideo();
-			this.toggleMusic_elem.classList.remove("fade");
-		}
-		Settings.music.setEnabled(!isPlaying);
+		this.youtube.playVideo();
+		// Browsers may refuse to start audio before the first user interaction:
+		// keep asking until it plays, or until music is turned off again
+		this.musicRetry = setInterval(() => {
+			if (!Settings.music.isEnabled() || this.youtube.getPlayerState() === YT.PlayerState.PLAYING)
+				clearInterval(this.musicRetry);
+			else if (this.youtube.getPlayerState() !== YT.PlayerState.BUFFERING)
+				this.youtube.playVideo();
+		}, 500);
 	}
 
 	toggleNotifications() {
@@ -4158,6 +4153,12 @@ function onYouTubeIframeAPIReady() {
 const eventManager = new EventManager(); 
 let userInteracted = false;
 var ui = new UI();
+// When the YouTube API is cached (any reload, e.g. after changing language) it
+// can finish loading before this script runs and never sees
+// onYouTubeIframeAPIReady, leaving the game without a music player: create it
+// directly in that case.
+if (typeof YT !== "undefined" && YT.loaded)
+	ui.initYouTube();
 var board = new Board();
 var weather = new Weather();
 var game = new Game();
