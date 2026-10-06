@@ -2961,3 +2961,8 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 .card-description > p {
 	line-height: 1.1;
 }
+
+/* Keep controls clickable above an open carousel */
+body:has(#carousel:not(.hide)) :is(#exit-game, #toggle-keybinds, #match-fullscreen-toggle, #toggle-music, #toggle-sfx, #toggle-notifications) {
+	z-index: 95;
+}
