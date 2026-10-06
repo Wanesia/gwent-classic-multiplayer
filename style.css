@@ -133,6 +133,9 @@ html {
 	transition: opacity 0.3s;
 	pointer-events: auto;
 	cursor: pointer;
+	/* its opacity/filter make it a stacking context, which would trap the
+	   tooltip under the opponent's deck pile (and the graves at z-index 2) */
+	z-index: 3;
 }
 #match-fullscreen-toggle:hover {
 	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
