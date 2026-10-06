@@ -1152,6 +1152,7 @@ main { background-image: url('img/boardtest8.png'); }
 	width: 0%;
 	left:90%;
 	top: 87%;
+	white-space: nowrap;
 	
 	color: tan;
 	font-size: 1.5vw;
@@ -1571,7 +1572,7 @@ main { background-image: url('img/boardtest8.png'); }
 	text-align: center;
 	color: #8f6c36;
 	line-height: 0%;
-	margin: 9%;
+	margin: 9% -50%; /* wider than the card so long labels stay centered */
 }
 
 #card-leader > div {
@@ -1588,17 +1589,18 @@ main { background-image: url('img/boardtest8.png'); }
 
 #deck-stats {
 	position: absolute;
-	width: 12%;
+	width: 16%;
 	height: 30%;
 	top: 49.5%;
-	left: 44.05%;
+	left: 42.05%;
 }
 
 #deck-stats > p:nth-child(odd) {
 	color: #82735f;
 	font-size: 1.05vw;
+	line-height: 1.1;
 	text-align: center;
-	margin-bottom: -6.75%;
+	margin-bottom: -5.06%;
 }
 
 #deck-stats > p:nth-child(even) {
@@ -1606,8 +1608,8 @@ main { background-image: url('img/boardtest8.png'); }
 	text-align: left;
 	color: #9f7d3e;
 	padding-left: 2.3vw;
-	margin-left: 3.95vw;
-	margin-bottom: -6.75%;
+	margin-left: 5.95vw;
+	margin-bottom: -5.06%;
 	
 	background-repeat: no-repeat;
 	background-position: left;
@@ -1723,7 +1725,11 @@ main { background-image: url('img/boardtest8.png'); }
 
 #card-deck-title {
 	top: 7.8%;
-	left: 84.45%;
+	left: auto;
+	right: 8.5%;
+	width: auto;
+	text-align: right;
+	white-space: nowrap;
 }
 
 /* ----------- cards ------------------*/
@@ -1869,6 +1875,17 @@ main { background-image: url('img/boardtest8.png'); }
 	#match-fullscreen-toggle[data-title]:hover::after {
 		left: auto;
 		right: 0;
+	}
+
+	/* Buttons at the left screen edge: grow the tooltip rightwards */
+	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-keybinds)[data-title]:hover::after {
+		left: 0;
+	}
+
+	#room-code[data-title]:hover::after {
+		left: 50%;
+		transform: translateX(-50%);
+		letter-spacing: normal;
 	}
 }
 
@@ -2129,6 +2146,7 @@ main { background-image: url('img/boardtest8.png'); }
 }
 
 #room-code {
+	position: relative;
 	display: inline-block;
 	margin: .5vw auto;
 	padding: .5vw 1.2vw .5vw 2vw;
@@ -2943,13 +2961,18 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 #pass-button {
 	white-space: nowrap;
 }
+/* Taller scripts touched or crossed the button's border */
+:lang(ar) #pass-button, :lang(ja) #pass-button, :lang(ko) #pass-button,
+:lang(zh-CN) #pass-button, :lang(zh-TW) #pass-button {
+	font-size: 1.6vw;
+}
 :lang(de) #pass-button, :lang(fr) #pass-button, :lang(it) #pass-button,
 :lang(pt-BR) #pass-button, :lang(hu) #pass-button, :lang(es) #pass-button,
 :lang(es-MX) #pass-button, :lang(pl) #pass-button, :lang(cs) #pass-button {
 	font-size: 1.6vw;
 }
 :lang(de) #pass-button {
-	font-size: 1.45vw; /* "Passen" is the widest */
+	font-size: 1.35vw; /* "Passen" is the widest */
 }
 /* "Kartensammlung", "Kártyagyűjtemény" etc. overflowed or wrapped onto the
    cards below; there is free space to the right of this title. */
