@@ -16,6 +16,7 @@ const SUITES = [
 	'e2e-multiplayer.js',  // full online match, checksums, disconnect
 	'e2e-quickmatch.js',   // find-opponent pairing, search screen, cancel
 	'e2e-rematch.js',      // re-ready + mid-game exit
+	'e2e-chat.js',         // quick chat opt-in, rate limits, no desync
 ];
 
 // Resolves true if something is already accepting connections on the port.
