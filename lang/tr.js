@@ -152,7 +152,8 @@ I18N.register("tr", {
 		passRound: "Turu pas geç",
 		useLeader: "Lideri görüntüle / kullan",
 		cancel: "İptal / geri",
-		toggleHelp: "Bu yardımı aç/kapat"
+		toggleHelp: "Bu yardımı aç/kapat",
+		chat: "Sohbete mesaj yaz (çevrim içi)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("tr", {
 		notifications: "Oyun mesajlarını aç/kapat",
 		keybinds: "Klavye kısayolları",
 		feedback: "Geri bildirim / hata bildir",
-		quickChat: "Hızlı sohbeti aç/kapat",
+		chat: "Sohbet ayarları",
 		language: "Dil"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("tr", {
 		hello: "Merhaba!",
 		goodLuck: "Bol şans!",
 		goodMove: "İyi hamle!",
-		watchThis: "Şuna bak...",
+		watchThis: "Şuna bak!",
 		oops: "Hay aksi!",
 		goodGame: "İyi oyundu!",
 		thanks: "Oyun için teşekkürler!",
 		bye: "Hoşça kal!",
-		opponentOn: "Rakibin hızlı sohbeti açık: mesajlarını görüyor",
-		opponentOff: "Rakibin hızlı sohbeti kapalı: mesajlarını görmeyecek",
+		settingsTitle: "Sohbet ayarları",
+		quickLabel: "Hızlı sohbet",
+		quickHint: "Hazır ifadeler ve emojiler",
+		textLabel: "Yazılı sohbet",
+		textHint: "Kendi mesajlarını yaz",
+		muteLabel: "Bu rakibi sustur",
+		muteHint: "Bu maç boyunca mesajlarını gizler",
+		logTitle: "Sohbet",
+		showLog: "Sohbeti göster",
+		hideLog: "Sohbeti gizle",
+		placeholder: "Bir mesaj yaz… (T)",
+		opponentTextOff: "Rakibin yazılı sohbeti kapalı",
+		opponentState: "Rakip: {quick}, {text} (susturmak için tıkla)",
+		opQuickOn: "hızlı sohbet açık",
+		opQuickOff: "hızlı sohbet kapalı",
+		opTextOn: "yazılı sohbet açık",
+		opTextOff: "yazılı sohbet kapalı",
+		opponentMuted: "Rakip bu maç boyunca susturuldu (geri almak için tıkla)",
 		cooldown: "Sohbet {s} sn sonra açılacak (spam önlemi)",
 		openCooldown: "Hızlı sohbet ({s} sn sonra açılır)"
 	},

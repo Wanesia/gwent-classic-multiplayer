@@ -152,7 +152,8 @@ I18N.register("cs", {
 		passRound: "Složit kolo",
 		useLeader: "Zobrazit / použít vůdce",
 		cancel: "Zrušit / zpět",
-		toggleHelp: "Zobrazit/skrýt tuto nápovědu"
+		toggleHelp: "Zobrazit/skrýt tuto nápovědu",
+		chat: "Napsat zprávu do chatu (online)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("cs", {
 		notifications: "Zapnout/vypnout herní zprávy",
 		keybinds: "Klávesové zkratky",
 		feedback: "Zpětná vazba / nahlásit chybu",
-		quickChat: "Zapnout/vypnout rychlý chat",
+		chat: "Nastavení chatu",
 		language: "Jazyk"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("cs", {
 		hello: "Ahoj!",
 		goodLuck: "Hodně štěstí!",
 		goodMove: "Dobrý tah!",
-		watchThis: "Sleduj tohle...",
+		watchThis: "Sleduj tohle!",
 		oops: "Jejda!",
 		goodGame: "Dobrá hra!",
 		thanks: "Díky za hru!",
 		bye: "Měj se!",
-		opponentOn: "Soupeř má rychlý chat zapnutý: vidí vaše zprávy",
-		opponentOff: "Soupeř má rychlý chat vypnutý: vaše zprávy neuvidí",
+		settingsTitle: "Nastavení chatu",
+		quickLabel: "Rychlý chat",
+		quickHint: "Připravené fráze a emoce",
+		textLabel: "Textový chat",
+		textHint: "Pište vlastní zprávy",
+		muteLabel: "Ztlumit tohoto soupeře",
+		muteHint: "Skryje jeho zprávy do konce zápasu",
+		logTitle: "Chat",
+		showLog: "Zobrazit chat",
+		hideLog: "Skrýt chat",
+		placeholder: "Napište zprávu… (T)",
+		opponentTextOff: "Soupeř má textový chat vypnutý",
+		opponentState: "Soupeř: {quick}, {text} (kliknutím ztlumíte)",
+		opQuickOn: "rychlý chat zapnutý",
+		opQuickOff: "rychlý chat vypnutý",
+		opTextOn: "textový chat zapnutý",
+		opTextOff: "textový chat vypnutý",
+		opponentMuted: "Soupeř je ztlumený do konce zápasu (kliknutím zrušíte)",
 		cooldown: "Chat se odemkne za {s} s (ochrana proti spamu)",
 		openCooldown: "Rychlý chat (odemkne se za {s} s)"
 	},

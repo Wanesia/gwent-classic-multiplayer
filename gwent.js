@@ -2226,10 +2226,8 @@ class UI {
 		this.toggleSFX_elem.addEventListener('click', () => this.toggleSFX())
 		if (!Settings.soundEffects.isEnabled())
 			this.toggleSFX_elem.classList.add("fade");
-		this.toggleChat_elem = document.getElementById("toggle-chat");
-		this.toggleSettings.push(this.toggleChat_elem);
-		this.toggleChat_elem.classList.toggle("fade", !Settings.quickChat.isEnabled());
-		this.toggleChat_elem.addEventListener("click", () => this.toggleQuickChat(), false);
+		// Chat settings popover (chat.js)
+		this.toggleSettings.push(document.getElementById("toggle-chat-settings"));
 
 		this.toggleFeedback_elem = document.getElementById("toggle-feedback");
 		this.toggleSettings.push(this.toggleFeedback_elem);
@@ -2314,13 +2312,6 @@ class UI {
 		{
 			this.toggleNotifications_elem.classList.add("fade");
 		}
-	}
-
-	toggleQuickChat() {
-		Settings.quickChat.toggle();
-		this.toggleChat_elem.classList.toggle("fade", !Settings.quickChat.isEnabled());
-		QuickChat.refresh();
-		lobby.syncChatState();
 	}
 
 	toggleSFX() {
@@ -3878,7 +3869,8 @@ class Settings
 	static music = new ToggleOption("gc-music", false);
 	static notifications = new ToggleOption("gc-notifications", true);
 	static soundEffects = new ToggleOption("gc-sound-effects", false);
-	static quickChat = new ToggleOption("gc-quick-chat", false);
+	static quickChat = new ToggleOption("gc-quick-chat", true);
+	static textChat = new ToggleOption("gc-text-chat", true);
 	static lastFaction = new SavedString("gc-last-faction", "realms"); 
 	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0], "realms");
 	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2], "nilfgaard");
@@ -4324,6 +4316,11 @@ class KeyboardControls {
 		if ((k === "h" || k === "?") && this.inGame && !Carousel.curr && !Popup.curr) {
 			e.preventDefault();
 			this.toggleLegend();
+			return;
+		}
+		// Chat works on either player's turn, so it doesn't wait for this.active
+		if (k === "t" && this.inGame && !this.legendOpen() && ChatLog.focusInput()) {
+			e.preventDefault();
 			return;
 		}
 		if (this.legendOpen()) {

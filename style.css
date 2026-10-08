@@ -225,12 +225,13 @@ html {
 	z-index: 95;
 }
 
-#toggle-chat {
+/* Left of the leader portrait, in line with the quick chat button above it */
+#toggle-chat-settings {
 	top: 48.9vw;
-	left: 22.9vw;
+	left: 1.55vw;
 }
-#toggle-chat.deck-menu,
-#toggle-chat.lobby-menu {
+#toggle-chat-settings.deck-menu,
+#toggle-chat-settings.lobby-menu {
 	position: fixed;
 	bottom: 2vh;
 	top: auto;
@@ -1891,7 +1892,7 @@ main { background-image: url('img/boardtest8.png'); }
 	}
 
 	/* Buttons at the left screen edge: grow the tooltip rightwards */
-	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat, #toggle-keybinds, #chat-button, #chat-op-state)[data-title]:hover::after {
+	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat-settings, #toggle-keybinds, #chat-button, #chat-op-state)[data-title]:hover::after {
 		left: 0;
 	}
 
@@ -3124,7 +3125,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 /* Keep controls clickable above an open carousel */
-body:has(#carousel:not(.hide)) :is(#exit-game, #toggle-keybinds, #match-fullscreen-toggle, #toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat) {
+body:has(#carousel:not(.hide)) :is(#exit-game, #toggle-keybinds, #match-fullscreen-toggle, #toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat-settings) {
 	z-index: 95;
 }
 
@@ -3197,19 +3198,25 @@ body:has(#popup:not(.hide)) #chat-layer {
 	text-align: center;
 }
 
-/* Opponent's quick chat setting, next to their portrait */
+/* Opponent's chat settings, next to their portrait; a click mutes them */
 #chat-op-state {
 	top: 16vw;
-	cursor: default;
 }
+#chat-op-state:hover {
+	border-color: goldenrod;
+}
+/* Opted out of chat: faded, dashed outline */
 #chat-op-state.off {
-	border-color: rgba(218, 165, 32, 0.2);
+	border-style: dashed;
+	border-color: rgba(218, 165, 32, 0.3);
+	background-color: rgba(10, 10, 10, 0.4);
 }
-#chat-op-state.off > img {
+#chat-op-state:is(.off, .muted) > img {
 	opacity: 0.3;
 	filter: grayscale(1);
 }
-#chat-op-state.off::before {
+/* Muted by us: red ring and slash */
+#chat-op-state.muted::before {
 	content: "";
 	position: absolute;
 	left: 50%;
@@ -3218,7 +3225,34 @@ body:has(#popup:not(.hide)) #chat-layer {
 	height: 76%;
 	translate: -50% 0;
 	rotate: 45deg;
-	background-color: rgba(218, 165, 32, 0.55);
+	background-color: #d4553f;
+}
+#chat-op-state.muted {
+	border-style: solid;
+	border-color: rgba(205, 70, 50, 0.75);
+}
+/* Text chat is on (theirs on the opponent's icon, ours on the quick chat button) */
+.chat-text-tag {
+	display: none;
+	position: absolute;
+	right: -0.6vw;
+	bottom: -0.4vw;
+	padding: 0 0.2vw;
+	border: 0.08vw solid goldenrod;
+	border-radius: 0.3vw;
+	background-color: #1d1810;
+	color: #f3dfae;
+	font-family: Arial, sans-serif;
+	font-size: 0.72vw;
+	font-weight: bold;
+	line-height: 1vw;
+	pointer-events: none;
+}
+:is(#chat-op-state, #chat-button).text > .chat-text-tag {
+	display: block;
+}
+#chat-op-state.muted > .chat-text-tag {
+	opacity: 0.45;
 }
 
 #chat-picker {
@@ -3339,6 +3373,8 @@ body:has(#popup:not(.hide)) #chat-layer {
 	font-size: 1.2vw;
 	line-height: 1.25;
 	text-align: center;
+	overflow-wrap: anywhere;
+	text-wrap: balance;
 	pointer-events: none;
 }
 .chat-bubble.chat-emote {
@@ -3357,13 +3393,14 @@ body:has(#popup:not(.hide)) #chat-layer {
 	content: "";
 	position: absolute;
 	left: 50%;
-	translate: -50% 0;
 	width: 0.9vw;
 	height: 0.9vw;
 	background-color: inherit;
 	border: inherit;
 	border-width: 0 0.12vw 0.12vw 0;
 	border-radius: 0;
+	/* Keep only the half outside the bubble so it never covers the content */
+	clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 #chat-bubble-op {
@@ -3371,7 +3408,8 @@ body:has(#popup:not(.hide)) #chat-layer {
 	transform-origin: 50% -0.6vw;
 }
 #chat-bubble-op::after {
-	top: -0.5vw;
+	top: 0;
+	translate: -50% -50%;
 	transform: rotate(-135deg);
 }
 
@@ -3380,7 +3418,8 @@ body:has(#popup:not(.hide)) #chat-layer {
 	transform-origin: 50% calc(100% + 0.6vw);
 }
 #chat-bubble-me::after {
-	bottom: -0.5vw;
+	bottom: 0;
+	translate: -50% 50%;
 	transform: rotate(45deg);
 }
 
@@ -3401,4 +3440,322 @@ body:has(#popup:not(.hide)) #chat-layer {
 }
 @keyframes chat-fade {
 	to { opacity: 0; transform: translateY(-0.3vw); }
+}
+
+/* ---------- chat settings popover (chat.js) ---------- */
+
+#toggle-chat-settings.open {
+	z-index: 1002;
+}
+#toggle-chat-settings.open > img {
+	filter: drop-shadow(0px 0px 3px rgba(255, 255, 255, 0.5));
+}
+#toggle-chat-settings.open[data-title]:hover::after {
+	display: none;
+}
+
+#chat-settings {
+	display: none;
+	position: absolute;
+	bottom: calc(100% + 0.9vw);
+	left: -0.5vw;
+	width: 19vw;
+	padding: 0.6vw 0.8vw 0.3vw;
+	border: 0.12vw solid rgba(218, 165, 32, 0.55);
+	border-radius: 0.6vw;
+	background-color: rgba(12, 10, 7, 0.97);
+	box-shadow: 0 0.3vw 1.2vw rgba(0, 0, 0, 0.8);
+	font-family: Arial Narrow, sans-serif;
+	transform-origin: 1.75vw calc(100% + 0.9vw);
+}
+#toggle-chat-settings.open > #chat-settings {
+	display: block;
+	animation: chat-picker-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+/* Tail pointing at the cog */
+#chat-settings::after {
+	content: "";
+	position: absolute;
+	bottom: -0.5vw;
+	left: 1.3vw;
+	width: 0.9vw;
+	height: 0.9vw;
+	background-color: inherit;
+	border: inherit;
+	border-width: 0 0.12vw 0.12vw 0;
+	border-radius: 0;
+	rotate: 45deg;
+}
+#chat-settings h3 {
+	margin: 0 0 0.3vw;
+	color: goldenrod;
+	font-size: 1.15vw;
+	font-weight: bold;
+	letter-spacing: 0.05vw;
+}
+
+.chat-switch {
+	display: flex;
+	align-items: center;
+	gap: 0.8vw;
+	width: 100%;
+	padding: 0.55vw 0;
+	border: 0;
+	border-top: 0.08vw solid rgba(218, 165, 32, 0.2);
+	background: none;
+	font-family: inherit;
+	text-align: start;
+}
+.chat-switch.hide {
+	display: none;
+}
+/* Text chat sits under quick chat and needs it on */
+.chat-switch-sub {
+	padding-left: 1.2vw;
+}
+.chat-switch:disabled > * {
+	opacity: 0.4;
+}
+.chat-switch-label {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.1vw;
+}
+.chat-switch-label > b {
+	color: #f3dfae;
+	font-size: 1.1vw;
+	line-height: 1.2;
+}
+.chat-switch-label > small {
+	color: rgba(232, 207, 150, 0.6);
+	font-size: 0.85vw;
+	line-height: 1.2;
+}
+.chat-switch:not(:disabled):hover .chat-switch-label > b {
+	color: #fff6dc;
+}
+.chat-switch-track {
+	flex: none;
+	position: relative;
+	width: 2.7vw;
+	height: 1.4vw;
+	border: 0.1vw solid rgba(218, 165, 32, 0.35);
+	border-radius: 0.7vw;
+	background-color: rgba(70, 64, 52, 0.9);
+	transition: background-color 0.15s, border-color 0.15s;
+}
+.chat-switch-track::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0.15vw;
+	width: 0.95vw;
+	height: 0.95vw;
+	translate: 0 -50%;
+	border-radius: 50%;
+	background-color: #a39882;
+	box-shadow: 0 0.05vw 0.2vw rgba(0, 0, 0, 0.6);
+	transition: translate 0.15s, background-color 0.15s;
+}
+.chat-switch:not(:disabled):hover .chat-switch-track {
+	border-color: goldenrod;
+}
+.chat-switch[aria-checked="true"] .chat-switch-track {
+	border-color: goldenrod;
+	background-color: #b8860b;
+}
+.chat-switch[aria-checked="true"] .chat-switch-track::after {
+	translate: 1.3vw -50%;
+	background-color: #fff6dc;
+}
+.chat-switch[data-setting="mute"][aria-checked="true"] .chat-switch-track {
+	border-color: #d4553f;
+	background-color: #8b2a1a;
+}
+
+/* ---------- text chat log (chat.js) ----------
+   Fills the empty middle of the right panel, inside the large card preview's
+   area so the preview covers it. */
+
+#chat-log {
+	position: absolute;
+	top: 12.4vw;
+	left: 80.5vw;
+	width: 15.7vw;
+	height: 29.5vw;
+	display: flex;
+	flex-direction: column;
+	border: 0.12vw solid rgba(218, 165, 32, 0.45);
+	border-radius: 0.6vw;
+	background-color: rgba(12, 10, 7, 0.85);
+	box-shadow: 0 0.3vw 1.2vw rgba(0, 0, 0, 0.6);
+	font-family: Arial Narrow, sans-serif;
+	z-index: 79;
+}
+#chat-log.hide,
+body:has(#popup:not(.hide)) #chat-log,
+body:has(#carousel:not(.hide)) #chat-log {
+	display: none;
+}
+/* Above the card preview while typing, and above the end screen for a "gg" */
+#chat-log:focus-within {
+	z-index: 81;
+}
+body:has(#end-screen:not(.hide)) #chat-log {
+	z-index: 1001;
+}
+#chat-log.collapsed {
+	left: auto;
+	right: 3.8vw;
+	width: auto;
+	height: auto;
+}
+#chat-log.collapsed > :not(#chat-log-head) {
+	display: none;
+}
+
+#chat-log-head {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.5vw;
+	width: 100%;
+	padding: 0.45vw 0.75vw;
+	border: 0;
+	border-bottom: 0.08vw solid rgba(218, 165, 32, 0.25);
+	background: none;
+	color: goldenrod;
+	font-family: inherit;
+	font-size: 1.1vw;
+	font-weight: bold;
+	letter-spacing: 0.05vw;
+	text-align: start;
+}
+#chat-log-head:hover {
+	color: #ffd864;
+}
+#chat-log.collapsed #chat-log-head {
+	border-bottom: 0;
+}
+#chat-log-head[data-title]:hover::after {
+	left: auto;
+	right: 0;
+}
+.chat-log-chevron {
+	margin-inline-start: auto;
+	width: 0.55vw;
+	height: 0.55vw;
+	border-right: 0.15vw solid currentColor;
+	border-bottom: 0.15vw solid currentColor;
+	rotate: -135deg;
+	translate: 0 0.15vw;
+}
+#chat-log.collapsed .chat-log-chevron {
+	rotate: 45deg;
+	translate: 0 -0.15vw;
+}
+#chat-log-unread {
+	min-width: 1.2vw;
+	height: 1.2vw;
+	padding: 0 0.3vw;
+	border: 0.08vw solid goldenrod;
+	border-radius: 0.6vw;
+	background-color: #8b1a1a;
+	color: #fff2cf;
+	font-size: 0.85vw;
+	line-height: 1.05vw;
+	text-align: center;
+	letter-spacing: 0;
+}
+#chat-log-unread.hide {
+	display: none;
+}
+
+#chat-log-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 0.35vw 0.75vw;
+	overflow-wrap: anywhere;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(218, 165, 32, 0.45) transparent;
+}
+.chat-entry {
+	margin: 0.25vw 0;
+	color: #f3dfae;
+	font-size: 1.05vw;
+	line-height: 1.3;
+}
+/* Not plaintext: the line takes its direction from dir="auto" on the label */
+#chat-log-list > .chat-entry {
+	unicode-bidi: isolate;
+}
+.chat-entry-who {
+	font-weight: bold;
+}
+.chat-entry-who::after {
+	content: ":";
+}
+.chat-entry-me > .chat-entry-who {
+	color: #f0b840;
+}
+.chat-entry-op > .chat-entry-who {
+	color: #8ec5f0;
+}
+
+#chat-log-note {
+	display: none;
+	margin: 0 0.5vw;
+	padding: 0.3vw 0.4vw 0;
+	color: #f3dfae;
+	font-size: 0.9vw;
+	line-height: 1.2;
+	text-align: center;
+}
+#chat-log.chat-cooldown:not(.collapsed, .peer-off) #chat-log-note {
+	display: block;
+}
+
+#chat-input {
+	margin: 0.45vw;
+	padding: 0.4vw 0.6vw;
+	border: 0.1vw solid rgba(218, 165, 32, 0.4);
+	border-radius: 0.4vw;
+	background-color: rgba(0, 0, 0, 0.55);
+	color: #fff2cf;
+	font-family: inherit;
+	font-size: 1.05vw;
+	outline: none;
+	cursor: text;
+}
+#chat-input:focus {
+	border-color: goldenrod;
+	box-shadow: 0 0 0.5vw rgba(218, 165, 32, 0.45);
+}
+:lang(ar) #chat-input:placeholder-shown {
+	direction: rtl;
+}
+#chat-input::placeholder {
+	color: rgba(232, 207, 150, 0.5);
+}
+#chat-log-off {
+	display: none;
+	margin: 0.45vw;
+	padding: 0.4vw 0.6vw;
+	border: 0.1vw dashed rgba(218, 165, 32, 0.3);
+	border-radius: 0.4vw;
+	color: rgba(232, 207, 150, 0.6);
+	font-size: 1vw;
+	line-height: 1.25;
+	text-align: center;
+}
+#chat-log.peer-off #chat-input {
+	display: none;
+}
+#chat-log.peer-off:not(.collapsed) #chat-log-off {
+	display: block;
+}
+#chat-log.chat-cooldown #chat-input:not(:disabled) {
+	border-color: rgba(205, 70, 50, 0.7);
 }

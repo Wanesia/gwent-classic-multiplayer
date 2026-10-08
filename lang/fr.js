@@ -152,7 +152,8 @@ I18N.register("fr", {
 		passRound: "Passer la manche",
 		useLeader: "Voir / utiliser votre chef",
 		cancel: "Annuler / retour",
-		toggleHelp: "Afficher/masquer cette aide"
+		toggleHelp: "Afficher/masquer cette aide",
+		chat: "Écrire dans le chat (en ligne)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("fr", {
 		notifications: "Activer/désactiver les messages de jeu",
 		keybinds: "Raccourcis clavier",
 		feedback: "Retour / signaler un bug",
-		quickChat: "Activer/désactiver le chat rapide",
+		chat: "Paramètres du chat",
 		language: "Langue"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("fr", {
 		hello: "Salut !",
 		goodLuck: "Bonne chance !",
 		goodMove: "Bien joué !",
-		watchThis: "Regarde ça...",
+		watchThis: "Regarde ça !",
 		oops: "Oups !",
 		goodGame: "Bonne partie !",
 		thanks: "Merci pour la partie !",
 		bye: "Au revoir !",
-		opponentOn: "Le chat rapide de l'adversaire est activé : il voit vos messages",
-		opponentOff: "Le chat rapide de l'adversaire est désactivé : il ne verra pas vos messages",
+		settingsTitle: "Paramètres du chat",
+		quickLabel: "Chat rapide",
+		quickHint: "Phrases et émotes prédéfinies",
+		textLabel: "Chat textuel",
+		textHint: "Écrivez vos propres messages",
+		muteLabel: "Ignorer cet adversaire",
+		muteHint: "Masque ses messages pendant cette partie",
+		logTitle: "Chat",
+		showLog: "Afficher le chat",
+		hideLog: "Masquer le chat",
+		placeholder: "Écrivez un message… (T)",
+		opponentTextOff: "Le chat textuel de l'adversaire est désactivé",
+		opponentState: "Adversaire : {quick}, {text} (cliquez pour l'ignorer)",
+		opQuickOn: "chat rapide activé",
+		opQuickOff: "chat rapide désactivé",
+		opTextOn: "chat textuel activé",
+		opTextOff: "chat textuel désactivé",
+		opponentMuted: "Adversaire ignoré pour cette partie (cliquez pour annuler)",
 		cooldown: "Chat disponible dans {s} s (anti-spam)",
 		openCooldown: "Chat rapide (disponible dans {s} s)"
 	},

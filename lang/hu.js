@@ -152,7 +152,8 @@ I18N.register("hu", {
 		passRound: "Kör passzolása",
 		useLeader: "Vezér megtekintése / használata",
 		cancel: "Mégse / vissza",
-		toggleHelp: "Súgó megjelenítése/elrejtése"
+		toggleHelp: "Súgó megjelenítése/elrejtése",
+		chat: "Üzenet írása a csevegésbe (online)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("hu", {
 		notifications: "Játéküzenetek be/ki",
 		keybinds: "Billentyűparancsok",
 		feedback: "Visszajelzés / hiba jelentése",
-		quickChat: "Gyors csevegés be/ki",
+		chat: "Csevegés beállításai",
 		language: "Nyelv"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("hu", {
 		hello: "Szia!",
 		goodLuck: "Sok sikert!",
 		goodMove: "Jó lépés!",
-		watchThis: "Ezt figyeld...",
+		watchThis: "Ezt figyeld!",
 		oops: "Hoppá!",
 		goodGame: "Jó játék volt!",
 		thanks: "Köszi a játékot!",
 		bye: "Szia, viszlát!",
-		opponentOn: "Az ellenfél gyors csevegése be van kapcsolva: látja az üzeneteidet",
-		opponentOff: "Az ellenfél gyors csevegése ki van kapcsolva: nem látja az üzeneteidet",
+		settingsTitle: "Csevegés beállításai",
+		quickLabel: "Gyors csevegés",
+		quickHint: "Előre megírt mondatok és emotikonok",
+		textLabel: "Szöveges csevegés",
+		textHint: "Írd meg a saját üzeneteidet",
+		muteLabel: "Ellenfél némítása",
+		muteHint: "Elrejti az üzeneteit a meccs végéig",
+		logTitle: "Csevegés",
+		showLog: "Csevegés megjelenítése",
+		hideLog: "Csevegés elrejtése",
+		placeholder: "Írj üzenetet… (T)",
+		opponentTextOff: "Az ellenfél szöveges csevegése ki van kapcsolva",
+		opponentState: "Ellenfél: {quick}, {text} (kattints a némításhoz)",
+		opQuickOn: "gyors csevegés be",
+		opQuickOff: "gyors csevegés ki",
+		opTextOn: "szöveges csevegés be",
+		opTextOff: "szöveges csevegés ki",
+		opponentMuted: "Ellenfél lenémítva a meccs végéig (kattints a feloldáshoz)",
 		cooldown: "A csevegés {s} mp múlva újra elérhető (spam elleni védelem)",
 		openCooldown: "Gyors csevegés ({s} mp múlva elérhető)"
 	},

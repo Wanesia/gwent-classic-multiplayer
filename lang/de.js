@@ -152,7 +152,8 @@ I18N.register("de", {
 		passRound: "Runde passen",
 		useLeader: "Anführer ansehen / einsetzen",
 		cancel: "Abbrechen / zurück",
-		toggleHelp: "Diese Hilfe ein-/ausblenden"
+		toggleHelp: "Diese Hilfe ein-/ausblenden",
+		chat: "Chatnachricht schreiben (online)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("de", {
 		notifications: "Spielmeldungen an/aus",
 		keybinds: "Tastenkürzel",
 		feedback: "Feedback / Fehler melden",
-		quickChat: "Schnellchat an/aus",
+		chat: "Chat-Einstellungen",
 		language: "Sprache"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("de", {
 		hello: "Hallo!",
 		goodLuck: "Viel Glück!",
 		goodMove: "Guter Zug!",
-		watchThis: "Pass auf...",
+		watchThis: "Pass auf!",
 		oops: "Hoppla!",
 		goodGame: "Gutes Spiel!",
 		thanks: "Danke für das Spiel!",
 		bye: "Tschüss!",
-		opponentOn: "Schnellchat des Gegners ist an: Er sieht deine Nachrichten",
-		opponentOff: "Schnellchat des Gegners ist aus: Er sieht deine Nachrichten nicht",
+		settingsTitle: "Chat-Einstellungen",
+		quickLabel: "Schnellchat",
+		quickHint: "Vorgefertigte Sätze und Emotes",
+		textLabel: "Textchat",
+		textHint: "Eigene Nachrichten schreiben",
+		muteLabel: "Diesen Gegner stummschalten",
+		muteHint: "Blendet seine Nachrichten für dieses Spiel aus",
+		logTitle: "Chat",
+		showLog: "Chat einblenden",
+		hideLog: "Chat ausblenden",
+		placeholder: "Nachricht schreiben… (T)",
+		opponentTextOff: "Der Gegner hat den Textchat aus",
+		opponentState: "Gegner: {quick}, {text} (Klicken zum Stummschalten)",
+		opQuickOn: "Schnellchat an",
+		opQuickOff: "Schnellchat aus",
+		opTextOn: "Textchat an",
+		opTextOff: "Textchat aus",
+		opponentMuted: "Gegner für dieses Spiel stummgeschaltet (Klicken zum Aufheben)",
 		cooldown: "Chat wieder verfügbar in {s} s (Spamschutz)",
 		openCooldown: "Schnellchat (wieder verfügbar in {s} s)"
 	},

@@ -152,7 +152,8 @@ I18N.register("ko", {
 		passRound: "라운드 패스",
 		useLeader: "리더 보기 / 사용",
 		cancel: "취소 / 뒤로",
-		toggleHelp: "이 도움말 표시/숨기기"
+		toggleHelp: "이 도움말 표시/숨기기",
+		chat: "채팅 메시지 입력 (온라인)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("ko", {
 		notifications: "게임 메시지 켜기/끄기",
 		keybinds: "키보드 단축키",
 		feedback: "피드백 / 버그 신고",
-		quickChat: "빠른 채팅 켜기/끄기",
+		chat: "채팅 설정",
 		language: "언어"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("ko", {
 		hello: "안녕하세요!",
 		goodLuck: "행운을 빌어요!",
 		goodMove: "좋은 수네요!",
-		watchThis: "이거 봐요...",
+		watchThis: "이거 봐요!",
 		oops: "이런!",
 		goodGame: "좋은 게임이었어요!",
 		thanks: "게임 감사합니다!",
 		bye: "안녕히!",
-		opponentOn: "상대의 빠른 채팅이 켜져 있습니다: 내 메시지가 보입니다",
-		opponentOff: "상대의 빠른 채팅이 꺼져 있습니다: 내 메시지가 보이지 않습니다",
+		settingsTitle: "채팅 설정",
+		quickLabel: "빠른 채팅",
+		quickHint: "미리 정해진 문구와 이모트",
+		textLabel: "텍스트 채팅",
+		textHint: "직접 메시지 입력",
+		muteLabel: "이 상대 음소거",
+		muteHint: "이번 대전 동안 상대의 메시지를 숨깁니다",
+		logTitle: "채팅",
+		showLog: "채팅 보기",
+		hideLog: "채팅 숨기기",
+		placeholder: "메시지 입력… (T)",
+		opponentTextOff: "상대가 텍스트 채팅을 꺼 두었습니다",
+		opponentState: "상대: {quick}, {text} (클릭하여 음소거)",
+		opQuickOn: "빠른 채팅 켜짐",
+		opQuickOff: "빠른 채팅 꺼짐",
+		opTextOn: "텍스트 채팅 켜짐",
+		opTextOff: "텍스트 채팅 꺼짐",
+		opponentMuted: "이번 대전 동안 상대 음소거됨 (클릭하여 해제)",
 		cooldown: "{s}초 후 채팅 가능 (도배 방지)",
 		openCooldown: "빠른 채팅 ({s}초 후 가능)"
 	},

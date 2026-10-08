@@ -153,7 +153,8 @@ I18N.register("en", {
 		passRound: "Pass the round",
 		useLeader: "View / use your Leader",
 		cancel: "Cancel / go back",
-		toggleHelp: "Toggle this help"
+		toggleHelp: "Toggle this help",
+		chat: "Type a chat message (online)"
 	},
 
 	settings: {
@@ -162,7 +163,7 @@ I18N.register("en", {
 		notifications: "Toggle game messages",
 		keybinds: "Keyboard shortcuts",
 		feedback: "Feedback / report a bug",
-		quickChat: "Toggle quick chat",
+		chat: "Chat settings",
 		language: "Language"
 	},
 
@@ -171,13 +172,29 @@ I18N.register("en", {
 		hello: "Hello!",
 		goodLuck: "Good luck!",
 		goodMove: "Good move!",
-		watchThis: "Watch this...",
+		watchThis: "Watch this!",
 		oops: "Oops!",
 		goodGame: "Good game!",
 		thanks: "Thanks for the game!",
 		bye: "Bye!",
-		opponentOn: "Opponent's quick chat is on: they see your messages",
-		opponentOff: "Opponent's quick chat is off: they won't see your messages",
+		settingsTitle: "Chat settings",
+		quickLabel: "Quick chat",
+		quickHint: "Preset phrases and emotes",
+		textLabel: "Text chat",
+		textHint: "Type your own messages",
+		muteLabel: "Mute this opponent",
+		muteHint: "Hides their messages for this match",
+		logTitle: "Chat",
+		showLog: "Show chat",
+		hideLog: "Hide chat",
+		placeholder: "Type a message… (T)",
+		opponentTextOff: "Opponent has text chat off",
+		opponentState: "Opponent: {quick}, {text} (click to mute)",
+		opQuickOn: "quick chat on",
+		opQuickOff: "quick chat off",
+		opTextOn: "text chat on",
+		opTextOff: "text chat off",
+		opponentMuted: "Opponent muted for this match (click to unmute)",
 		cooldown: "Chat unlocks in {s}s (prevents spam)",
 		openCooldown: "Quick chat (unlocks in {s}s)"
 	},

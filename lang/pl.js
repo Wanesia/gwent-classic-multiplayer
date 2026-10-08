@@ -152,7 +152,8 @@ I18N.register("pl", {
 		passRound: "Spasuj rundę",
 		useLeader: "Zobacz / użyj dowódcy",
 		cancel: "Anuluj / cofnij",
-		toggleHelp: "Przełącz tę pomoc"
+		toggleHelp: "Przełącz tę pomoc",
+		chat: "Napisz wiadomość na czacie (online)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("pl", {
 		notifications: "Przełącz komunikaty gry",
 		keybinds: "Skróty klawiszowe",
 		feedback: "Opinie / zgłoś błąd",
-		quickChat: "Przełącz szybki czat",
+		chat: "Ustawienia czatu",
 		language: "Język"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("pl", {
 		hello: "Cześć!",
 		goodLuck: "Powodzenia!",
 		goodMove: "Dobry ruch!",
-		watchThis: "Patrz na to...",
+		watchThis: "Patrz na to!",
 		oops: "Ups!",
 		goodGame: "Dobra gra!",
 		thanks: "Dzięki za grę!",
 		bye: "Na razie!",
-		opponentOn: "Szybki czat przeciwnika jest włączony: widzi twoje wiadomości",
-		opponentOff: "Szybki czat przeciwnika jest wyłączony: nie zobaczy twoich wiadomości",
+		settingsTitle: "Ustawienia czatu",
+		quickLabel: "Szybki czat",
+		quickHint: "Gotowe zwroty i emotki",
+		textLabel: "Czat tekstowy",
+		textHint: "Pisz własne wiadomości",
+		muteLabel: "Wycisz tego przeciwnika",
+		muteHint: "Ukrywa jego wiadomości do końca meczu",
+		logTitle: "Czat",
+		showLog: "Pokaż czat",
+		hideLog: "Ukryj czat",
+		placeholder: "Napisz wiadomość… (T)",
+		opponentTextOff: "Przeciwnik ma wyłączony czat tekstowy",
+		opponentState: "Przeciwnik: {quick}, {text} (kliknij, aby wyciszyć)",
+		opQuickOn: "szybki czat włączony",
+		opQuickOff: "szybki czat wyłączony",
+		opTextOn: "czat tekstowy włączony",
+		opTextOff: "czat tekstowy wyłączony",
+		opponentMuted: "Przeciwnik wyciszony do końca meczu (kliknij, aby cofnąć)",
 		cooldown: "Czat odblokuje się za {s} s (ochrona przed spamem)",
 		openCooldown: "Szybki czat (odblokuje się za {s} s)"
 	},
