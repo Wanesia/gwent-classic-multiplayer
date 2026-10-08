@@ -14,11 +14,11 @@ class TokenBucket {
 
 	reset() {
 		this.tokens = this.size;
-		this.last = Date.now();
+		this.last = performance.now();
 	}
 
 	refill() {
-		const now = Date.now();
+		const now = performance.now();
 		this.tokens = Math.min(this.size, this.tokens + (now - this.last) / this.refillMs);
 		this.last = now;
 	}
@@ -42,18 +42,20 @@ var QuickChat = {
 	PHRASES: ["hello", "goodLuck", "goodMove", "watchThis", "oops", "goodGame", "thanks", "bye"],
 	EMOTE_MS: 3000,
 	PHRASE_MS: 4500,
-	HOVER_CLOSE_MS: 300,
+	HOVER_CLOSE_MS: 700,
 
 	// The receiving side is a little more lenient so network jitter that
 	// bunches up honest messages doesn't drop them
 	sendBucket: new TokenBucket(3, 4000),
 	recvBucket: new TokenBucket(4, 3000),
 	timers: {},
+	pinned: false,
 
 	init() {
 		this.layer = document.getElementById("chat-layer");
 		this.button = document.getElementById("chat-button");
 		this.picker = document.getElementById("chat-picker");
+		this.opState = document.getElementById("chat-op-state");
 		this.bubbles = { me: document.getElementById("chat-bubble-me"), op: document.getElementById("chat-bubble-op") };
 		this.buildPicker();
 
@@ -68,15 +70,18 @@ var QuickChat = {
 				el.addEventListener("mouseleave", () => this.scheduleClose());
 			}
 		}
+		// A click pins the picker open until the next click outside, Escape or a send
 		this.button.addEventListener("click", e => {
 			e.stopPropagation();
-			if (canHover || !this.isOpen())
-				this.openPicker();
-			else
+			if (this.pinned) {
 				this.closePicker();
+			} else {
+				this.openPicker();
+				this.pinned = this.isOpen();
+			}
 		});
 		document.addEventListener("pointerdown", e => {
-			if (this.isOpen() && !this.button.contains(e.target) && !this.picker.contains(e.target))
+			if (this.isOpen() && !this.button.contains(e.target) && !this.isInsidePicker(e))
 				this.closePicker();
 		});
 		// Capture phase so Escape closes the picker without also cancelling a
@@ -113,7 +118,17 @@ var QuickChat = {
 			add(emotes, id, this.EMOTES[id]);
 		for (const id of this.PHRASES)
 			add(phrases, id, I18N.t("chat." + id));
-		this.picker.append(emotes, phrases);
+		this.cooldownNote = document.createElement("div");
+		this.cooldownNote.id = "chat-cooldown-note";
+		this.picker.append(emotes, phrases, this.cooldownNote);
+	},
+
+	// The picker's invisible hover margin counts as outside for clicks
+	isInsidePicker(e) {
+		if (!this.picker.contains(e.target))
+			return false;
+		const r = this.picker.getBoundingClientRect();
+		return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
 	},
 
 	// Online match, chat switched on, and an opponent whose client knows the
@@ -137,6 +152,7 @@ var QuickChat = {
 			this.hideBubble("me");
 			this.hideBubble("op");
 		}
+		this.updatePeerState();
 		this.updateCooldown();
 	},
 
@@ -154,6 +170,20 @@ var QuickChat = {
 		if (!this.available() || !this.isKnown(msg.q) || !this.recvBucket.take())
 			return;
 		this.show("op", msg.q);
+	},
+
+	// {t:"chat-state", on}: the opponent switched their quick chat on or off
+	receiveState(msg) {
+		if (typeof msg.on !== "boolean")
+			return;
+		lobby.peerChatOn = msg.on;
+		this.updatePeerState();
+	},
+
+	updatePeerState() {
+		const on = lobby.peerChatOn === true;
+		this.opState.classList.toggle("off", !on);
+		this.opState.setAttribute("data-title", I18N.t(on ? "chat.opponentOn" : "chat.opponentOff"));
 	},
 
 	isKnown(id) {
@@ -196,21 +226,32 @@ var QuickChat = {
 
 	closePicker() {
 		clearTimeout(this.closeTimer);
+		this.pinned = false;
 		this.picker.classList.remove("open");
 		this.button.classList.remove("active");
 	},
 
 	scheduleClose() {
 		clearTimeout(this.closeTimer);
+		if (this.pinned)
+			return;
 		this.closeTimer = setTimeout(() => this.closePicker(), this.HOVER_CLOSE_MS);
 	},
 
+	// Disables the options while the send bucket is empty, with a per-second countdown
 	updateCooldown() {
 		clearTimeout(this.cooldownTimer);
 		const wait = this.sendBucket.msUntilNext();
+		const s = Math.ceil(wait / 1000);
 		this.layer.classList.toggle("chat-cooldown", wait > 0);
-		if (wait > 0)
-			this.cooldownTimer = setTimeout(() => this.updateCooldown(), wait);
+		this.cooldownNote.textContent = wait > 0 ? I18N.t("chat.cooldown", { s }) : "";
+		this.button.setAttribute("data-title", wait > 0 ? I18N.t("chat.openCooldown", { s }) : I18N.t("chat.open"));
+		if (wait > 0) {
+			this.button.dataset.cooldown = s;
+			this.cooldownTimer = setTimeout(() => this.updateCooldown(), wait % 1000 || 1000);
+		} else {
+			delete this.button.dataset.cooldown;
+		}
 	}
 };
 

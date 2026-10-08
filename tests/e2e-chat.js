@@ -1,7 +1,9 @@
 // End-to-end quick chat test: chat is off by default, can be switched on
 // mid-match, arrives translated into the receiver's language, is rate-limited
-// and filtered on both ends, and never disturbs the lockstep game (the match
-// is played out to the end screen with matching checksums).
+// and filtered on both ends, shows whether the opponent has it switched on,
+// keeps the picker open on slow/diagonal mouse paths and when pinned by a
+// click, and never disturbs the lockstep game (the match is played out to the
+// end screen with matching checksums).
 const { chromium } = require('playwright-core');
 
 const URL = 'http://localhost:8077/index.html?server=ws://localhost:8765';
@@ -38,6 +40,20 @@ async function waitFor(page, fn, label, timeout = 30000, arg = null) {
 	}
 }
 
+const picking = page => page.evaluate(() => document.getElementById('chat-picker').classList.contains('open'));
+const opState = page => page.evaluate(() => {
+	const el = document.getElementById('chat-op-state');
+	return { on: !el.classList.contains('off'), title: el.getAttribute('data-title') };
+});
+const center = (page, sel) => page.evaluate(s => {
+	const r = document.querySelector(s).getBoundingClientRect();
+	return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}, sel);
+const EN_ON = "Opponent's quick chat is on: they see your messages";
+const EN_OFF = "Opponent's quick chat is off: they won't see your messages";
+const PL_ON = 'Szybki czat przeciwnika jest włączony: widzi twoje wiadomości';
+const PL_OFF = 'Szybki czat przeciwnika jest wyłączony: nie zobaczy twoich wiadomości';
+
 const layerShown = page => page.evaluate(() => !document.getElementById('chat-layer').classList.contains('hide'));
 const bubble = (page, who) => page.evaluate(w => {
 	const b = document.getElementById('chat-bubble-' + w);
@@ -66,14 +82,37 @@ const bubble = (page, who) => page.evaluate(w => {
 	await waitFor(A, () => lobby.inMultiplayer, 'host entered deck setup');
 	await waitFor(B, () => lobby.inMultiplayer, 'guest entered deck setup');
 
+	// record what the host hears in the lobby
+	await A.evaluate(() => {
+		window.lobbyMsgs = [];
+		const route = lobby.routeLobby.bind(lobby);
+		lobby.routeLobby = m => { window.lobbyMsgs.push(m); route(m); };
+	});
+
+	// the guest's setting travels with its lobby-ready
+	await B.evaluate(() => ui.toggleQuickChat());
+	await B.evaluate(() => document.getElementById('start-game').click());
+	await waitFor(A, () => lobby.remoteReady, 'host sees guest ready');
+	assert(await A.evaluate(() => lobby.peerChatOn === true && window.lobbyMsgs.some(m => m.t === 'lobby-ready' && m.chatOn === true)), 'initial opponent chat state arrives with lobby-ready');
+
+	// a toggle after readying waits until the host has advertised chat support
+	await B.evaluate(() => ui.toggleQuickChat());
+	await A.waitForTimeout(300);
+	assert(await A.evaluate(() => lobby.peerChatOn === true && !window.lobbyMsgs.some(m => m.t === 'chat-state')), 'no chat-state sent before the peer advertised chat support');
+
 	await A.evaluate(() => { GameRNG.randomSeed = () => 1; });
 	await A.evaluate(() => document.getElementById('start-game').click());
-	await waitFor(B, () => lobby.remoteReady, 'guest sees host ready');
-	await B.evaluate(() => document.getElementById('start-game').click());
 	await waitFor(A, () => mp.active && game.state.val === 10, 'host game started');
 	await waitFor(B, () => mp.active && game.state.val === 10, 'guest game started');
 
 	assert(await A.evaluate(() => lobby.peerChat) && await B.evaluate(() => lobby.peerChat), 'both clients advertised chat support');
+
+	// --- the deferred toggle reached the host before the match started ---
+	assert(await A.evaluate(() => window.lobbyMsgs.some(m => m.t === 'chat-state' && m.on === false) && lobby.peerChatOn === false), 'deck-builder toggle arrives through the lobby once both are ready');
+	let st = await opState(A);
+	assert(!st.on && st.title === EN_OFF, 'host indicator shows the guest chat off: ' + st.title);
+	st = await opState(B);
+	assert(!st.on && st.title === PL_OFF, 'guest indicator shows the host chat off: ' + st.title);
 
 	// --- off by default ---
 	assert(await A.evaluate(() => !Settings.quickChat.isEnabled()), 'quick chat is off by default');
@@ -83,8 +122,14 @@ const bubble = (page, who) => page.evaluate(w => {
 	// --- opt in mid-match (during the redraw) via the settings toggle ---
 	await waitFor(A, () => Carousel.curr, 'host redraw open');
 	await A.click('#toggle-chat');
+	await waitFor(B, () => lobby.peerChatOn === true, 'mid-match toggle reaches the guest');
 	await B.click('#toggle-chat');
 	assert(await layerShown(A) && await layerShown(B), 'chat button appears after opting in');
+	st = await opState(B);
+	assert(st.on && st.title === PL_ON, 'guest indicator lights up with the toggle: ' + st.title);
+	await waitFor(A, () => !document.getElementById('chat-op-state').classList.contains('off'), 'host indicator lights up with the toggle');
+	st = await opState(A);
+	assert(st.on && st.title === EN_ON, 'host indicator tooltip follows the toggle: ' + st.title);
 
 	// --- sending through the real picker: hover opens it, click sends ---
 	await A.hover('#chat-button');
@@ -104,12 +149,60 @@ const bubble = (page, who) => page.evaluate(w => {
 	await B.evaluate(() => Carousel.curr.cancel());
 	await waitFor(A, () => game.roundCount === 1 && game.currPlayer, 'round 1 started');
 
+	// --- slow diagonal path from the button up-right to the far-right phrase ---
+	await A.evaluate(() => { QuickChat.closePicker(); QuickChat.sendBucket.reset(); });
+	const from = await center(A, '#chat-button');
+	await A.mouse.move(from.x, from.y);
+	await waitFor(A, () => document.getElementById('chat-picker').classList.contains('open'), 'hover opens the picker');
+	await A.waitForTimeout(250);
+	const to = await center(A, '#chat-picker [data-chat="bye"]');
+	let stayedOpen = true;
+	for (let i = 1; i <= 30; i++) {
+		await A.mouse.move(from.x + (to.x - from.x) * i / 30, from.y + (to.y - from.y) * i / 30);
+		await A.waitForTimeout(40);
+		if (!(await picking(A))) stayedOpen = false;
+	}
+	assert(stayedOpen, 'picker stays open along a slow diagonal path');
+	await A.mouse.down(); await A.mouse.up();
+	await waitFor(B, () => document.getElementById('chat-bubble-op').textContent === 'Na razie!', 'phrase reached by the diagonal path is sent');
+
+	// --- a click pins the picker open until Escape or a click outside ---
+	await A.evaluate(() => QuickChat.sendBucket.reset());
+	await A.click('#chat-button');
+	await A.mouse.move(A.viewportSize().width * 0.6, A.viewportSize().height * 0.5);
+	await A.waitForTimeout(1200);
+	assert(await picking(A), 'clicked picker survives the mouse leaving');
+	await A.keyboard.press('Escape');
+	assert(!(await picking(A)), 'Escape closes the pinned picker');
+	await A.click('#chat-button');
+	const vw = A.viewportSize().width / 100;
+	await A.mouse.click(18 * vw, 11 * vw);
+	assert(!(await picking(A)), 'a click outside closes the pinned picker');
+	await A.mouse.move(A.viewportSize().width * 0.6, A.viewportSize().height * 0.5);
+
 	// --- sender rate limit: a burst of 3, the rest dropped ---
 	await B.evaluate(() => { window.chatSeen = 0; const show = QuickChat.show.bind(QuickChat); QuickChat.show = (w, id) => { if (w === 'op') window.chatSeen++; show(w, id); }; });
 	await A.evaluate(() => { QuickChat.sendBucket.reset(); for (let i = 0; i < 6; i++) QuickChat.send('oops'); });
 	await A.waitForTimeout(800);
 	assert(await B.evaluate(() => window.chatSeen) === 3, 'only 3 of 6 rapid messages sent (got ' + await B.evaluate(() => window.chatSeen) + ')');
 	assert(await A.evaluate(() => document.getElementById('chat-layer').classList.contains('chat-cooldown')), 'sender picker greyed out during cooldown');
+
+	// --- the cooldown is explained with a live countdown ---
+	await A.evaluate(() => QuickChat.openPicker());
+	const note = () => A.evaluate(() => {
+		const n = document.getElementById('chat-cooldown-note');
+		return getComputedStyle(n).display === 'none' ? null : { text: n.textContent, badge: document.getElementById('chat-button').dataset.cooldown };
+	});
+	const n1 = await note();
+	const secs = n1 && +(n1.text.match(/\d+/) || [])[0];
+	assert(n1 && /^Chat unlocks in \d+s \(prevents spam\)$/.test(n1.text) && secs >= 1 && secs <= 4, 'cooldown banner shows the seconds left: ' + (n1 && n1.text));
+	assert(n1 && +n1.badge === secs, 'chat button badge shows the same countdown');
+	await A.waitForTimeout(1100);
+	const n2 = await note();
+	assert(!n2 || +(n2.text.match(/\d+/) || [])[0] < secs, 'countdown ticks down: ' + (n2 && n2.text));
+	await waitFor(A, () => !document.getElementById('chat-layer').classList.contains('chat-cooldown'), 'chat unlocks again', 6000);
+	assert(await note() === null && await A.evaluate(() => !('cooldown' in document.getElementById('chat-button').dataset)), 'banner and badge disappear once unlocked');
+	await A.evaluate(() => QuickChat.closePicker());
 
 	// --- receiver filtering: unknown ids and floods from a modified client ---
 	await B.evaluate(() => { window.chatSeen = 0; QuickChat.recvBucket.reset(); });
@@ -122,11 +215,15 @@ const bubble = (page, who) => page.evaluate(w => {
 	// --- opting out: nothing shown, nothing sent ---
 	await B.click('#toggle-chat');
 	assert(!(await layerShown(B)), 'chat button hidden after opting out');
+	await waitFor(A, () => document.getElementById('chat-op-state').classList.contains('off'), 'opponent indicator dims when they opt out');
+	st = await opState(A);
+	assert(!st.on && st.title === EN_OFF, 'opponent indicator tooltip says they won\'t see messages: ' + st.title);
 	await B.evaluate(() => { window.chatSeen = 0; QuickChat.recvBucket.reset(); });
 	await A.evaluate(() => { QuickChat.sendBucket.reset(); QuickChat.send('hello'); });
 	await A.waitForTimeout(500);
 	assert(await B.evaluate(() => window.chatSeen) === 0, 'opted-out player receives nothing');
 	await B.click('#toggle-chat');
+	await waitFor(A, () => !document.getElementById('chat-op-state').classList.contains('off'), 'opponent indicator lights up when they opt back in');
 
 	// --- an opponent on an older client: no chat UI ---
 	await A.evaluate(() => { lobby.peerChat = false; QuickChat.refresh(); });

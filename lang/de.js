@@ -174,7 +174,11 @@ I18N.register("de", {
 		oops: "Hoppla!",
 		goodGame: "Gutes Spiel!",
 		thanks: "Danke für das Spiel!",
-		bye: "Tschüss!"
+		bye: "Tschüss!",
+		opponentOn: "Schnellchat des Gegners ist an: Er sieht deine Nachrichten",
+		opponentOff: "Schnellchat des Gegners ist aus: Er sieht deine Nachrichten nicht",
+		cooldown: "Chat wieder verfügbar in {s} s (Spamschutz)",
+		openCooldown: "Schnellchat (wieder verfügbar in {s} s)"
 	},
 
 	feedback: {

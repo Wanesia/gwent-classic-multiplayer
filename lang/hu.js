@@ -174,7 +174,11 @@ I18N.register("hu", {
 		oops: "Hoppá!",
 		goodGame: "Jó játék volt!",
 		thanks: "Köszi a játékot!",
-		bye: "Szia, viszlát!"
+		bye: "Szia, viszlát!",
+		opponentOn: "Az ellenfél gyors csevegése be van kapcsolva: látja az üzeneteidet",
+		opponentOff: "Az ellenfél gyors csevegése ki van kapcsolva: nem látja az üzeneteidet",
+		cooldown: "A csevegés {s} mp múlva újra elérhető (spam elleni védelem)",
+		openCooldown: "Gyors csevegés ({s} mp múlva elérhető)"
 	},
 
 	feedback: {

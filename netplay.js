@@ -7,7 +7,8 @@
 // messages and replays them through the same code paths the UI uses.
 //
 // Wire messages (perspective-neutral; players/rows referenced as host/guest):
-//   {t:"lobby-ready", deck, chat} {t:"lobby-unready"}  ready-up (lobby.js)
+//   {t:"lobby-ready", deck, chat, chatOn}              ready-up (lobby.js)
+//   {t:"lobby-unready"}
 //   {t:"lobby-start", seed} {t:"lobby-start-ack"}      host-driven match start
 //   {t:"pick", i} {t:"pickEnd"}                        any synced carousel
 //   {t:"first", who}                                   Scoia'tael go-first choice
@@ -15,7 +16,7 @@
 //   {t:"decoy", i, d, j} {t:"leader"}
 //   {t:"row", d}                                       mid-resolution row choice
 //   {t:"sum", h}                                       per-turn state checksum
-//   {t:"chat", q}                                      quick chat (chat.js), outside the lockstep
+//   {t:"chat", q} {t:"chat-state", on}                 quick chat (chat.js), outside the lockstep
 
 // Hand replica for the remote human player. Mirrors the local Hand's array
 // semantics exactly (sorted insert, or splice at an explicit index during
@@ -134,6 +135,8 @@ class MPSession {
 			return lobby.routeLobby(msg);
 		if (msg.t === "chat")
 			return QuickChat.receive(msg);
+		if (msg.t === "chat-state")
+			return QuickChat.receiveState(msg);
 		this.queue.push(msg);
 		const w = this.waiter;
 		if (w) {

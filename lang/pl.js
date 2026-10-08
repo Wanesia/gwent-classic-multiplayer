@@ -174,7 +174,11 @@ I18N.register("pl", {
 		oops: "Ups!",
 		goodGame: "Dobra gra!",
 		thanks: "Dzięki za grę!",
-		bye: "Na razie!"
+		bye: "Na razie!",
+		opponentOn: "Szybki czat przeciwnika jest włączony: widzi twoje wiadomości",
+		opponentOff: "Szybki czat przeciwnika jest wyłączony: nie zobaczy twoich wiadomości",
+		cooldown: "Czat odblokuje się za {s} s (ochrona przed spamem)",
+		openCooldown: "Szybki czat (odblokuje się za {s} s)"
 	},
 
 	feedback: {

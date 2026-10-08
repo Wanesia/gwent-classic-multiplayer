@@ -174,7 +174,11 @@ I18N.register("cs", {
 		oops: "Jejda!",
 		goodGame: "Dobrá hra!",
 		thanks: "Díky za hru!",
-		bye: "Měj se!"
+		bye: "Měj se!",
+		opponentOn: "Soupeř má rychlý chat zapnutý: vidí vaše zprávy",
+		opponentOff: "Soupeř má rychlý chat vypnutý: vaše zprávy neuvidí",
+		cooldown: "Chat se odemkne za {s} s (ochrana proti spamu)",
+		openCooldown: "Rychlý chat (odemkne se za {s} s)"
 	},
 
 	feedback: {
