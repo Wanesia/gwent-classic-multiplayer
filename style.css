@@ -225,6 +225,19 @@ html {
 	z-index: 95;
 }
 
+#toggle-chat {
+	top: 48.9vw;
+	left: 22.9vw;
+}
+#toggle-chat.deck-menu,
+#toggle-chat.lobby-menu {
+	position: fixed;
+	bottom: 2vh;
+	top: auto;
+	left: 12vw;
+	z-index: 95;
+}
+
 #pass-button[data-title]:hover::after
 {
 	bottom: -2.2vw;
@@ -1878,7 +1891,7 @@ main { background-image: url('img/boardtest8.png'); }
 	}
 
 	/* Buttons at the left screen edge: grow the tooltip rightwards */
-	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-keybinds)[data-title]:hover::after {
+	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat, #toggle-keybinds, #chat-button)[data-title]:hover::after {
 		left: 0;
 	}
 
@@ -3111,6 +3124,206 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 /* Keep controls clickable above an open carousel */
-body:has(#carousel:not(.hide)) :is(#exit-game, #toggle-keybinds, #match-fullscreen-toggle, #toggle-music, #toggle-sfx, #toggle-notifications) {
+body:has(#carousel:not(.hide)) :is(#exit-game, #toggle-keybinds, #match-fullscreen-toggle, #toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat) {
 	z-index: 95;
+}
+
+/* ---------- quick chat (chat.js) ----------
+   Positions are in canvas units (vw), lined up with the portraits in the
+   left panel. */
+
+#chat-layer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: calc(100vw * 1080 / 1920);
+	pointer-events: none;
+	z-index: 1001;
+}
+#chat-layer.hide,
+body:has(#popup:not(.hide)) #chat-layer {
+	display: none;
+}
+
+#chat-button {
+	position: absolute;
+	left: 1.6vw;
+	top: 37.05vw;
+	width: 2.4vw;
+	height: 2.4vw;
+	padding: 0.45vw;
+	border: 0.12vw solid rgba(218, 165, 32, 0.45);
+	border-radius: 50%;
+	background-color: rgba(10, 10, 10, 0.75);
+	pointer-events: auto;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+#chat-button > img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+#chat-button:hover,
+#chat-button.active {
+	border-color: goldenrod;
+	box-shadow: 0 0 0.6vw rgba(218, 165, 32, 0.6);
+}
+#chat-button.active::after {
+	display: none;
+}
+.chat-cooldown #chat-button {
+	opacity: 0.45;
+}
+
+#chat-picker {
+	display: none;
+	position: absolute;
+	left: 0.9vw;
+	bottom: 21.6vw;
+	width: 22.6vw;
+	padding: 0.6vw;
+	border: 0.12vw solid rgba(218, 165, 32, 0.55);
+	border-radius: 0.6vw;
+	background-color: rgba(12, 10, 7, 0.96);
+	box-shadow: 0 0.3vw 1.2vw rgba(0, 0, 0, 0.8);
+	pointer-events: auto;
+	transform-origin: 1.9vw calc(100% + 2.6vw);
+}
+#chat-picker.open {
+	display: block;
+	animation: chat-picker-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+/* Bridges the gap down to the button so moving the mouse between them
+   doesn't close the picker */
+#chat-picker::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 100%;
+	width: 4vw;
+	height: 2.6vw;
+}
+
+.chat-emotes {
+	display: flex;
+	justify-content: space-between;
+	padding-bottom: 0.5vw;
+	margin-bottom: 0.5vw;
+	border-bottom: 0.08vw solid rgba(218, 165, 32, 0.25);
+}
+.chat-phrases {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.35vw;
+}
+
+.chat-option {
+	border: 0.08vw solid rgba(218, 165, 32, 0.25);
+	background-color: rgba(40, 32, 20, 0.7);
+	color: #e8cf96;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 1.05vw;
+	line-height: 1.2;
+	padding: 0.35vw 0.5vw;
+	border-radius: 0.35vw;
+	overflow-wrap: anywhere;
+	transition: background-color 0.1s, border-color 0.1s, transform 0.1s;
+	animation: chat-option-in 0.22s ease-out backwards;
+	animation-delay: calc(var(--i) * 18ms);
+}
+.chat-emotes > .chat-option {
+	width: 3.1vw;
+	height: 3.1vw;
+	padding: 0;
+	border-radius: 50%;
+	font-size: 1.7vw;
+	line-height: 1;
+}
+.chat-option:hover {
+	background-color: rgba(218, 165, 32, 0.22);
+	border-color: goldenrod;
+	color: #fff2cf;
+}
+.chat-emotes > .chat-option:hover {
+	transform: scale(1.12);
+}
+.chat-cooldown .chat-option {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.chat-bubble {
+	display: none;
+	position: absolute;
+	left: 4.4vw;
+	max-width: 17vw;
+	padding: 0.45vw 0.85vw;
+	border: 0.12vw solid rgba(218, 165, 32, 0.7);
+	border-radius: 0.8vw;
+	background-color: rgba(18, 14, 9, 0.96);
+	box-shadow: 0 0.2vw 0.9vw rgba(0, 0, 0, 0.85);
+	color: #f3dfae;
+	font-family: Arial Narrow, sans-serif;
+	font-size: 1.2vw;
+	line-height: 1.25;
+	pointer-events: none;
+}
+.chat-bubble.chat-emote {
+	padding: 0.2vw 0.6vw;
+	font-size: 2.3vw;
+	line-height: 1.2;
+}
+.chat-bubble.show {
+	display: block;
+	animation:
+		chat-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1),
+		chat-fade 0.4s ease-in calc(var(--chat-ms) - 0.4s) forwards;
+}
+/* Tail pointing at the portrait */
+.chat-bubble::after {
+	content: "";
+	position: absolute;
+	left: 4.1vw;
+	width: 0.9vw;
+	height: 0.9vw;
+	background-color: inherit;
+	border: inherit;
+	border-width: 0 0.12vw 0.12vw 0;
+	border-radius: 0;
+}
+
+#chat-bubble-op {
+	top: 21.1vw;
+	transform-origin: 4.55vw -0.6vw;
+}
+#chat-bubble-op::after {
+	top: -0.5vw;
+	transform: rotate(-135deg);
+}
+
+#chat-bubble-me {
+	bottom: 21.6vw;
+	transform-origin: 4.55vw calc(100% + 0.6vw);
+}
+#chat-bubble-me::after {
+	bottom: -0.5vw;
+	transform: rotate(45deg);
+}
+
+@keyframes chat-picker-in {
+	from { opacity: 0; transform: scale(0.85); }
+	to { opacity: 1; transform: scale(1); }
+}
+@keyframes chat-option-in {
+	from { opacity: 0; transform: translateY(0.5vw); }
+	to { opacity: 1; transform: translateY(0); }
+}
+@keyframes chat-pop {
+	from { opacity: 0; transform: scale(0.5); }
+	to { opacity: 1; transform: scale(1); }
+}
+@keyframes chat-fade {
+	to { opacity: 0; transform: translateY(-0.3vw); }
 }

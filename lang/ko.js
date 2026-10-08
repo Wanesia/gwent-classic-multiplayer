@@ -161,7 +161,20 @@ I18N.register("ko", {
 		notifications: "게임 메시지 켜기/끄기",
 		keybinds: "키보드 단축키",
 		feedback: "피드백 / 버그 신고",
+		quickChat: "빠른 채팅 켜기/끄기",
 		language: "언어"
+	},
+
+	chat: {
+		open: "빠른 채팅",
+		hello: "안녕하세요!",
+		goodLuck: "행운을 빌어요!",
+		goodMove: "좋은 수네요!",
+		watchThis: "이거 봐요...",
+		oops: "이런!",
+		goodGame: "좋은 게임이었어요!",
+		thanks: "게임 감사합니다!",
+		bye: "안녕히!"
 	},
 
 	feedback: {

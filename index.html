@@ -319,6 +319,15 @@
 
 </main>
 
+<!-- Quick chat (chat.js): outside <main> so it stays usable on the opponent's
+     turn, and above the redraw picker and end screen -->
+<section id="chat-layer" class="hide">
+	<div id="chat-picker"></div>
+	<div id="chat-bubble-op" class="chat-bubble"></div>
+	<div id="chat-bubble-me" class="chat-bubble"></div>
+	<button id="chat-button" type="button" tabindex="-1" data-title="Quick chat" data-i18n-datatitle="chat.open"><img src="svg/chat.svg" alt=""></button>
+</section>
+
 <section id="deck-customization">
 	<a id="fullscreen-toggle" data-i18n="deck.fullscreenMode">Fullscreen mode</a>
 	<div id="faction-title" class="center">
@@ -467,6 +476,7 @@
 <div data-title="Toggle music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
 <div data-title="Toggle sound effects" data-i18n-datatitle="settings.sfx" id="toggle-sfx" class="center deck-menu settings-button"><img src="svg/sfx.svg"></img></div>
 <div data-title="Toggle game messages" data-i18n-datatitle="settings.notifications" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
+<div data-title="Toggle quick chat" data-i18n-datatitle="settings.quickChat" id="toggle-chat" class="center deck-menu settings-button"><img src="svg/chat.svg"></img></div>
 <div data-title="Keyboard shortcuts" data-i18n-datatitle="settings.keybinds" id="toggle-keybinds" class="center deck-menu settings-button"><span>?</span></div>
 <div data-title="Feedback / report a bug" data-i18n-datatitle="settings.feedback" id="toggle-feedback" class="center deck-menu settings-button"><img src="svg/feedback.svg"></img></div>
 <div id="lang-select">
@@ -563,6 +573,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="text/javascript" src="gwent.js"></script>
 <script type="text/javascript" src="netplay.js"></script>
+<script type="text/javascript" src="chat.js"></script>
 <script type="text/javascript" src="lobby.js"></script>
 <script type="text/javascript" src="fit-screen.js"></script>
 <script type="text/javascript" src="changelog.js"></script>

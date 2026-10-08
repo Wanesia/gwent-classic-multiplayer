@@ -161,7 +161,20 @@ I18N.register("es", {
 		notifications: "Activar/desactivar mensajes de juego",
 		keybinds: "Atajos de teclado",
 		feedback: "Comentarios / informar de un error",
+		quickChat: "Activar/desactivar chat rápido",
 		language: "Idioma"
+	},
+
+	chat: {
+		open: "Chat rápido",
+		hello: "¡Hola!",
+		goodLuck: "¡Buena suerte!",
+		goodMove: "¡Buena jugada!",
+		watchThis: "Mira esto...",
+		oops: "¡Uy!",
+		goodGame: "¡Buena partida!",
+		thanks: "¡Gracias por la partida!",
+		bye: "¡Adiós!"
 	},
 
 	feedback: {

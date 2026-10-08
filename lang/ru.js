@@ -162,7 +162,20 @@ I18N.register("ru", {
 		notifications: "Вкл/выкл игровые сообщения",
 		keybinds: "Горячие клавиши",
 		feedback: "Отзыв / сообщить об ошибке",
+		quickChat: "Вкл/выкл быстрый чат",
 		language: "Язык"
+	},
+
+	chat: {
+		open: "Быстрый чат",
+		hello: "Привет!",
+		goodLuck: "Удачи!",
+		goodMove: "Хороший ход!",
+		watchThis: "Смотри...",
+		oops: "Упс!",
+		goodGame: "Хорошая игра!",
+		thanks: "Спасибо за игру!",
+		bye: "Пока!"
 	},
 
 	feedback: {

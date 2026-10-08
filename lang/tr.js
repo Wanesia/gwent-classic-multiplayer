@@ -161,7 +161,20 @@ I18N.register("tr", {
 		notifications: "Oyun mesajlarını aç/kapat",
 		keybinds: "Klavye kısayolları",
 		feedback: "Geri bildirim / hata bildir",
+		quickChat: "Hızlı sohbeti aç/kapat",
 		language: "Dil"
+	},
+
+	chat: {
+		open: "Hızlı sohbet",
+		hello: "Merhaba!",
+		goodLuck: "Bol şans!",
+		goodMove: "İyi hamle!",
+		watchThis: "Şuna bak...",
+		oops: "Hay aksi!",
+		goodGame: "İyi oyundu!",
+		thanks: "Oyun için teşekkürler!",
+		bye: "Hoşça kal!"
 	},
 
 	feedback: {

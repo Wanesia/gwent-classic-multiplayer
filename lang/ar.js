@@ -161,7 +161,20 @@ I18N.register("ar", {
 		notifications: "تشغيل/إيقاف رسائل اللعبة",
 		keybinds: "اختصارات لوحة المفاتيح",
 		feedback: "ملاحظات / الإبلاغ عن خطأ",
+		quickChat: "تشغيل/إيقاف الدردشة السريعة",
 		language: "اللغة"
+	},
+
+	chat: {
+		open: "دردشة سريعة",
+		hello: "مرحبًا!",
+		goodLuck: "حظًا موفقًا!",
+		goodMove: "حركة جيدة!",
+		watchThis: "شاهد هذا...",
+		oops: "عفوًا!",
+		goodGame: "لعبة جيدة!",
+		thanks: "شكرًا على اللعبة!",
+		bye: "وداعًا!"
 	},
 
 	feedback: {
