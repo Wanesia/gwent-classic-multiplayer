@@ -174,7 +174,11 @@ I18N.register("tr", {
 		oops: "Hay aksi!",
 		goodGame: "İyi oyundu!",
 		thanks: "Oyun için teşekkürler!",
-		bye: "Hoşça kal!"
+		bye: "Hoşça kal!",
+		opponentOn: "Rakibin hızlı sohbeti açık: mesajlarını görüyor",
+		opponentOff: "Rakibin hızlı sohbeti kapalı: mesajlarını görmeyecek",
+		cooldown: "Sohbet {s} sn sonra açılacak (spam önlemi)",
+		openCooldown: "Hızlı sohbet ({s} sn sonra açılır)"
 	},
 
 	feedback: {

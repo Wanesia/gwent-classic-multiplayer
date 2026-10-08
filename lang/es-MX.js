@@ -176,7 +176,11 @@ I18N.register("es-MX", {
 		oops: "¡Ups!",
 		goodGame: "¡Buen juego!",
 		thanks: "¡Gracias por el juego!",
-		bye: "¡Adiós!"
+		bye: "¡Adiós!",
+		opponentOn: "El chat rápido del rival está activado: ve tus mensajes",
+		opponentOff: "El chat rápido del rival está desactivado: no verá tus mensajes",
+		cooldown: "El chat se desbloquea en {s} s (evita el spam)",
+		openCooldown: "Chat rápido (se desbloquea en {s} s)"
 	},
 
 	feedback: {

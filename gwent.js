@@ -2320,6 +2320,7 @@ class UI {
 		Settings.quickChat.toggle();
 		this.toggleChat_elem.classList.toggle("fade", !Settings.quickChat.isEnabled());
 		QuickChat.refresh();
+		lobby.syncChatState();
 	}
 
 	toggleSFX() {

@@ -174,7 +174,11 @@ I18N.register("ko", {
 		oops: "이런!",
 		goodGame: "좋은 게임이었어요!",
 		thanks: "게임 감사합니다!",
-		bye: "안녕히!"
+		bye: "안녕히!",
+		opponentOn: "상대의 빠른 채팅이 켜져 있습니다: 내 메시지가 보입니다",
+		opponentOff: "상대의 빠른 채팅이 꺼져 있습니다: 내 메시지가 보이지 않습니다",
+		cooldown: "{s}초 후 채팅 가능 (도배 방지)",
+		openCooldown: "빠른 채팅 ({s}초 후 가능)"
 	},
 
 	feedback: {

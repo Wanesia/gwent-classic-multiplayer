@@ -174,7 +174,11 @@ I18N.register("ja", {
 		oops: "おっと！",
 		goodGame: "いい勝負だった！",
 		thanks: "対戦ありがとう！",
-		bye: "またね！"
+		bye: "またね！",
+		opponentOn: "相手のクイックチャットはオン：あなたのメッセージが表示されます",
+		opponentOff: "相手のクイックチャットはオフ：あなたのメッセージは表示されません",
+		cooldown: "あと{s}秒で送信可能（スパム防止）",
+		openCooldown: "クイックチャット（あと{s}秒）"
 	},
 
 	feedback: {

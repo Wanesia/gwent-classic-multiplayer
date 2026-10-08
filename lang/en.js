@@ -175,7 +175,11 @@ I18N.register("en", {
 		oops: "Oops!",
 		goodGame: "Good game!",
 		thanks: "Thanks for the game!",
-		bye: "Bye!"
+		bye: "Bye!",
+		opponentOn: "Opponent's quick chat is on: they see your messages",
+		opponentOff: "Opponent's quick chat is off: they won't see your messages",
+		cooldown: "Chat unlocks in {s}s (prevents spam)",
+		openCooldown: "Quick chat (unlocks in {s}s)"
 	},
 
 	feedback: {

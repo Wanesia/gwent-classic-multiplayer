@@ -174,7 +174,11 @@ I18N.register("zh-TW", {
 		oops: "哎呀！",
 		goodGame: "打得好！",
 		thanks: "感謝這局對戰！",
-		bye: "再見！"
+		bye: "再見！",
+		opponentOn: "對手已開啟快捷聊天：能看到你的訊息",
+		opponentOff: "對手已關閉快捷聊天：看不到你的訊息",
+		cooldown: "{s} 秒後可再次傳送（防止洗頻）",
+		openCooldown: "快捷聊天（{s} 秒後可用）"
 	},
 
 	feedback: {

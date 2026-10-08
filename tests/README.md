@@ -22,5 +22,5 @@ node relay-protocol.js                               # tests room creation, join
 node e2e-singleplayer.js                             # vs-AI
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
-node e2e-chat.js                                     # quick chat opt-in, translation, rate limits, no desync
+node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
 ```

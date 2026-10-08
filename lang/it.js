@@ -174,7 +174,11 @@ I18N.register("it", {
 		oops: "Ops!",
 		goodGame: "Bella partita!",
 		thanks: "Grazie per la partita!",
-		bye: "Ciao ciao!"
+		bye: "Ciao ciao!",
+		opponentOn: "La chat rapida dell'avversario è attiva: vede i tuoi messaggi",
+		opponentOff: "La chat rapida dell'avversario è disattivata: non vedrà i tuoi messaggi",
+		cooldown: "Chat di nuovo disponibile tra {s} s (anti-spam)",
+		openCooldown: "Chat rapida (disponibile tra {s} s)"
 	},
 
 	feedback: {
