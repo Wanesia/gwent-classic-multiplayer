@@ -23,4 +23,5 @@ node e2e-singleplayer.js                             # vs-AI
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
 node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
+node e2e-text-chat.js                                # text chat: settings cog, log, sanitizing, mute, T shortcut, no desync
 ```

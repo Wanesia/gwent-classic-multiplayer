@@ -1,4 +1,4 @@
-// End-to-end quick chat test: chat is off by default, can be switched on
+// End-to-end quick chat test: chat is on by default and can be switched off and on
 // mid-match, arrives translated into the receiver's language, is rate-limited
 // and filtered on both ends, shows whether the opponent has it switched on,
 // keeps the picker open on slow/diagonal mouse paths and when pinned by a
@@ -49,10 +49,17 @@ const center = (page, sel) => page.evaluate(s => {
 	const r = document.querySelector(s).getBoundingClientRect();
 	return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }, sel);
-const EN_ON = "Opponent's quick chat is on: they see your messages";
-const EN_OFF = "Opponent's quick chat is off: they won't see your messages";
-const PL_ON = 'Szybki czat przeciwnika jest włączony: widzi twoje wiadomości';
-const PL_OFF = 'Szybki czat przeciwnika jest wyłączony: nie zobaczy twoich wiadomości';
+const EN_ON = 'Opponent: quick chat on, text chat off (click to mute)';
+const EN_OFF = 'Opponent: quick chat off, text chat off (click to mute)';
+const PL_ON = 'Przeciwnik: szybki czat włączony, czat tekstowy wyłączony (kliknij, aby wyciszyć)';
+const PL_OFF = 'Przeciwnik: szybki czat wyłączony, czat tekstowy wyłączony (kliknij, aby wyciszyć)';
+
+// Flips a switch in the chat settings popover on the cog, then closes it
+async function toggleSetting(page, setting) {
+	await page.click('#toggle-chat-settings');
+	await page.click('#chat-settings [data-setting="' + setting + '"]');
+	await page.keyboard.press('Escape');
+}
 
 const layerShown = page => page.evaluate(() => !document.getElementById('chat-layer').classList.contains('hide'));
 const bubble = (page, who) => page.evaluate(w => {
@@ -60,10 +67,28 @@ const bubble = (page, who) => page.evaluate(w => {
 	return b.classList.contains('show') ? b.textContent : null;
 }, who);
 
+// The flows below opt in from chat off; seeded only when unset so reloads keep toggles
+const startChatOff = () => {
+	if (localStorage.getItem('gc-quick-chat') === null) {
+		localStorage.setItem('gc-quick-chat', 'false');
+		localStorage.setItem('gc-text-chat', 'false');
+	}
+};
+
 (async () => {
 	const browser = await chromium.launch();
-	const A = await (await browser.newContext()).newPage(); // host, English
+	// --- a new player starts with quick and text chat on ---
+	const fresh0 = await (await browser.newContext()).newPage();
+	await fresh0.goto(URL);
+	await fresh0.waitForFunction(() => typeof lobby !== 'undefined');
+	assert(await fresh0.evaluate(() => Settings.quickChat.isEnabled() && Settings.textChat.isEnabled()), 'quick and text chat are on by default');
+	await fresh0.close();
+
+	const aCtx = await browser.newContext();
+	await aCtx.addInitScript(startChatOff);
+	const A = await aCtx.newPage(); // host, English
 	const bCtx = await browser.newContext();
+	await bCtx.addInitScript(startChatOff);
 	await bCtx.addInitScript(() => localStorage.setItem('lang', 'pl'));
 	const B = await bCtx.newPage(); // guest, Polish
 	watch(A, 'A'); watch(B, 'B');
@@ -90,15 +115,15 @@ const bubble = (page, who) => page.evaluate(w => {
 	});
 
 	// the guest's setting travels with its lobby-ready
-	await B.evaluate(() => ui.toggleQuickChat());
+	await toggleSetting(B, 'quickChat');
 	await B.evaluate(() => document.getElementById('start-game').click());
 	await waitFor(A, () => lobby.remoteReady, 'host sees guest ready');
-	assert(await A.evaluate(() => lobby.peerChatOn === true && window.lobbyMsgs.some(m => m.t === 'lobby-ready' && m.chatOn === true)), 'initial opponent chat state arrives with lobby-ready');
+	assert(await A.evaluate(() => lobby.peerChatQuick === true && lobby.peerChatText === false && window.lobbyMsgs.some(m => m.t === 'lobby-ready' && m.chatQuick === true && m.chatText === false)), 'initial opponent chat state arrives with lobby-ready');
 
 	// a toggle after readying waits until the host has advertised chat support
-	await B.evaluate(() => ui.toggleQuickChat());
+	await toggleSetting(B, 'quickChat');
 	await A.waitForTimeout(300);
-	assert(await A.evaluate(() => lobby.peerChatOn === true && !window.lobbyMsgs.some(m => m.t === 'chat-state')), 'no chat-state sent before the peer advertised chat support');
+	assert(await A.evaluate(() => lobby.peerChatQuick === true && !window.lobbyMsgs.some(m => m.t === 'chat-state')), 'no chat-state sent before the peer advertised chat support');
 
 	await A.evaluate(() => { GameRNG.randomSeed = () => 1; });
 	await A.evaluate(() => document.getElementById('start-game').click());
@@ -108,22 +133,23 @@ const bubble = (page, who) => page.evaluate(w => {
 	assert(await A.evaluate(() => lobby.peerChat) && await B.evaluate(() => lobby.peerChat), 'both clients advertised chat support');
 
 	// --- the deferred toggle reached the host before the match started ---
-	assert(await A.evaluate(() => window.lobbyMsgs.some(m => m.t === 'chat-state' && m.on === false) && lobby.peerChatOn === false), 'deck-builder toggle arrives through the lobby once both are ready');
+	assert(await A.evaluate(() => window.lobbyMsgs.some(m => m.t === 'chat-state' && m.quick === false && m.text === false) && lobby.peerChatQuick === false), 'deck-builder toggle arrives through the lobby once both are ready');
 	let st = await opState(A);
 	assert(!st.on && st.title === EN_OFF, 'host indicator shows the guest chat off: ' + st.title);
 	st = await opState(B);
 	assert(!st.on && st.title === PL_OFF, 'guest indicator shows the host chat off: ' + st.title);
 
-	// --- off by default ---
-	assert(await A.evaluate(() => !Settings.quickChat.isEnabled()), 'quick chat is off by default');
+	// --- starting from chat off ---
+	assert(await A.evaluate(() => !Settings.quickChat.isEnabled()), 'quick chat is off');
 	assert(!(await layerShown(A)) && !(await layerShown(B)), 'chat button hidden while chat is off');
-	assert(await A.evaluate(() => document.getElementById('toggle-chat').classList.contains('fade')), 'settings toggle shows chat off');
+	assert(await A.evaluate(() => document.querySelector('#chat-settings [data-setting="quickChat"]').getAttribute('aria-checked') === 'false'), 'settings switch shows quick chat off');
 
 	// --- opt in mid-match (during the redraw) via the settings toggle ---
 	await waitFor(A, () => Carousel.curr, 'host redraw open');
-	await A.click('#toggle-chat');
-	await waitFor(B, () => lobby.peerChatOn === true, 'mid-match toggle reaches the guest');
-	await B.click('#toggle-chat');
+	await toggleSetting(A, 'quickChat');
+	assert(await A.evaluate(() => Carousel.curr !== null), 'Escape closing the settings popover leaves the redraw open');
+	await waitFor(B, () => lobby.peerChatQuick === true, 'mid-match toggle reaches the guest');
+	await toggleSetting(B, 'quickChat');
 	assert(await layerShown(A) && await layerShown(B), 'chat button appears after opting in');
 	st = await opState(B);
 	assert(st.on && st.title === PL_ON, 'guest indicator lights up with the toggle: ' + st.title);
@@ -213,7 +239,7 @@ const bubble = (page, who) => page.evaluate(w => {
 	assert(await B.evaluate(() => mp.active), 'bad chat messages did not desync the match');
 
 	// --- opting out: nothing shown, nothing sent ---
-	await B.click('#toggle-chat');
+	await toggleSetting(B, 'quickChat');
 	assert(!(await layerShown(B)), 'chat button hidden after opting out');
 	await waitFor(A, () => document.getElementById('chat-op-state').classList.contains('off'), 'opponent indicator dims when they opt out');
 	st = await opState(A);
@@ -222,7 +248,7 @@ const bubble = (page, who) => page.evaluate(w => {
 	await A.evaluate(() => { QuickChat.sendBucket.reset(); QuickChat.send('hello'); });
 	await A.waitForTimeout(500);
 	assert(await B.evaluate(() => window.chatSeen) === 0, 'opted-out player receives nothing');
-	await B.click('#toggle-chat');
+	await toggleSetting(B, 'quickChat');
 	await waitFor(A, () => !document.getElementById('chat-op-state').classList.contains('off'), 'opponent indicator lights up when they opt back in');
 
 	// --- an opponent on an older client: no chat UI ---
