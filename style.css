@@ -3182,7 +3182,7 @@ body:has(#popup:not(.hide)) #chat-layer {
 	position: absolute;
 	left: 0.9vw;
 	bottom: 21.6vw;
-	width: 22.6vw;
+	width: 24.4vw;
 	padding: 0.6vw;
 	border: 0.12vw solid rgba(218, 165, 32, 0.55);
 	border-radius: 0.6vw;
@@ -3224,11 +3224,12 @@ body:has(#popup:not(.hide)) #chat-layer {
 	background-color: rgba(40, 32, 20, 0.7);
 	color: #e8cf96;
 	font-family: Arial Narrow, sans-serif;
-	font-size: 1.05vw;
+	font-size: 1vw;
 	line-height: 1.2;
-	padding: 0.35vw 0.5vw;
+	padding: 0.35vw;
 	border-radius: 0.35vw;
 	overflow-wrap: anywhere;
+	text-wrap: balance;
 	transition: background-color 0.1s, border-color 0.1s, transform 0.1s;
 	animation: chat-option-in 0.22s ease-out backwards;
 	animation-delay: calc(var(--i) * 18ms);
@@ -3257,7 +3258,9 @@ body:has(#popup:not(.hide)) #chat-layer {
 .chat-bubble {
 	display: none;
 	position: absolute;
-	left: 4.4vw;
+	left: 9.225vw;
+	translate: -50% 0;
+	width: max-content;
 	max-width: 17vw;
 	padding: 0.45vw 0.85vw;
 	border: 0.12vw solid rgba(218, 165, 32, 0.7);
@@ -3268,6 +3271,7 @@ body:has(#popup:not(.hide)) #chat-layer {
 	font-family: Arial Narrow, sans-serif;
 	font-size: 1.2vw;
 	line-height: 1.25;
+	text-align: center;
 	pointer-events: none;
 }
 .chat-bubble.chat-emote {
@@ -3285,7 +3289,8 @@ body:has(#popup:not(.hide)) #chat-layer {
 .chat-bubble::after {
 	content: "";
 	position: absolute;
-	left: 4.1vw;
+	left: 50%;
+	translate: -50% 0;
 	width: 0.9vw;
 	height: 0.9vw;
 	background-color: inherit;
@@ -3296,7 +3301,7 @@ body:has(#popup:not(.hide)) #chat-layer {
 
 #chat-bubble-op {
 	top: 21.1vw;
-	transform-origin: 4.55vw -0.6vw;
+	transform-origin: 50% -0.6vw;
 }
 #chat-bubble-op::after {
 	top: -0.5vw;
@@ -3305,7 +3310,7 @@ body:has(#popup:not(.hide)) #chat-layer {
 
 #chat-bubble-me {
 	bottom: 21.6vw;
-	transform-origin: 4.55vw calc(100% + 0.6vw);
+	transform-origin: 50% calc(100% + 0.6vw);
 }
 #chat-bubble-me::after {
 	bottom: -0.5vw;
