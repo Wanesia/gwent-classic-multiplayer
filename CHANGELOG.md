@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 (2026-10-08)
+
+Chat with your opponent in online matches. It's on by default; you can turn it off at any time or mute an annoying opponent. Chat isn't filtered, so please try being somewhat respectful.
+
+### Chat
+- **Quick chat:** send a preset phrase or emote with the chat button next to your portrait. Phrases appear in each player's own language, so you can greet an opponent who doesn't speak yours.
+- **Text chat:** type your own messages in the chat panel on the right. Press **T** to start typing. Collapse the panel when you want it out of the way; a counter shows how many messages you missed.
+- **Your choice:** the cog lets you pick no chat, quick chat, or quick chat with text chat. Both are on by default, and your choice is remembered.
+- **See your opponent's settings:** the icon next to their portrait shows whether they use quick chat, text chat (marked **Aa**) or no chat at all.
+- **Mute:** click your opponent's icon, or use the cog, to hide their messages for the rest of the match.
+- **No spam:** after a few messages in a row, chat pauses for a few seconds and shows when it unlocks.
+
+### Quality of life
+- **Connection help:** if the game can't reach the server, it now suggests what to try: a private window, turning off ad blockers or VPNs, or another browser.
+
 ## 1.1.0 (2026-10-07)
 
 Patch notes are now in the game.
