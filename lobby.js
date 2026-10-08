@@ -23,6 +23,7 @@ class Lobby {
 		this.joinError = document.getElementById("join-error");
 		this.joinInput = document.getElementById("join-code");
 		this.joinSubtitle = document.getElementById("join-subtitle");
+		this.helpElem = document.getElementById("lobby-help");
 
 		this.inMultiplayer = false;
 		this.localReady = false;
@@ -44,6 +45,10 @@ class Lobby {
 		document.getElementById("join-button").addEventListener("click", () => this.joinGame());
 		document.getElementById("lobby-return").addEventListener("click", () => this.returnToMenu());
 		this.codeElem.addEventListener("click", () => this.copyCode());
+		document.getElementById("lobby-help-report").addEventListener("click", e => {
+			e.preventDefault();
+			ui.feedbackModal.classList.remove("hide");
+		});
 		this.joinInput.addEventListener("keydown", e => {
 			if (e.key === "Enter")
 				this.joinGame();
@@ -63,6 +68,7 @@ class Lobby {
 	}
 
 	showView(id) {
+		this.helpElem.classList.add("hide");
 		[...this.elem.getElementsByClassName("lobby-view")].forEach(v =>
 			v.classList.toggle("hide", v.id !== id));
 	}
@@ -140,7 +146,7 @@ class Lobby {
 			if (attempt !== this.attempt)
 				return;
 			this.stopSearchExtras();
-			this.searchStatus.textContent = this.errorText(e.message);
+			this.showError(this.searchStatus, e.message);
 			this.searchStatus.classList.remove("is-waiting");
 		}
 	}
@@ -178,7 +184,7 @@ class Lobby {
 		} catch (e) {
 			if (attempt !== this.attempt)
 				return;
-			this.createStatus.textContent = this.errorText(e.message);
+			this.showError(this.createStatus, e.message);
 			this.createStatus.classList.remove("is-waiting");
 		}
 	}
@@ -194,6 +200,7 @@ class Lobby {
 			return;
 		}
 		this.joinError.textContent = "";
+		this.helpElem.classList.add("hide");
 		const attempt = ++this.attempt;
 		try {
 			await Net.connect();
@@ -205,7 +212,7 @@ class Lobby {
 			this.enterDeckSetup();
 		} catch (e) {
 			if (attempt === this.attempt)
-				this.joinError.textContent = this.errorText(e.message);
+				this.showError(this.joinError, e.message);
 		}
 	}
 
@@ -217,6 +224,18 @@ class Lobby {
 		if (Net.code)
 			Net.leave();
 		return true;
+	}
+
+	// Shows an error in elem, with troubleshooting tips below it if the server was unreachable
+	showError(elem, code) {
+		elem.textContent = this.errorText(code);
+		if (code === "unreachable")
+			this.showHelp(elem);
+	}
+
+	showHelp(elem) {
+		elem.after(this.helpElem);
+		this.helpElem.classList.remove("hide");
 	}
 
 	errorText(code) {
@@ -454,6 +473,8 @@ class Lobby {
 			for (const status of [this.createStatus, this.searchStatus]) {
 				status.textContent = this.errorText("unreachable");
 				status.classList.remove("is-waiting");
+				if (!status.closest(".lobby-view").classList.contains("hide"))
+					this.showHelp(status);
 			}
 		}
 	}

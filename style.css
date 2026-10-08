@@ -2136,6 +2136,37 @@ main { background-image: url('img/boardtest8.png'); }
 	100% { content: ""; }
 }
 
+/* Connection troubleshooting tips shown under a "could not reach" error */
+#lobby-help {
+	max-width: 32vw;
+	margin: .4vw auto .8vw;
+	font-family: sans-serif;
+	font-size: 12px;
+	letter-spacing: 1px;
+	line-height: 1.5;
+	color: rgba(255,255,255,0.6);
+}
+#lobby-help.hide {
+	display: none;
+}
+#lobby-help p {
+	margin: .3vw 0;
+}
+.lobby-help-title {
+	color: rgba(255,255,255,0.8);
+}
+#lobby-help ul {
+	margin: .3vw 0 .5vw;
+	padding-left: 1.2vw;
+	text-align: left;
+}
+#lobby-help-report {
+	color: goldenrod;
+}
+#lobby-help-report:hover {
+	color: #ffd864;
+}
+
 .lobby-status.is-waiting::after {
 	content: "";
 	position: absolute;
@@ -2477,6 +2508,9 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 		font-size: calc(15px * var(--uw-boost));
 	}
 	.lobby-status {
+		font-size: calc(15px * var(--uw-boost));
+	}
+	#lobby-help {
 		font-size: calc(15px * var(--uw-boost));
 	}
 	.mp-action-button {
@@ -3037,6 +3071,13 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 :lang(ar) .name,
 :lang(ar) .deck-name {
 	text-align: left;
+}
+/* the connection tips list reads right-to-left, bullets included */
+:lang(ar) #lobby-help ul {
+	direction: rtl;
+	text-align: right;
+	padding-left: 0;
+	padding-right: 1.2vw;
 }
 
 /* Translated labels that are longer than the English ones: keep the Pass
