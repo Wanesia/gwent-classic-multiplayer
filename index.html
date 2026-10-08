@@ -451,6 +451,17 @@
 		<button id="join-button" class="mp-action-button" data-i18n="lobby.joinButton">Join Game</button>
 		<button class="mp-back lobby-back" data-target="lobby-mp"><span class="mp-back-icon"></span><span data-i18n="lobby.back">Back</span></button>
 	</div>
+	<!-- moved under whichever view shows a "could not reach" error -->
+	<div id="lobby-help" class="hide">
+		<p class="lobby-help-title" data-i18n="lobby.helpTitle">Trouble connecting? Try these:</p>
+		<ul>
+			<li data-i18n="lobby.helpPrivate">Open the game in a private/incognito window. If it works there, a browser extension is blocking it.</li>
+			<li data-i18n="lobby.helpBlocker">Turn off ad blockers and privacy extensions for this site.</li>
+			<li data-i18n="lobby.helpVpn">Turn off your VPN or proxy.</li>
+			<li data-i18n="lobby.helpBrowser">Try a different browser or network.</li>
+		</ul>
+		<p><span data-i18n="lobby.helpStillStuck">Still not working?</span> <a id="lobby-help-report" href="#" data-i18n="feedback.reportBug">Report a bug</a></p>
+	</div>
 </section>
 
 <div data-title="Toggle music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
