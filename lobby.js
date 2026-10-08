@@ -33,8 +33,9 @@ class Lobby {
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
 		this.peerChat = false;
-		this.peerChatOn = false; // opponent's quick chat setting
-		this.sentChatOn = null; // our setting as the opponent last heard it
+		this.peerChatQuick = false; // opponent's chat settings
+		this.peerChatText = false;
+		this.sentChat = null; // our settings as the opponent last heard them
 		this.issuedSeeds = new Set(); // every seed offered since the last match started
 		this.attempt = 0; // bumped by Back so a still-pending create/join/search is dropped
 		this.searchHintTimer = null;
@@ -289,8 +290,9 @@ class Lobby {
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
 		this.peerChat = false;
-		this.peerChatOn = false;
-		this.sentChatOn = null;
+		this.peerChatQuick = false;
+		this.peerChatText = false;
+		this.sentChat = null;
 		Net.onMessage = m => this.routeLobby(m);
 		this.elem.classList.add("hide");
 		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
@@ -324,9 +326,10 @@ class Lobby {
 	routeLobby(m) {
 		switch (m.t) {
 			case "lobby-ready":
-				// chat: 1 = their client understands quick chat messages
+				// chat: 1 = their client understands chat messages
 				this.peerChat = m.chat === 1;
-				this.peerChatOn = m.chatOn === true;
+				this.peerChatQuick = m.chatQuick === true;
+				this.peerChatText = m.chatText === true;
 				this.syncChatState();
 				this.remoteReady = true;
 				this.remoteCustomizing = false;
@@ -376,19 +379,21 @@ class Lobby {
 		}
 	}
 
-	// chat: 1 = we understand quick chat messages; chatOn = our setting
+	// chat: 1 = we understand chat messages; chatQuick/chatText = our settings
 	sendReady() {
-		this.sentChatOn = Settings.quickChat.isEnabled();
-		Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1, chatOn: this.sentChatOn });
+		this.sentChat = { quick: Settings.quickChat.isEnabled(), text: Settings.textChat.isEnabled() };
+		Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1, chatQuick: this.sentChat.quick, chatText: this.sentChat.text });
 	}
 
 	// Tells a chat-capable opponent about a toggle since our last lobby-ready
 	syncChatState() {
-		const on = Settings.quickChat.isEnabled();
-		if (!this.inMultiplayer || !Net.code || !this.peerChat || this.sentChatOn === null || this.sentChatOn === on)
+		const quick = Settings.quickChat.isEnabled();
+		const text = Settings.textChat.isEnabled();
+		const sent = this.sentChat;
+		if (!this.inMultiplayer || !Net.code || !this.peerChat || sent === null || (sent.quick === quick && sent.text === text))
 			return;
-		this.sentChatOn = on;
-		Net.send({ t: "chat-state", on });
+		this.sentChat = { quick, text };
+		Net.send({ t: "chat-state", quick, text });
 	}
 
 	checkStart() {

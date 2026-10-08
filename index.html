@@ -311,6 +311,7 @@
 				<tr class="kb-sep"><td><kbd>P</kbd> / <kbd>F</kbd> <span class="kb-hold" data-i18n="kbd.hold1s">(hold 1s)</span></td><td data-i18n="kbd.passRound">Pass the round</td></tr>
 				<tr><td><kbd>L</kbd> / <kbd>E</kbd></td><td data-i18n="kbd.useLeader">View / use your Leader</td></tr>
 				<tr><td><kbd>Q</kbd> / <kbd>Backspace</kbd> / <kbd>Esc</kbd></td><td data-i18n="kbd.cancel">Cancel / go back</td></tr>
+				<tr><td><kbd>T</kbd></td><td data-i18n="kbd.chat">Type a chat message (online)</td></tr>
 				<tr><td><kbd>H</kbd> / <kbd>?</kbd></td><td data-i18n="kbd.toggleHelp">Toggle this help</td></tr>
 			</table>
 		</div>
@@ -323,10 +324,22 @@
      turn, and above the redraw picker and end screen -->
 <section id="chat-layer" class="hide">
 	<div id="chat-picker"></div>
-	<div id="chat-bubble-op" class="chat-bubble"></div>
-	<div id="chat-bubble-me" class="chat-bubble"></div>
-	<div id="chat-op-state" class="off" data-title="Opponent's quick chat is off: they won't see your messages" data-i18n-datatitle="chat.opponentOff"><img src="svg/chat.svg" alt=""></div>
-	<button id="chat-button" type="button" tabindex="-1" data-title="Quick chat" data-i18n-datatitle="chat.open"><img src="svg/chat.svg" alt=""></button>
+	<div id="chat-bubble-op" class="chat-bubble" dir="auto"></div>
+	<div id="chat-bubble-me" class="chat-bubble" dir="auto"></div>
+	<div id="chat-op-state" class="off"><img src="svg/chat.svg" alt=""><span class="chat-text-tag">Aa</span></div>
+	<button id="chat-button" type="button" tabindex="-1" data-title="Quick chat" data-i18n-datatitle="chat.open"><img src="svg/chat.svg" alt=""><span class="chat-text-tag">Aa</span></button>
+</section>
+<!-- Text chat log (chat.js): under the card preview, notifications and carousels -->
+<section id="chat-log" class="hide">
+	<button id="chat-log-head" type="button" tabindex="-1">
+		<span data-i18n="chat.logTitle">Chat</span>
+		<span id="chat-log-unread" class="hide"></span>
+		<span class="chat-log-chevron"></span>
+	</button>
+	<div id="chat-log-list"></div>
+	<div id="chat-log-note"></div>
+	<input id="chat-input" type="text" dir="auto" autocomplete="off" enterkeyhint="send" spellcheck="false">
+	<div id="chat-log-off" data-i18n="chat.opponentTextOff">Opponent has text chat off</div>
 </section>
 
 <section id="deck-customization">
@@ -477,7 +490,23 @@
 <div data-title="Toggle music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
 <div data-title="Toggle sound effects" data-i18n-datatitle="settings.sfx" id="toggle-sfx" class="center deck-menu settings-button"><img src="svg/sfx.svg"></img></div>
 <div data-title="Toggle game messages" data-i18n-datatitle="settings.notifications" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
-<div data-title="Toggle quick chat" data-i18n-datatitle="settings.quickChat" id="toggle-chat" class="center deck-menu settings-button"><img src="svg/chat.svg"></img></div>
+<div data-title="Chat settings" data-i18n-datatitle="settings.chat" id="toggle-chat-settings" class="center deck-menu settings-button"><img src="svg/cog.svg"></img>
+	<section id="chat-settings">
+		<h3 data-i18n="chat.settingsTitle">Chat settings</h3>
+		<button type="button" tabindex="-1" role="switch" aria-checked="false" class="chat-switch" data-setting="quickChat">
+			<span class="chat-switch-label"><b data-i18n="chat.quickLabel">Quick chat</b><small data-i18n="chat.quickHint">Preset phrases and emotes</small></span>
+			<span class="chat-switch-track"></span>
+		</button>
+		<button type="button" tabindex="-1" role="switch" aria-checked="false" class="chat-switch chat-switch-sub" data-setting="textChat">
+			<span class="chat-switch-label"><b data-i18n="chat.textLabel">Text chat</b><small data-i18n="chat.textHint">Type your own messages</small></span>
+			<span class="chat-switch-track"></span>
+		</button>
+		<button type="button" tabindex="-1" role="switch" aria-checked="false" class="chat-switch hide" data-setting="mute">
+			<span class="chat-switch-label"><b data-i18n="chat.muteLabel">Mute this opponent</b><small data-i18n="chat.muteHint">Hides their messages for this match</small></span>
+			<span class="chat-switch-track"></span>
+		</button>
+	</section>
+</div>
 <div data-title="Keyboard shortcuts" data-i18n-datatitle="settings.keybinds" id="toggle-keybinds" class="center deck-menu settings-button"><span>?</span></div>
 <div data-title="Feedback / report a bug" data-i18n-datatitle="settings.feedback" id="toggle-feedback" class="center deck-menu settings-button"><img src="svg/feedback.svg"></img></div>
 <div id="lang-select">

@@ -1,8 +1,9 @@
 "use strict"
 
-// Opt-in quick chat for online matches. Only preset ids travel over the wire
-// ({t:"chat", q:id}), so each player reads them in their own language and
-// nothing free-form can reach the opponent.
+// Opt-in chat for online matches, outside the lockstep. Quick chat sends only
+// preset ids ({t:"chat", q:id}), so each player reads them in their own
+// language. Text chat ({t:"chat-text", s}) carries free text, sanitized on
+// both ends and only ever rendered as plain text.
 
 // Rate limiter: `size` messages at once, then one more every `refillMs`
 class TokenBucket {
@@ -37,19 +38,42 @@ class TokenBucket {
 	}
 }
 
+const CHAT_MAX_CHARS = 120;
+
+// One visible line of at most CHAT_MAX_CHARS code points, or "" if nothing is left
+function sanitizeChatText(s) {
+	if (typeof s !== "string")
+		return "";
+	s = s.normalize("NFC")
+		.replace(/\p{Cc}/gu, " ")
+		// format characters (bidi controls, BOM...) except the joiners emoji and scripts need,
+		// lone surrogates and blank fillers
+		.replace(/(?![\u200C\u200D])[\p{Cf}\p{Cs}ᅟᅠㅤﾠ⠀]/gu, "")
+		// stacked combining marks would draw over the lines around them
+		.replace(/(\p{M}{4})\p{M}+/gu, "$1")
+		.replace(/\s+/gu, " ")
+		.trim();
+	const chars = Array.from(s);
+	if (chars.length > CHAT_MAX_CHARS)
+		s = chars.slice(0, CHAT_MAX_CHARS).join("").trim();
+	return s;
+}
+
 var QuickChat = {
-	EMOTES: { wave: "👋", thumbsUp: "👍", laugh: "😄", wow: "😮", think: "🤔", sad: "😢" },
+	EMOTES: { wave: "👋", cool: "😎", laugh: "😄", wow: "😮", think: "🤔", sad: "😢" },
 	PHRASES: ["hello", "goodLuck", "goodMove", "watchThis", "oops", "goodGame", "thanks", "bye"],
 	EMOTE_MS: 3000,
 	PHRASE_MS: 4500,
 	HOVER_CLOSE_MS: 700,
 
-	// The receiving side is a little more lenient so network jitter that
-	// bunches up honest messages doesn't drop them
+	// Quick and text messages share these: spam is spam. The receiving side
+	// is a little more lenient so network jitter that bunches up honest
+	// messages doesn't drop them.
 	sendBucket: new TokenBucket(3, 4000),
 	recvBucket: new TokenBucket(4, 3000),
 	timers: {},
 	pinned: false,
+	muted: false, // this opponent, for this match only
 
 	init() {
 		this.layer = document.getElementById("chat-layer");
@@ -80,6 +104,7 @@ var QuickChat = {
 				this.pinned = this.isOpen();
 			}
 		});
+		this.opState.addEventListener("click", () => this.setMuted(!this.muted));
 		document.addEventListener("pointerdown", e => {
 			if (this.isOpen() && !this.button.contains(e.target) && !this.isInsidePicker(e))
 				this.closePicker();
@@ -131,70 +156,156 @@ var QuickChat = {
 		return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
 	},
 
-	// Online match, chat switched on, and an opponent whose client knows the
-	// "chat" message (an older one would treat it as a desync)
-	available() {
-		return mp.active && Settings.quickChat.isEnabled() && lobby.peerChat;
+	// Online match with an opponent whose client knows the chat messages (an
+	// older one would treat them as a desync)
+	online() {
+		return mp.active && lobby.peerChat;
 	},
 
-	// New match: fresh rate limits, then show or hide the chat UI
+	quickOn() {
+		return this.online() && Settings.quickChat.isEnabled();
+	},
+
+	// Text chat is an add-on to quick chat
+	textOn() {
+		return this.quickOn() && Settings.textChat.isEnabled();
+	},
+
+	// New match: fresh rate limits, no mute, empty log, then show or hide the chat UI
 	reset() {
 		this.sendBucket.reset();
 		this.recvBucket.reset();
+		this.muted = false;
+		ChatLog.clear();
 		this.refresh();
 	},
 
 	refresh() {
-		const on = this.available();
-		this.layer.classList.toggle("hide", !on);
-		if (!on) {
+		const quick = this.quickOn();
+		this.layer.classList.toggle("hide", !quick);
+		this.button.classList.toggle("hide", !quick);
+		this.button.classList.toggle("text", this.textOn());
+		if (!quick)
 			this.closePicker();
+		if (!this.online()) {
 			this.hideBubble("me");
 			this.hideBubble("op");
 		}
+		ChatLog.refresh();
+		ChatSettings.render();
 		this.updatePeerState();
 		this.updateCooldown();
 	},
 
+	// Every chat message type, routed here before the lockstep queue.
+	// Unknown chat types are dropped so newer clients can add some.
+	route(msg) {
+		if (msg.t === "chat")
+			this.receive(msg);
+		else if (msg.t === "chat-text")
+			this.receiveText(msg);
+		else if (msg.t === "chat-state")
+			this.receiveState(msg);
+	},
+
 	send(id) {
-		if (!this.available() || !this.sendBucket.take())
+		if (!this.quickOn() || !this.sendBucket.take())
 			return;
 		mp.send({ t: "chat", q: id });
 		this.closePicker();
 		this.show("me", id);
+		ChatLog.add("me", this.label(id));
 		this.updateCooldown();
+	},
+
+	// False if nothing was sent (empty, cooling down, or the opponent can't read it)
+	sendText(raw) {
+		const s = sanitizeChatText(raw);
+		if (!s || !this.textOn() || !lobby.peerChatText)
+			return false;
+		if (!this.sendBucket.take()) {
+			this.updateCooldown();
+			return false;
+		}
+		mp.send({ t: "chat-text", s });
+		this.showText("me", s);
+		ChatLog.add("me", s);
+		this.updateCooldown();
+		return true;
 	},
 
 	// The peer is untrusted: only known ids, at a bounded rate
 	receive(msg) {
-		if (!this.available() || !this.isKnown(msg.q) || !this.recvBucket.take())
+		if (!this.quickOn() || this.muted || !this.isKnown(msg.q) || !this.recvBucket.take())
 			return;
 		this.show("op", msg.q);
+		ChatLog.add("op", this.label(msg.q));
 	},
 
-	// {t:"chat-state", on}: the opponent switched their quick chat on or off
-	receiveState(msg) {
-		if (typeof msg.on !== "boolean")
+	receiveText(msg) {
+		if (!this.textOn() || this.muted)
 			return;
-		lobby.peerChatOn = msg.on;
+		const s = sanitizeChatText(msg.s);
+		if (!s || !this.recvBucket.take())
+			return;
+		this.showText("op", s);
+		ChatLog.add("op", s);
+	},
+
+	// {t:"chat-state", quick, text}: the opponent changed their chat settings
+	receiveState(msg) {
+		if (typeof msg.quick !== "boolean" || typeof msg.text !== "boolean")
+			return;
+		lobby.peerChatQuick = msg.quick;
+		lobby.peerChatText = msg.text;
 		this.updatePeerState();
 	},
 
+	setMuted(muted) {
+		if (!mp.active)
+			return;
+		this.muted = muted;
+		if (muted)
+			this.hideBubble("op");
+		this.updatePeerState();
+		ChatSettings.render();
+	},
+
 	updatePeerState() {
-		const on = lobby.peerChatOn === true;
-		this.opState.classList.toggle("off", !on);
-		this.opState.setAttribute("data-title", I18N.t(on ? "chat.opponentOn" : "chat.opponentOff"));
+		const quick = lobby.peerChatQuick === true;
+		const text = lobby.peerChatText === true;
+		this.opState.classList.toggle("off", !quick && !text);
+		this.opState.classList.toggle("text", text);
+		this.opState.classList.toggle("muted", this.muted);
+		const state = I18N.t("chat.opponentState", {
+			quick: I18N.t(quick ? "chat.opQuickOn" : "chat.opQuickOff"),
+			text: I18N.t(text ? "chat.opTextOn" : "chat.opTextOff")
+		});
+		this.opState.setAttribute("data-title", this.muted ? I18N.t("chat.opponentMuted") : state);
+		ChatLog.updateInput();
 	},
 
 	isKnown(id) {
 		return typeof id === "string" && (Object.hasOwn(this.EMOTES, id) || this.PHRASES.includes(id));
 	},
 
+	label(id) {
+		return Object.hasOwn(this.EMOTES, id) ? this.EMOTES[id] : I18N.t("chat." + id);
+	},
+
 	show(who, id) {
-		const bubble = this.bubbles[who];
 		const emote = Object.hasOwn(this.EMOTES, id);
-		const ms = emote ? this.EMOTE_MS : this.PHRASE_MS;
-		bubble.textContent = emote ? this.EMOTES[id] : I18N.t("chat." + id);
+		this.display(who, this.label(id), emote, emote ? this.EMOTE_MS : this.PHRASE_MS);
+	},
+
+	// Longer messages stay up longer
+	showText(who, s) {
+		this.display(who, s, false, Math.min(9000, 4000 + 50 * Array.from(s).length));
+	},
+
+	display(who, text, emote, ms) {
+		const bubble = this.bubbles[who];
+		bubble.textContent = text;
 		bubble.classList.toggle("chat-emote", emote);
 		bubble.style.setProperty("--chat-ms", ms + "ms");
 		// Restart the animation when a new message replaces the current one
@@ -216,7 +327,7 @@ var QuickChat = {
 
 	openPicker() {
 		clearTimeout(this.closeTimer);
-		if (!this.available())
+		if (!this.quickOn())
 			return;
 		this.updateCooldown();
 		this.hideBubble("me");
@@ -238,7 +349,7 @@ var QuickChat = {
 		this.closeTimer = setTimeout(() => this.closePicker(), this.HOVER_CLOSE_MS);
 	},
 
-	// Disables the options while the send bucket is empty, with a per-second countdown
+	// Disables sending while the send bucket is empty, with a per-second countdown
 	updateCooldown() {
 		clearTimeout(this.cooldownTimer);
 		const wait = this.sendBucket.msUntilNext();
@@ -246,6 +357,7 @@ var QuickChat = {
 		this.layer.classList.toggle("chat-cooldown", wait > 0);
 		this.cooldownNote.textContent = wait > 0 ? I18N.t("chat.cooldown", { s }) : "";
 		this.button.setAttribute("data-title", wait > 0 ? I18N.t("chat.openCooldown", { s }) : I18N.t("chat.open"));
+		ChatLog.setCooldown(wait > 0 ? I18N.t("chat.cooldown", { s }) : "");
 		if (wait > 0) {
 			this.button.dataset.cooldown = s;
 			this.cooldownTimer = setTimeout(() => this.updateCooldown(), wait % 1000 || 1000);
@@ -255,4 +367,204 @@ var QuickChat = {
 	}
 };
 
+// Text chat panel in the right panel: both sides' messages and the input
+var ChatLog = {
+	MAX_ENTRIES: 50,
+	COLLAPSED_KEY: "gc-chat-log-collapsed",
+	unread: 0,
+
+	init() {
+		this.elem = document.getElementById("chat-log");
+		this.list = document.getElementById("chat-log-list");
+		this.input = document.getElementById("chat-input");
+		this.note = document.getElementById("chat-log-note");
+		this.badge = document.getElementById("chat-log-unread");
+		this.head = document.getElementById("chat-log-head");
+		this.input.placeholder = I18N.t("chat.placeholder");
+		this.collapsed = safeStorage.get(this.COLLAPSED_KEY) === "true";
+		this.elem.classList.toggle("collapsed", this.collapsed);
+
+		this.head.addEventListener("mousedown", e => e.preventDefault());
+		this.head.addEventListener("click", () => this.setCollapsed(!this.collapsed));
+		this.input.addEventListener("keydown", e => {
+			// Typing must never reach the game's or a carousel's shortcuts
+			e.stopPropagation();
+			if (e.key === "Enter" && !e.isComposing) {
+				e.preventDefault();
+				if (QuickChat.sendText(this.input.value))
+					this.input.value = "";
+			} else if (e.key === "Escape") {
+				e.preventDefault();
+				this.input.blur();
+			}
+		});
+		this.input.addEventListener("keyup", e => e.stopPropagation());
+		this.input.addEventListener("input", e => {
+			if (e.isComposing)
+				return;
+			const chars = Array.from(this.input.value);
+			if (chars.length > CHAT_MAX_CHARS)
+				this.input.value = chars.slice(0, CHAT_MAX_CHARS).join("");
+		});
+		this.updateTitle();
+	},
+
+	refresh() {
+		const on = QuickChat.textOn();
+		this.elem.classList.toggle("hide", !on);
+		if (!on)
+			this.input.blur();
+		this.updateInput();
+	},
+
+	clear() {
+		this.list.replaceChildren();
+		this.setUnread(0);
+	},
+
+	add(who, text) {
+		if (!QuickChat.textOn())
+			return;
+		const atBottom = this.list.scrollTop + this.list.clientHeight >= this.list.scrollHeight - 4;
+		const entry = document.createElement("div");
+		entry.className = "chat-entry chat-entry-" + who;
+		entry.dir = "auto"; // follows the label's script, so Arabic lines read right to left
+		const name = document.createElement("span");
+		name.className = "chat-entry-who";
+		name.textContent = I18N.t(who === "me" ? "game.you" : "game.opponent");
+		const body = document.createElement("span");
+		body.className = "chat-entry-text";
+		body.dir = "auto";
+		body.textContent = text;
+		entry.append(name, " ", body);
+		this.list.appendChild(entry);
+		while (this.list.childElementCount > this.MAX_ENTRIES)
+			this.list.firstElementChild.remove();
+		if (atBottom || who === "me")
+			this.list.scrollTop = this.list.scrollHeight;
+		if (who === "op" && this.collapsed)
+			this.setUnread(this.unread + 1);
+	},
+
+	setUnread(n) {
+		this.unread = n;
+		this.badge.textContent = n > 99 ? "99+" : String(n);
+		this.badge.classList.toggle("hide", n === 0);
+	},
+
+	setCollapsed(collapsed) {
+		this.collapsed = collapsed;
+		safeStorage.set(this.COLLAPSED_KEY, collapsed);
+		this.elem.classList.toggle("collapsed", collapsed);
+		this.updateTitle();
+		if (collapsed) {
+			this.input.blur();
+		} else {
+			this.setUnread(0);
+			this.list.scrollTop = this.list.scrollHeight;
+		}
+	},
+
+	// T shortcut: true if the input took focus
+	focusInput() {
+		if (!QuickChat.textOn() || Carousel.curr || Popup.curr || this.input.disabled)
+			return false;
+		if (this.collapsed)
+			this.setCollapsed(false);
+		this.input.focus();
+		return true;
+	},
+
+	// Replaced by a notice while the opponent can't read text messages
+	updateInput() {
+		const peerOff = lobby.peerChatText !== true;
+		if (peerOff)
+			this.input.blur();
+		this.input.disabled = peerOff;
+		this.elem.classList.toggle("peer-off", peerOff);
+	},
+
+	updateTitle() {
+		this.head.setAttribute("data-title", I18N.t(this.collapsed ? "chat.showLog" : "chat.hideLog"));
+	},
+
+	setCooldown(text) {
+		this.note.textContent = text;
+		this.elem.classList.toggle("chat-cooldown", text !== "");
+	}
+};
+
+// Chat settings popover on the cog in the settings cluster
+var ChatSettings = {
+	init() {
+		this.button = document.getElementById("toggle-chat-settings");
+		this.panel = document.getElementById("chat-settings");
+		this.switches = [...this.panel.querySelectorAll(".chat-switch")];
+		this.enforceTextNeedsQuick();
+		this.panel.addEventListener("mousedown", e => e.preventDefault());
+		this.button.addEventListener("click", e => {
+			if (!this.panel.contains(e.target))
+				this.isOpen() ? this.close() : this.open();
+		});
+		for (const sw of this.switches)
+			sw.addEventListener("click", () => this.toggle(sw.dataset.setting));
+		document.addEventListener("pointerdown", e => {
+			if (this.isOpen() && !this.button.contains(e.target))
+				this.close();
+		});
+		window.addEventListener("keydown", e => {
+			if (e.key === "Escape" && this.isOpen()) {
+				e.stopImmediatePropagation();
+				this.close();
+			}
+		}, true);
+		this.render();
+	},
+
+	toggle(setting) {
+		if (setting === "mute") {
+			QuickChat.setMuted(!QuickChat.muted);
+			return;
+		}
+		Settings[setting].toggle();
+		this.enforceTextNeedsQuick();
+		QuickChat.refresh();
+		lobby.syncChatState();
+	},
+
+	enforceTextNeedsQuick() {
+		if (!Settings.quickChat.isEnabled())
+			Settings.textChat.disable();
+	},
+
+	isOpen() {
+		return this.button.classList.contains("open");
+	},
+
+	open() {
+		this.render();
+		this.button.classList.add("open");
+	},
+
+	close() {
+		this.button.classList.remove("open");
+	},
+
+	render() {
+		if (!this.switches)
+			return;
+		for (const sw of this.switches) {
+			const s = sw.dataset.setting;
+			const on = s === "mute" ? QuickChat.muted : Settings[s].isEnabled();
+			sw.setAttribute("aria-checked", on);
+			if (s === "textChat")
+				sw.disabled = !Settings.quickChat.isEnabled();
+			if (s === "mute")
+				sw.classList.toggle("hide", !mp.active);
+		}
+	}
+};
+
 QuickChat.init();
+ChatLog.init();
+ChatSettings.init();

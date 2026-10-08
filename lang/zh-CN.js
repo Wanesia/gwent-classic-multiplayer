@@ -152,7 +152,8 @@ I18N.register("zh-CN", {
 		passRound: "本回合过牌",
 		useLeader: "查看 / 使用领袖",
 		cancel: "取消 / 返回",
-		toggleHelp: "显示/隐藏此帮助"
+		toggleHelp: "显示/隐藏此帮助",
+		chat: "输入聊天消息（联机）"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("zh-CN", {
 		notifications: "开关游戏消息",
 		keybinds: "键盘快捷键",
 		feedback: "反馈 / 报告错误",
-		quickChat: "开关快捷聊天",
+		chat: "聊天设置",
 		language: "语言"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("zh-CN", {
 		hello: "你好！",
 		goodLuck: "祝你好运！",
 		goodMove: "好棋！",
-		watchThis: "看好了……",
+		watchThis: "看好了！",
 		oops: "哎呀！",
 		goodGame: "打得好！",
 		thanks: "感谢这局对战！",
 		bye: "再见！",
-		opponentOn: "对手已开启快捷聊天：能看到你的消息",
-		opponentOff: "对手已关闭快捷聊天：看不到你的消息",
+		settingsTitle: "聊天设置",
+		quickLabel: "快捷聊天",
+		quickHint: "预设短语和表情",
+		textLabel: "文字聊天",
+		textHint: "输入你自己的消息",
+		muteLabel: "屏蔽此对手",
+		muteHint: "本局内隐藏其所有消息",
+		logTitle: "聊天",
+		showLog: "显示聊天",
+		hideLog: "隐藏聊天",
+		placeholder: "输入消息…（T）",
+		opponentTextOff: "对手已关闭文字聊天",
+		opponentState: "对手：{quick}，{text}（点击屏蔽）",
+		opQuickOn: "快捷聊天已开启",
+		opQuickOff: "快捷聊天已关闭",
+		opTextOn: "文字聊天已开启",
+		opTextOff: "文字聊天已关闭",
+		opponentMuted: "本局已屏蔽对手（点击取消）",
 		cooldown: "{s} 秒后可再次发送（防刷屏）",
 		openCooldown: "快捷聊天（{s} 秒后可用）"
 	},

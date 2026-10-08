@@ -152,7 +152,8 @@ I18N.register("ja", {
 		passRound: "ラウンドをパス",
 		useLeader: "リーダーを見る／使う",
 		cancel: "キャンセル／戻る",
-		toggleHelp: "このヘルプを表示／非表示"
+		toggleHelp: "このヘルプを表示／非表示",
+		chat: "チャットを入力（オンライン）"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("ja", {
 		notifications: "ゲームメッセージのオン／オフ",
 		keybinds: "キーボードショートカット",
 		feedback: "フィードバック／バグ報告",
-		quickChat: "クイックチャットのオン／オフ",
+		chat: "チャット設定",
 		language: "言語"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("ja", {
 		hello: "こんにちは！",
 		goodLuck: "よろしく！",
 		goodMove: "いい手だ！",
-		watchThis: "見てろよ…",
+		watchThis: "見てろよ！",
 		oops: "おっと！",
 		goodGame: "いい勝負だった！",
 		thanks: "対戦ありがとう！",
 		bye: "またね！",
-		opponentOn: "相手のクイックチャットはオン：あなたのメッセージが表示されます",
-		opponentOff: "相手のクイックチャットはオフ：あなたのメッセージは表示されません",
+		settingsTitle: "チャット設定",
+		quickLabel: "クイックチャット",
+		quickHint: "定型文とエモート",
+		textLabel: "テキストチャット",
+		textHint: "自由にメッセージを入力",
+		muteLabel: "この相手をミュート",
+		muteHint: "この対戦中、相手のメッセージを非表示にします",
+		logTitle: "チャット",
+		showLog: "チャットを表示",
+		hideLog: "チャットを隠す",
+		placeholder: "メッセージを入力…（T）",
+		opponentTextOff: "相手はテキストチャットをオフにしています",
+		opponentState: "相手：{quick}、{text}（クリックでミュート）",
+		opQuickOn: "クイックチャット オン",
+		opQuickOff: "クイックチャット オフ",
+		opTextOn: "テキストチャット オン",
+		opTextOff: "テキストチャット オフ",
+		opponentMuted: "この対戦中は相手をミュート中（クリックで解除）",
 		cooldown: "あと{s}秒で送信可能（スパム防止）",
 		openCooldown: "クイックチャット（あと{s}秒）"
 	},

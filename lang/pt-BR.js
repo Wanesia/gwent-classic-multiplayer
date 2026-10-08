@@ -152,7 +152,8 @@ I18N.register("pt-BR", {
 		passRound: "Passar a rodada",
 		useLeader: "Ver / usar seu Líder",
 		cancel: "Cancelar / voltar",
-		toggleHelp: "Alternar esta ajuda"
+		toggleHelp: "Alternar esta ajuda",
+		chat: "Escrever no chat (online)"
 	},
 
 	settings: {
@@ -161,7 +162,7 @@ I18N.register("pt-BR", {
 		notifications: "Alternar mensagens do jogo",
 		keybinds: "Atalhos de teclado",
 		feedback: "Feedback / reportar um bug",
-		quickChat: "Alternar chat rápido",
+		chat: "Configurações do chat",
 		language: "Idioma"
 	},
 
@@ -170,13 +171,29 @@ I18N.register("pt-BR", {
 		hello: "Olá!",
 		goodLuck: "Boa sorte!",
 		goodMove: "Boa jogada!",
-		watchThis: "Olha só...",
+		watchThis: "Olha só!",
 		oops: "Opa!",
 		goodGame: "Bom jogo!",
 		thanks: "Obrigado pelo jogo!",
 		bye: "Tchau!",
-		opponentOn: "O chat rápido do oponente está ativado: ele vê suas mensagens",
-		opponentOff: "O chat rápido do oponente está desativado: ele não verá suas mensagens",
+		settingsTitle: "Configurações do chat",
+		quickLabel: "Chat rápido",
+		quickHint: "Frases e emotes prontos",
+		textLabel: "Chat de texto",
+		textHint: "Escreva suas próprias mensagens",
+		muteLabel: "Silenciar este oponente",
+		muteHint: "Oculta as mensagens dele nesta partida",
+		logTitle: "Chat",
+		showLog: "Mostrar chat",
+		hideLog: "Ocultar chat",
+		placeholder: "Digite uma mensagem… (T)",
+		opponentTextOff: "O oponente está com o chat de texto desativado",
+		opponentState: "Oponente: {quick}, {text} (clique para silenciar)",
+		opQuickOn: "chat rápido ativado",
+		opQuickOff: "chat rápido desativado",
+		opTextOn: "chat de texto ativado",
+		opTextOff: "chat de texto desativado",
+		opponentMuted: "Oponente silenciado nesta partida (clique para desfazer)",
 		cooldown: "O chat libera em {s} s (evita spam)",
 		openCooldown: "Chat rápido (libera em {s} s)"
 	},
