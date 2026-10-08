@@ -161,7 +161,20 @@ I18N.register("hu", {
 		notifications: "Játéküzenetek be/ki",
 		keybinds: "Billentyűparancsok",
 		feedback: "Visszajelzés / hiba jelentése",
+		quickChat: "Gyors csevegés be/ki",
 		language: "Nyelv"
+	},
+
+	chat: {
+		open: "Gyors csevegés",
+		hello: "Szia!",
+		goodLuck: "Sok sikert!",
+		goodMove: "Jó lépés!",
+		watchThis: "Ezt figyeld...",
+		oops: "Hoppá!",
+		goodGame: "Jó játék volt!",
+		thanks: "Köszi a játékot!",
+		bye: "Szia, viszlát!"
 	},
 
 	feedback: {

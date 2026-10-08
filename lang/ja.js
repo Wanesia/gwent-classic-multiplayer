@@ -161,7 +161,20 @@ I18N.register("ja", {
 		notifications: "ゲームメッセージのオン／オフ",
 		keybinds: "キーボードショートカット",
 		feedback: "フィードバック／バグ報告",
+		quickChat: "クイックチャットのオン／オフ",
 		language: "言語"
+	},
+
+	chat: {
+		open: "クイックチャット",
+		hello: "こんにちは！",
+		goodLuck: "よろしく！",
+		goodMove: "いい手だ！",
+		watchThis: "見てろよ…",
+		oops: "おっと！",
+		goodGame: "いい勝負だった！",
+		thanks: "対戦ありがとう！",
+		bye: "またね！"
 	},
 
 	feedback: {

@@ -2226,6 +2226,10 @@ class UI {
 		this.toggleSFX_elem.addEventListener('click', () => this.toggleSFX())
 		if (!Settings.soundEffects.isEnabled())
 			this.toggleSFX_elem.classList.add("fade");
+		this.toggleChat_elem = document.getElementById("toggle-chat");
+		this.toggleSettings.push(this.toggleChat_elem);
+		this.toggleChat_elem.classList.toggle("fade", !Settings.quickChat.isEnabled());
+		this.toggleChat_elem.addEventListener("click", () => this.toggleQuickChat(), false);
 
 		this.toggleFeedback_elem = document.getElementById("toggle-feedback");
 		this.toggleSettings.push(this.toggleFeedback_elem);
@@ -2241,6 +2245,7 @@ class UI {
 		EventManager.customizationOpened.bind(()=>this.toggleSettings.forEach(e=>e.classList.add('deck-menu')));
 
 		[	'.settings-button',
+			'#chat-button',
 			'.deck-options',
 			'#pass-button',
 			'#end-screen .end-actions button',
@@ -2309,6 +2314,12 @@ class UI {
 		{
 			this.toggleNotifications_elem.classList.add("fade");
 		}
+	}
+
+	toggleQuickChat() {
+		Settings.quickChat.toggle();
+		this.toggleChat_elem.classList.toggle("fade", !Settings.quickChat.isEnabled());
+		QuickChat.refresh();
 	}
 
 	toggleSFX() {
@@ -3866,6 +3877,7 @@ class Settings
 	static music = new ToggleOption("gc-music", false);
 	static notifications = new ToggleOption("gc-notifications", true);
 	static soundEffects = new ToggleOption("gc-sound-effects", false);
+	static quickChat = new ToggleOption("gc-quick-chat", false);
 	static lastFaction = new SavedString("gc-last-faction", "realms"); 
 	static realmsDeck = new SavedDeck("gc-deck-realms", premade_deck[0], "realms");
 	static nilfgaardDeck = new SavedDeck("gc-deck-nilfgaard", premade_deck[2], "nilfgaard");

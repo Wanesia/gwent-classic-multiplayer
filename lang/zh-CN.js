@@ -161,7 +161,20 @@ I18N.register("zh-CN", {
 		notifications: "开关游戏消息",
 		keybinds: "键盘快捷键",
 		feedback: "反馈 / 报告错误",
+		quickChat: "开关快捷聊天",
 		language: "语言"
+	},
+
+	chat: {
+		open: "快捷聊天",
+		hello: "你好！",
+		goodLuck: "祝你好运！",
+		goodMove: "好棋！",
+		watchThis: "看好了……",
+		oops: "哎呀！",
+		goodGame: "打得好！",
+		thanks: "感谢这局对战！",
+		bye: "再见！"
 	},
 
 	feedback: {

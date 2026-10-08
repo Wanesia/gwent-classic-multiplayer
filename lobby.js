@@ -32,6 +32,7 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.peerChat = false;
 		this.issuedSeeds = new Set(); // every seed offered since the last match started
 		this.attempt = 0; // bumped by Back so a still-pending create/join/search is dropped
 		this.searchHintTimer = null;
@@ -285,6 +286,7 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.peerChat = false;
 		Net.onMessage = m => this.routeLobby(m);
 		this.elem.classList.add("hide");
 		ui.toggleSettings.forEach(e => e.classList.remove('lobby-menu'));
@@ -302,7 +304,7 @@ class Lobby {
 			return;
 		if (!this.localReady) {
 			this.localReady = true;
-			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()) });
+			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1 });
 			this.startButton.textContent = I18N.t("lobby.cancelReady");
 			dm.elem.classList.add("mp-locked");
 			this.checkStart();
@@ -318,6 +320,8 @@ class Lobby {
 	routeLobby(m) {
 		switch (m.t) {
 			case "lobby-ready":
+				// chat: 1 = their client understands quick chat messages
+				this.peerChat = m.chat === 1;
 				this.remoteReady = true;
 				this.remoteCustomizing = false;
 				this.remoteDeckRaw = m.deck;
@@ -423,7 +427,7 @@ class Lobby {
 			return;
 		if (!this.localReady) {
 			this.localReady = true;
-			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()) });
+			Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1 });
 			this.checkStart();
 		} else {
 			this.localReady = false;

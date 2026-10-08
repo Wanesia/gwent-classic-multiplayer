@@ -161,7 +161,20 @@ I18N.register("it", {
 		notifications: "Attiva/disattiva messaggi di gioco",
 		keybinds: "Scorciatoie da tastiera",
 		feedback: "Feedback / segnala un bug",
+		quickChat: "Attiva/disattiva chat rapida",
 		language: "Lingua"
+	},
+
+	chat: {
+		open: "Chat rapida",
+		hello: "Ciao!",
+		goodLuck: "Buona fortuna!",
+		goodMove: "Bella mossa!",
+		watchThis: "Guarda qui...",
+		oops: "Ops!",
+		goodGame: "Bella partita!",
+		thanks: "Grazie per la partita!",
+		bye: "Ciao ciao!"
 	},
 
 	feedback: {

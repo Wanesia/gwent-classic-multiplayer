@@ -161,7 +161,20 @@ I18N.register("cs", {
 		notifications: "Zapnout/vypnout herní zprávy",
 		keybinds: "Klávesové zkratky",
 		feedback: "Zpětná vazba / nahlásit chybu",
+		quickChat: "Zapnout/vypnout rychlý chat",
 		language: "Jazyk"
+	},
+
+	chat: {
+		open: "Rychlý chat",
+		hello: "Ahoj!",
+		goodLuck: "Hodně štěstí!",
+		goodMove: "Dobrý tah!",
+		watchThis: "Sleduj tohle...",
+		oops: "Jejda!",
+		goodGame: "Dobrá hra!",
+		thanks: "Díky za hru!",
+		bye: "Měj se!"
 	},
 
 	feedback: {
