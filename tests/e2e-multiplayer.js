@@ -161,6 +161,13 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		const winB = await B.evaluate(() => player_me.health > 0 ? mp.roleOf(player_me) : (player_op.health > 0 ? mp.roleOf(player_op) : 'draw'));
 		assert(winA === winB, 'both clients agree on the outcome: ' + winA);
 		assert(await A.evaluate(() => game.rematch_elem.classList.contains('hide')), 'rematch button hidden online');
+		// both clients keep the same final board
+		const keptBoard = () => ["host", "guest"].map(role =>
+			board.playerRows(mp.playerOf(role)).map(r => r.cards.map(c => c.name).join("|")).join("/")).join(" vs ");
+		assert(await A.evaluate(keptBoard) === await B.evaluate(keptBoard), 'both clients keep the same final board');
+		// host looks at the board when the guest leaves
+		await A.click('#end-close');
+		assert(await A.evaluate(() => game.viewingBoard), 'host closed the results to view the board');
 	}
 
 	// --- disconnect handling: guest closes, host gets notified ---
@@ -170,6 +177,7 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	assert(/Disconnected/i.test(popupTitle), 'popup says opponent disconnected: "' + popupTitle + '"');
 	await A.evaluate(() => Popup.curr.selectYes());
 	await waitFor(A, () => !document.getElementById('lobby').classList.contains('hide'), 'host returned to main menu');
+	assert(await A.evaluate(() => !game.viewingBoard && document.getElementById('exit-game').dataset.title === 'Exit game'), 'leaving resets the board view');
 
 	assert(errors.A.length === 0, 'no js errors on host' + (errors.A.length ? ': ' + errors.A.join(' | ') : ''));
 	assert(errors.B.length === 0, 'no js errors on guest' + (errors.B.length ? ': ' + errors.B.join(' | ') : ''));

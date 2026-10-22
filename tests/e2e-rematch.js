@@ -55,6 +55,22 @@ async function passOutGame(pages) {
 	await passOutGame([A, B]);
 	console.log('     match 1 finished');
 
+	// Play Again while looking at the board: host readies, closes the results,
+	// and the rematch starts under it when the guest readies too
+	await A.click('#end-playagain');
+	await A.click('#end-close');
+	assert(await A.evaluate(() => game.viewingBoard), 'host is looking at the final board');
+	await B.waitForFunction(() => lobby.remoteReady);
+	await B.click('#end-playagain');
+	await waitFor(A, () => game.state.val === 10 && mp.active, 'rematch started while host viewed the board');
+	await waitFor(B, () => game.state.val === 10 && mp.active, 'rematch started (guest)');
+	assert(await A.evaluate(() => !game.viewingBoard && board.row.every(r => r.cards.length === 0) && document.getElementById('exit-game').dataset.title === 'Exit game'), 'host rematch starts from a clean board');
+	await waitFor(A, () => Carousel.curr, 'rematch redraw (host)'); await waitFor(B, () => Carousel.curr, 'rematch redraw (guest)');
+	await A.evaluate(() => Carousel.curr.cancel()); await B.evaluate(() => Carousel.curr.cancel());
+	await passOutGame([A, B]);
+	assert(await A.evaluate(() => mp.checksum()) === await B.evaluate(() => mp.checksum()), 'rematch finished in sync');
+	console.log('     rematch finished');
+
 	// host returns to the builder and re-readies WHILE guest is still on the
 	// end screen — this lobby-ready must survive the guest's stale mp routing
 	await A.evaluate(() => game.customize_elem.click());

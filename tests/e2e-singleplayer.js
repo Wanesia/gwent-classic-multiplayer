@@ -89,9 +89,52 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		assert(await page.evaluate(() => !game.newGame_elem.classList.contains('hide')), 'new game button visible in single player');
 		// AI actually played cards (its grave/board/hand changed)
 		assert(await page.evaluate(() => game.roundHistory.some(r => r.score_op > 0)), 'AI scored points during the game');
-		// rematch works (exercises GameRNG.reset + player reset path)
-		await page.evaluate(() => game.rematch_elem.click());
+
+		// The last round's board is left on the table under the results
+		assert(await page.evaluate(() => {
+			const last = game.roundHistory[game.roundHistory.length - 1];
+			const sum = p => board.playerRows(p).reduce((a, r) => a + r.total, 0);
+			return sum(player_me) === last.score_me && sum(player_op) === last.score_op;
+		}), 'final board kept: row totals match the last round scores');
+		assert(await page.evaluate(() => board.row.some(r => r.cards.length > 0)), 'final board still has cards on it');
+
+		// Closing the results shows the board; Escape brings them back
+		await page.click('#end-close');
+		assert(await page.isHidden('#end-screen') && await page.evaluate(() => game.viewingBoard), 'X closes the results');
+		assert(await page.getAttribute('#exit-game', 'data-title') === 'Back to results', 'exit button reads "Back to results" while viewing');
+		const row = await page.evaluateHandle(() => board.row.find(r => r.cards.length > 0).elem);
+		await row.click();
+		await waitFor(page, () => Carousel.curr, 'clicking a row opens its cards');
+		await page.keyboard.press('Escape');
+		await waitFor(page, () => !Carousel.curr, 'Escape closes the card viewer');
+		assert(await page.isHidden('#end-screen'), 'that Escape only closed the card viewer');
+		await page.keyboard.press('Escape');
+		assert(await page.isVisible('#end-screen') && await page.evaluate(() => !game.viewingBoard), 'second Escape brings the results back');
+		assert(await page.getAttribute('#exit-game', 'data-title') === 'Exit game', 'exit button label restored');
+
+		// A hand card can only be looked at, and the exit button also returns
+		await page.click('#end-close');
+		const handCard = await page.evaluateHandle(() => player_me.hand.cards[0]?.elem || null);
+		if (await handCard.evaluate(e => !!e)) {
+			const before = await page.evaluate(() => board.row.map(r => r.cards.length).join());
+			await handCard.click();
+			await waitFor(page, () => Carousel.curr, 'clicking a hand card opens it in the card viewer');
+			assert(await page.evaluate(() => ui.previewCard === null), 'no placing preview after the match');
+			await page.evaluate(() => Carousel.curr.select(new Event('click')));
+			await page.waitForTimeout(300);
+			assert(await page.evaluate(() => board.row.map(r => r.cards.length).join()) === before, 'the hand card cannot be played');
+			await page.evaluate(() => Carousel.curr?.cancel());
+		}
+		await page.click('#exit-game');
+		assert(await page.isVisible('#end-screen'), 'exit button brings the results back');
+
+		// A new match started while the board is shown (an online rematch does
+		// this) starts from a clean table
+		await page.click('#end-close');
+		await page.evaluate(() => game.rematchGame());
 		await waitFor(page, () => game.state.val === 10 && game.roundCount === 0, 'rematch started');
+		assert(await page.evaluate(() => !game.viewingBoard && board.row.every(r => r.cards.length === 0 && !r.special) && weather.cards.length === 0), 'rematch clears the kept board');
+		assert(await page.getAttribute('#exit-game', 'data-title') === 'Exit game', 'rematch restores the exit button label');
 		await waitFor(page, () => Carousel.curr, 'rematch redraw opened');
 	}
 
