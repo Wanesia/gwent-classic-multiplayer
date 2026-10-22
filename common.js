@@ -16,6 +16,10 @@ const safeStorage = {
 	remove(key) { try { localStorage.removeItem(key); } catch (e) {} },
 };
 
+// Scales every game delay (sleep, fades, polls): a fast replay runs the same
+// game code with shorter waits
+const GameSpeed = { factor: 1 };
+
 function isEmpty(obj)
 {
 	for (const property in obj)

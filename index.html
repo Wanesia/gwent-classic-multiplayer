@@ -291,6 +291,7 @@
 			<button id="end-rematch" data-i18n="game.rematch">Rematch</button>
 			<button id="end-newgame" data-i18n="game.newGame">New Game</button>
 			<button id="end-leave" class="hide" data-i18n="game.leave">Leave</button>
+			<button id="end-history" data-i18n="history.button">Match history</button>
 		</div>
 		<span id="end-close" title="View the board" data-i18n-title="game.closeResults">&times;</span>
 	</section>
@@ -536,6 +537,7 @@
 	</ul>
 </div>
 <div id="lobby-fullscreen-toggle" class="settings-button" data-title="Fullscreen mode" data-i18n-datatitle="deck.fullscreenMode"><img src="svg/fullscreen-gold.svg"></div>
+<div id="lobby-history-toggle" class="settings-button" data-title="Match history" data-i18n-datatitle="history.button"><img src="svg/history.svg"></div>
 
 <section id="feedback-modal" class="hide">
 	<div class="fb-panel">
@@ -555,6 +557,33 @@
 		<span class="fb-close" title="Close">&times;</span>
 		<h2>PATCH NOTES</h2>
 		<div class="cl-body"></div>
+	</div>
+</section>
+
+<section id="history-modal" class="hide">
+	<div class="fb-panel hist-panel">
+		<span class="fb-close" title="Close" data-i18n-title="feedback.close">&times;</span>
+		<h2 data-i18n="history.title">MATCH HISTORY</h2>
+		<div class="hist-filter">
+			<button type="button" data-filter="all" data-i18n="history.filterAll">All</button>
+			<button type="button" data-filter="ai" data-i18n="history.filterAi">vs Computer</button>
+			<button type="button" data-filter="online" data-i18n="history.filterOnline">Online</button>
+		</div>
+		<div class="hist-stats"></div>
+		<p class="hist-notice hide"></p>
+		<div class="hist-ask hide">
+			<p class="hist-ask-text"></p>
+			<div class="hist-ask-buttons"></div>
+		</div>
+		<div class="hist-list"></div>
+		<button type="button" class="hist-more hide" data-i18n="history.showMore">Show more</button>
+		<div class="hist-actions">
+			<button type="button" class="fb-btn hist-export" data-i18n="history.export">Export</button>
+			<button type="button" class="fb-btn hist-import" data-i18n="history.import">Import</button>
+			<button type="button" class="fb-btn hist-clear" data-i18n="history.clear">Clear</button>
+			<input type="file" class="hist-file" accept=".json,application/json" hidden />
+		</div>
+		<p class="hist-note" data-i18n="history.note">Your history is saved only in this browser on this device.</p>
 	</div>
 </section>
 
@@ -608,6 +637,8 @@
 <script type="text/javascript" src="lobby.js"></script>
 <script type="text/javascript" src="fit-screen.js"></script>
 <script type="text/javascript" src="changelog.js"></script>
+<script type="text/javascript" src="history.js"></script>
+<script type="text/javascript" src="replay.js"></script>
 </body>
 
 </html>

@@ -41,23 +41,10 @@ var factions = {
 		name: "Scoia'tael",
 		factionAbility: player => game.gameStart.push( async () => {
 			let notif = "";
-			if (player === player_me) {
-				await ui.popup(I18N.t("game.goFirst"), () => game.firstPlayer = player, I18N.t("game.letOpponentStart"), () => game.firstPlayer = player.opponent(), I18N.t("game.goFirstTitle"), I18N.t("game.goFirstBody"), 0.55);
-				if (mp.active)
-					mp.send({t: "first", who: mp.roleOf(game.firstPlayer)});
-				notif = game.firstPlayer.tag + "-first";
-			} else if (player.controller instanceof ControllerAI) {
-				if (Math.random() < 0.5) {
-					game.firstPlayer = player;
-					notif = "scoiatael";
-				} else {
-					game.firstPlayer = player.opponent();
-					notif = game.firstPlayer.tag + "-first";
-				}
-			} else {
-				// remote player's choice arrives over the wire
-				const m = await mp.next("first");
-				if (!mp.active)
+			if (mp.isRemote(player)) {
+				// remote player's choice arrives over the wire (or from a replay)
+				const m = await mp.next(mp.roleOf(player), "first");
+				if (!mp.live)
 					return true;
 				if (m.who !== "host" && m.who !== "guest") {
 					mp.desync();
@@ -65,6 +52,18 @@ var factions = {
 				}
 				game.firstPlayer = mp.playerOf(m.who);
 				notif = game.firstPlayer.tag + "-first";
+			} else if (player === player_me) {
+				await ui.popup(I18N.t("game.goFirst"), () => game.firstPlayer = player, I18N.t("game.letOpponentStart"), () => game.firstPlayer = player.opponent(), I18N.t("game.goFirstTitle"), I18N.t("game.goFirstBody"), 0.55);
+				mp.send({t: "first", who: mp.roleOf(game.firstPlayer)});
+				notif = game.firstPlayer.tag + "-first";
+			} else {
+				if (GameRNG.ai.coin()) {
+					game.firstPlayer = player;
+					notif = "scoiatael";
+				} else {
+					game.firstPlayer = player.opponent();
+					notif = game.firstPlayer.tag + "-first";
+				}
 			}
 			await ui.notification(notif,1200);
 			return true;
@@ -84,7 +83,7 @@ var factions = {
 				// One at a time, like the human path: a revived medic picks from
 				// the grave, and could pick the other card still being revived
 				for (let i = 0; i < 2; i++) {
-					const units = player.grave.findCardsRandom(c => c.isUnit(), 1);
+					const units = player.grave.findCardsRandom(c => c.isUnit(), 1, GameRNG.ai);
 					if (units.length === 0)
 						break;
 					await board.toRow(units[0], player.grave);

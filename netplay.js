@@ -16,6 +16,7 @@
 //   {t:"decoy", i, d, j} {t:"leader"}
 //   {t:"row", d}                                       mid-resolution row choice
 //   {t:"sum", h}                                       per-turn state checksum
+//   {t:"desync"}                                       the sender found a mismatch and left
 //   {t:"chat", q} {t:"chat-text", s}                   chat (chat.js): these and any other
 //   {t:"chat-state", quick, text}                      "chat-" type bypass the lockstep
 
@@ -47,7 +48,7 @@ class ControllerRemote {
 	redraw() {}
 
 	async startTurn(player) {
-		const m = await mp.next("play", "scorch", "decoy", "pass", "leader");
+		const m = await mp.next(mp.roleOf(player), "play", "scorch", "decoy", "pass", "leader");
 		const desync = () => { mp.desync(); return new Promise(() => {}); };
 		const validCard = Number.isInteger(m.i) && m.i >= 0 && m.i < player.hand.cards.length;
 		switch (m.t) {
@@ -98,6 +99,20 @@ class MPSession {
 		this.role = null; // "host" | "guest"
 		this.queue = [];
 		this.waiter = null;
+		// Set while a recorded match is played back (replay.js): every human
+		// player's choices then come from the recording instead of the wire
+		this.replay = null;
+	}
+
+	// Game logic runs the online code paths: a live online match, or the replay
+	// of one
+	get lockstep() {
+		return this.active || !!(this.replay && this.replay.online);
+	}
+
+	// A match whose remote choices are still being fed (online or replay)
+	get live() {
+		return this.active || !!this.replay;
 	}
 
 	activate(role) {
@@ -120,7 +135,11 @@ class MPSession {
 		QuickChat.refresh();
 	}
 
+	// A choice of the local player: recorded for the match history, and sent to
+	// the opponent in online games
 	send(msg) {
+		if (msg.t !== "sum")
+			MatchLog.add(this.localRole(), msg);
 		if (this.active)
 			Net.send(msg);
 	}
@@ -137,6 +156,10 @@ class MPSession {
 			return lobby.routeLobby(msg);
 		if (msg.t === "chat" || msg.t.startsWith("chat-"))
 			return QuickChat.route(msg);
+		// The peer found a mismatch: end here too, so both record a desync
+		// rather than one side a walkover
+		if (msg.t === "desync")
+			return this.desync();
 		this.queue.push(msg);
 		const w = this.waiter;
 		if (w) {
@@ -145,15 +168,21 @@ class MPSession {
 		}
 	}
 
-	// Awaits the next inbound message of one of the given types. Receiving any
-	// other type means the two simulations no longer agree on whose choice is
-	// pending - treated as a desync.
-	async next(...types) {
+	// Awaits the next choice of the player with the given role, as one of the
+	// given types. Online there is a single remote player and the role is only
+	// used for recording. Receiving any other type means the two simulations no
+	// longer agree on whose choice is pending - treated as a desync.
+	async next(role, ...types) {
+		if (this.replay)
+			return this.replay.next(role, types);
 		while (this.active) {
 			if (this.queue.length > 0) {
 				const m = this.queue.shift();
-				if (types.includes(m.t))
+				if (types.includes(m.t)) {
+					if (m.t !== "sum")
+						MatchLog.add(role, m);
 					return m;
+				}
 				console.error("Unexpected message", m, "expected", types);
 				this.desync();
 				break;
@@ -173,7 +202,7 @@ class MPSession {
 	}
 
 	localRole() {
-		return this.active ? this.role : "host";
+		return this.active ? this.role : this.replay ? this.replay.localRole : "host";
 	}
 
 	// Role of the player with the given Player.id (0 = local)
@@ -190,7 +219,7 @@ class MPSession {
 	}
 
 	isRemote(player) {
-		return this.active && player && player.controller instanceof ControllerRemote;
+		return this.live && !!player && player.controller instanceof ControllerRemote;
 	}
 
 	// Destinations the player may legally play the card to, mirroring
@@ -285,10 +314,13 @@ class MPSession {
 	}
 
 	desync() {
+		if (this.replay)
+			return this.replay.diverged();
 		if (!this.active)
 			return;
+		Net.send({t: "desync"});
 		this.deactivate();
-		lobby.endMultiplayerGame(I18N.t("lobby.desyncTitle"), I18N.t("lobby.desyncBody"));
+		lobby.endMultiplayerGame(I18N.t("lobby.desyncTitle"), I18N.t("lobby.desyncBody"), "desync");
 	}
 }
 

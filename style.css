@@ -1936,7 +1936,7 @@ main { background-image: url('img/boardtest8.png'); }
 	}
 
 	/* Buttons at the left screen edge: grow the tooltip rightwards */
-	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat-settings, #toggle-keybinds, #chat-button, #chat-op-state)[data-title]:hover::after {
+	:is(#toggle-music, #toggle-sfx, #toggle-notifications, #toggle-chat-settings, #toggle-keybinds, #chat-button, #chat-op-state, #lobby-history-toggle)[data-title]:hover::after {
 		left: 0;
 	}
 
@@ -2760,6 +2760,30 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	display: flex;
 }
 
+/* Match history: top-left of the main menu */
+#lobby-history-toggle {
+	display: none;
+	position: fixed;
+	top: 0.9vw;
+	left: 1.5vw;
+	width: 2.5vw;
+	height: 2.5vw;
+	z-index: 96;
+	align-items: center;
+	justify-content: center;
+}
+#lobby-history-toggle > img {
+	width: 1.7vw;
+	height: 1.7vw;
+	opacity: 0.85;
+}
+#lobby-history-toggle:hover > img {
+	opacity: 1;
+}
+#lobby:not(.hide):has(#lobby-mode:not(.hide)) ~ #lobby-history-toggle {
+	display: flex;
+}
+
 .lang-trigger {
 	display: flex;
 	align-items: center;
@@ -2933,7 +2957,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 /* Feedback modal: reuses the shortcut-legend overlay look */
-#feedback-modal, #changelog-modal {
+#feedback-modal, #changelog-modal, #history-modal {
 	position: fixed;
 	inset: 0;
 	z-index: 200;
@@ -2942,7 +2966,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.7);
 }
-#feedback-modal.hide, #changelog-modal.hide {
+#feedback-modal.hide, #changelog-modal.hide, #history-modal.hide {
 	display: none;
 }
 .fb-panel {
@@ -3802,4 +3826,199 @@ body:has(#end-screen:not(.hide)) #chat-log {
 }
 #chat-log.chat-cooldown #chat-input:not(:disabled) {
 	border-color: rgba(205, 70, 50, 0.7);
+}
+
+/* ---------- match history (history.js) ---------- */
+
+/* Above the end screen, which also opens it */
+#history-modal {
+	z-index: 1100;
+}
+.hist-panel {
+	width: 62vw;
+	max-width: 62vw;
+	max-height: 88vh;
+	display: flex;
+	flex-direction: column;
+	gap: 0.7vw;
+}
+.hist-panel h2 {
+	margin-bottom: 0;
+}
+.hist-filter {
+	display: flex;
+	justify-content: center;
+	gap: 0.6vw;
+}
+.hist-filter button, .hist-more {
+	padding: 0.3vw 1vw;
+	background: transparent;
+	border: 1px solid rgba(255, 200, 80, 0.25);
+	border-radius: 2px;
+	font-family: sans-serif;
+	font-size: 0.75vw;
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+	color: rgba(255, 210, 120, 0.7);
+}
+.hist-filter button:hover, .hist-more:hover {
+	border-color: rgba(255, 200, 80, 0.55);
+	color: rgba(255, 215, 130, 1);
+}
+.hist-filter button.active {
+	background: rgba(218, 165, 32, 0.18);
+	border-color: rgba(255, 200, 80, 0.6);
+	color: #ffd864;
+}
+.hist-stats {
+	display: flex;
+	justify-content: center;
+	gap: 2.6vw;
+}
+.hist-stats > div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.hist-stats b {
+	font-size: 1.6vw;
+	color: #ffd864;
+}
+.hist-stats span {
+	font-size: 0.8vw;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: rgba(232, 216, 176, 0.7);
+}
+.hist-notice, .hist-ask {
+	margin: 0;
+	padding: 0.5vw 0.8vw;
+	border: 1px solid rgba(218, 165, 32, 0.35);
+	border-radius: 0.3vw;
+	background: rgba(218, 165, 32, 0.08);
+	font-size: 0.95vw;
+	color: #e8d8b0;
+}
+.hist-ask-text {
+	margin: 0 0 0.5vw;
+}
+.hist-ask-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 0.8vw;
+}
+.hist-notice.hide, .hist-ask.hide, .hist-more.hide {
+	display: none;
+}
+.hist-list {
+	flex: 1 1 auto;
+	min-height: 8vw;
+	overflow-y: auto;
+	border-top: 1px solid rgba(218, 165, 32, 0.25);
+	border-bottom: 1px solid rgba(218, 165, 32, 0.25);
+}
+.hist-empty {
+	margin: 2vw 0;
+	font-size: 1vw;
+	color: rgba(232, 216, 176, 0.7);
+}
+.hist-row {
+	display: grid;
+	grid-template-columns: 1.6vw 6.5vw 10.5vw 1fr 1.6vw 1fr 9vw;
+	align-items: center;
+	gap: 0.6vw;
+	padding: 0.4vw 0.6vw;
+	border-bottom: 1px solid rgba(218, 165, 32, 0.1);
+	text-align: left;
+	font-size: 0.9vw;
+	color: #e8d8b0;
+}
+.hist-row:last-child {
+	border-bottom: none;
+}
+.hist-star {
+	padding: 0;
+	background: none;
+	border: none;
+	font-size: 1.2vw;
+	color: rgba(218, 165, 32, 0.45);
+}
+.hist-star:hover, .hist-star.on {
+	color: #ffd864;
+}
+.hist-result {
+	font-weight: bold;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	font-size: 0.85vw;
+}
+.hist-win, .hist-walkover { color: #8fd16a; }
+.hist-lose, .hist-left { color: #e06a5a; }
+.hist-draw { color: #e8d8b0; }
+.hist-desync, .hist-playing { color: rgba(232, 216, 176, 0.5); }
+.hist-when, .hist-names {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.hist-date, .hist-mode {
+	white-space: nowrap;
+}
+.hist-mode, .hist-faction {
+	font-size: 0.75vw;
+	color: rgba(232, 216, 176, 0.6);
+}
+.hist-side {
+	display: flex;
+	align-items: center;
+	gap: 0.5vw;
+	min-width: 0;
+}
+.hist-thumb {
+	flex: none;
+	width: 2.2vw;
+	height: 2.9vw;
+	border-radius: 0.2vw;
+	background-size: cover;
+	background-position: center;
+	background-color: rgba(255, 255, 255, 0.05);
+}
+.hist-leader {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: goldenrod;
+}
+.hist-vs {
+	text-align: center;
+	font-size: 0.75vw;
+	color: rgba(232, 216, 176, 0.5);
+}
+.hist-rounds {
+	display: flex;
+	gap: 0.5vw;
+	justify-content: flex-end;
+}
+.hist-round b {
+	font-weight: normal;
+}
+.hist-round b.won {
+	font-weight: bold;
+	color: goldenrod;
+}
+.hist-more {
+	align-self: center;
+}
+.hist-actions {
+	display: flex;
+	justify-content: center;
+	gap: 1vw;
+}
+.hist-actions .fb-btn, .hist-ask .fb-btn {
+	font-family: inherit;
+}
+.hist-note {
+	margin: 0;
+	font-size: 0.8vw;
+	color: rgba(232, 216, 176, 0.55);
 }

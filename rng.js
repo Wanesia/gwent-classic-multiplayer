@@ -45,15 +45,21 @@ function deriveSeed(base, label) {
 // the local player is "host") so that the order in which the two clients
 // build and redraw their decks cannot interleave the streams. All other
 // mid-game randomness draws from the "game" stream in lockstep order.
+// The computer opponent's choices draw from their own "ai" stream, so a
+// recorded single-player match replays with the same AI decisions.
 var GameRNG = {
+	seed: 0,
 	game: null,
 	deckHost: null,
 	deckGuest: null,
+	ai: null,
 
 	reset(seed) {
+		this.seed = seed >>> 0;
 		this.game = new RNG(deriveSeed(seed, "game"));
 		this.deckHost = new RNG(deriveSeed(seed, "deck-host"));
 		this.deckGuest = new RNG(deriveSeed(seed, "deck-guest"));
+		this.ai = new RNG(deriveSeed(seed, "ai"));
 	},
 
 	deckFor(role) {

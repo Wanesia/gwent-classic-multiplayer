@@ -67,7 +67,7 @@ class Lobby {
 		addMouseEnterSFXBySelector(".split-panel");
 
 		Net.onPeerJoined = () => this.enterDeckSetup();
-		Net.onPeerLeft = () => this.handlePeerLeft();
+		Net.onPeerLeft = reason => this.handlePeerLeft(reason);
 		EventManager.customizationOpened.bind(() => this.onCustomizationOpened());
 	}
 
@@ -122,6 +122,7 @@ class Lobby {
 
 	// Quick match
 	async findOpponent() {
+		this.matchMode = "quick"; // recorded in the match history
 		Net.trackEvent("mode-qm");
 		this.showView("lobby-search");
 		this.searchHint.textContent = I18N.t("lobby.searchHintDefault");
@@ -168,6 +169,7 @@ class Lobby {
 	}
 
 	async createGame() {
+		this.matchMode = "friend"; // recorded in the match history
 		this.showView("lobby-create");
 		this.codeElem.textContent = "·····";
 		this.copyHint.textContent = "";
@@ -194,6 +196,7 @@ class Lobby {
 	}
 
 	async joinGame() {
+		this.matchMode = "friend"; // recorded in the match history
 		const code = this.joinInput.value.trim().toUpperCase();
 		if (code.length === 0) {
 			if (this._joinReady) {
@@ -497,9 +500,14 @@ class Lobby {
 		}
 	}
 
-	handlePeerLeft() {
+	handlePeerLeft(reason) {
 		if (this.inMultiplayer) {
-			this.endMultiplayerGame(I18N.t("lobby.oppDisconnectedTitle"), I18N.t("lobby.oppDisconnectedBody"));
+			// Whoever disconnects loses a match in progress: a lost connection
+			// on our side is a defeat, the opponent dropping out a walkover
+			if (reason === "self")
+				this.endMultiplayerGame(I18N.t("lobby.connectionLostTitle"), I18N.t("lobby.connectionLostBody"), "left");
+			else
+				this.endMultiplayerGame(I18N.t("lobby.oppDisconnectedTitle"), I18N.t("lobby.oppDisconnectedBody"), "walkover");
 		} else if (!this.elem.classList.contains("hide")) {
 			// connection or room died while waiting in the create or search view
 			this.stopSearchExtras();
@@ -514,9 +522,16 @@ class Lobby {
 
 	// Ends an online session from any phase with a notice, then returns to the
 	// main menu. Used for disconnects and desyncs.
-	endMultiplayerGame(title, description) {
+	// result: how a match still in progress ends up in the match history
+	endMultiplayerGame(title, description, result) {
 		if (!this.inMultiplayer)
 			return;
+		if (game.state === GameState.PLAYING && result) {
+			MatchHistory.finish(result);
+			const note = { left: "lobby.countsAsLoss", walkover: "lobby.countsAsWin", desync: "lobby.notCounted" }[result];
+			if (note)
+				description += " " + I18N.t(note);
+		}
 		this.inMultiplayer = false;
 		mp.deactivate();
 		Net.leave();

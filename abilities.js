@@ -219,7 +219,7 @@ var ability_dict = {
 						const rangedDif = rangedVirtual.calcScore() - ranged.calcScore();
 						const rowName = closeDif > rangedDif ? "close" 
 							: closeDif < rangedDif ? "ranged"
-							: Math.random() < 0.5 ? "close" : "ranged";
+							: GameRNG.ai.coin() ? "close" : "ranged";
 						selectedRow = board.getRow(res, rowName, player_op);
 					}
 					else
@@ -324,7 +324,7 @@ var ability_dict = {
 		description: "Look at 3 random cards from your opponent's hand.",
 		activated: async card => {
 			// the reveal is purely visual and only shown to the activating player. AI and remote activations have nothing to display
-			if (card.holder !== player_me)
+			if (card.holder !== player_me || mp.isRemote(card.holder))
 				return;
 			let container = new CardContainer();
 			container.cards = card.holder.opponent().hand.findCardsRandom(() => true, 3);

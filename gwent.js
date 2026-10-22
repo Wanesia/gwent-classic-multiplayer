@@ -52,7 +52,7 @@ class ControllerAI {
 			}
 			await player.passRound();
 		} else {
-			let rand = randomInt(weightTotal);
+			let rand = GameRNG.ai.int(weightTotal);
 			for (var i=0; i < weights.length; ++i) {
 				rand -= weights[i].weight;
 				if (rand < 0)
@@ -147,7 +147,7 @@ class ControllerAI {
 		
 		let weathers = card.holder.hand.cards.filter(c => c.row === "weather");
 		if (weathers.length > 1){
-			weathers.splice(randomInt(weathers.length), 1);
+			weathers.splice(GameRNG.ai.int(weathers.length), 1);
 			cards.push(...weathers);
 		}
 		
@@ -216,7 +216,7 @@ class ControllerAI {
 			let max = data.medic.reduce( (a,c) => Math.max(a, c.power), -Infinity);
 			targ = data.medic.filter(c => c.power === max)[0];
 		} else if (data.scorch.length) {
-			targ = data.scorch[randomInt(data.scorch.length)];
+			targ = data.scorch[GameRNG.ai.int(data.scorch.length)];
 		} else {
 			let units = grave.findCards(c => c.isUnit());
 			targ = units.reduce( (a,c) => a.power < c.power ? c : a, units[0] );
@@ -231,14 +231,14 @@ class ControllerAI {
 			let min = data.spy.reduce( (a,c) => Math.min(a, c.power), Number.MAX_VALUE);
 			targ = data.spy.filter(c => c.power === min)[0];
 		} else if (data.medic.length) {
-			targ = data.medic[randomInt(data.medic.length)];
+			targ = data.medic[GameRNG.ai.int(data.medic.length)];
 		} else if (data.scorch.length) {
-			targ = data.scorch[randomInt(data.scorch.length)];
+			targ = data.scorch[GameRNG.ai.int(data.scorch.length)];
 		} else {
 			let pairs = max.rmax.filter((r,i) => i<3 && r.cards.length).reduce((a,r) => 
 				r.cards.map(c => ({r:r.row, c:c})).concat(a)
 			, []);
-			let pair = pairs[randomInt(pairs.length)];
+			let pair = pairs[GameRNG.ai.int(pairs.length)];
 			targ = pair.c;
 			row = pair.r;
 		}
@@ -250,7 +250,8 @@ class ControllerAI {
 			}
 		}
 		
-		setTimeout(() => board.toHand(targ, row), 1000);
+		// sleep, not setTimeout: a fast replay scales it like the rest of the game
+		sleep(1000).then(() => board.toHand(targ, row));
 		await this.player.playCardToRow(card, row);
 	}
 	
@@ -271,7 +272,7 @@ class ControllerAI {
 		vRanged.cards.push(card);
 		vRanged.updateState(card, true);
 		const dif = (vClose.calcScore() - close.calcScore()) - (vRanged.calcScore() - ranged.calcScore());
-		return dif > 0 ? close : dif < 0 ? ranged : Math.random() >0.5 ? close : ranged; 
+		return dif > 0 ? close : dif < 0 ? ranged : GameRNG.ai.coin() ? close : ranged; 
 	}
 
 	// Assigns a weight for how likely the conroller is to Pass the round
@@ -542,7 +543,8 @@ class Player {
 		if (this.leaderAvailable)
 			this.elem_leader.children[1].classList.remove("hide");
 		
-		if (this === player_me) {
+		// A replayed local player acts from the recording, not from clicks
+		if (this === player_me && !mp.isRemote(this)) {
 			this.awaitingAction = true;
 			document.getElementById("pass-button").classList.remove("noclick");
 		}
@@ -671,8 +673,7 @@ class Player {
 					if (!this.takeAction())
 						return;
 					AudioManager.playSFX('open');
-					if (mp.active)
-						mp.send({t: "leader"});
+					mp.send({t: "leader"});
 					await this.activateLeader();
 		}	), false);
 			this.elem_leader.children[0].setAttribute('data-title', I18N.t("game.playLeader"));
@@ -1570,6 +1571,8 @@ class Game {
 
 		if (this.viewingBoard)
 			this.setViewingBoard(false);
+		if (typeof Replay !== "undefined")
+			Replay.detach();
 
 		// Anything still waiting on the previous game (open or queued card
 		// pickers, a row choice, the AI's turn) checks this and is abandoned.
@@ -1592,7 +1595,7 @@ class Game {
 	initPlayers(p1, p2){
 		// Online, both clients must register game effects in the same order
 		// even though player_me/player_op identities are swapped between them
-		if (mp.active && p1 !== mp.playerOf("host")) {
+		if (mp.lockstep && p1 !== mp.playerOf("host")) {
 			const t = p1;
 			p1 = p2;
 			p2 = t;
@@ -1641,7 +1644,8 @@ class Game {
 	async startGame() {
 		const session = this.session;
 		EventManager.gameOpened.dispatch();
-		if (!mp.active) Net.trackEvent("sp-game-started");
+		if (!mp.active && !mp.replay) Net.trackEvent("sp-game-started");
+		MatchHistory.begin();
 		this.initPlayers(player_me, player_op);
 		this.setState(GameState.PLAYING);
 		AudioManager.playSFX('game_opening');
@@ -1679,7 +1683,7 @@ class Game {
 	// Online, both players redraw simultaneously and the round only starts
 	// once the local carousel is closed AND the remote picks have all arrived.
 	async initialRedraw(){
-		if (mp.active) {
+		if (mp.lockstep) {
 			let opRedrawDone = false;
 			await Promise.all([
 				ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
@@ -1690,7 +1694,7 @@ class Game {
 						ui.enablePlayer(false); // no acting while the opponent finishes
 						// We are done but the opponent still is: tell the player why
 						// the game appears to pause instead of leaving a blank board.
-						if (!opRedrawDone)
+						if (!opRedrawDone && !mp.replay)
 							ui.showNotification("op-redraw");
 					}),
 				ui.queueSyncedCarousel(player_op, player_op.hand, 2, async (c, i) => {
@@ -1702,7 +1706,8 @@ class Game {
 		} else {
 			for (let i=0; i< 2; i++)
 				player_op.controller.redraw();
-			await ui.queueCarousel(player_me.hand, 2, async (c, i) => {
+			// Synced only so the picks are recorded (and fed back in a replay)
+			await ui.queueSyncedCarousel(player_me, player_me.hand, 2, async (c, i) => {
 				AudioManager.playSFX('redraw');
 				await player_me.deck.swap(c, c.cards[i]);
 			}, c => true, false, true, I18N.t("game.redrawTitle"), true);
@@ -1747,7 +1752,7 @@ class Game {
 		await this.runEffects(this.turnStart);
 		if (session !== this.session)
 			return;
-		ui.enablePlayer(this.currPlayer === player_me);
+		ui.enablePlayer(this.currPlayer === player_me && !mp.isRemote(player_me));
 		this.currPlayer.startTurn();
 	}
 	
@@ -1765,20 +1770,28 @@ class Game {
 		await this.runEffects(this.turnEnd);
 		// Online, the state checksum below must include the summoned token
 		await this.settleRemovals();
-		if (session !== this.session)
+		// A turn ending late, after the match already ended, must not start
+		// another turn on the board kept for viewing
+		if (session !== this.session || this.state !== GameState.PLAYING)
 			return;
 		// Desync safety net: the player who just acted sends a state checksum,
-		// the other client verifies it against its own simulation
-		if (mp.active) {
-			if (this.currPlayer === player_me) {
-				mp.send({t: "sum", h: mp.checksum()});
-			} else {
-				const m = await mp.next("sum");
-				if (!mp.active)
-					return;
-				if (m.h !== mp.checksum())
-					return mp.desync();
-			}
+		// the other client verifies it against its own simulation. Every turn's
+		// checksum is also recorded, and a replay checks it against the recording.
+		if (mp.replay) {
+			if (!mp.replay.checkSum(mp.checksum()))
+				return mp.desync();
+		} else if (mp.active && this.currPlayer !== player_me) {
+			const m = await mp.next(mp.roleOf(this.currPlayer), "sum");
+			if (!mp.active)
+				return;
+			if (m.h !== mp.checksum())
+				return mp.desync();
+			MatchLog.sum(m.h);
+		} else {
+			const sum = mp.checksum();
+			MatchLog.sum(sum);
+			if (mp.active)
+				mp.send({t: "sum", h: sum});
 		}
 		if (this.currPlayer.passed)
 			await ui.notification(this.currPlayer.tag + "-pass", 1200);
@@ -1847,6 +1860,7 @@ class Game {
 			return;
 
 		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
+		MatchHistory.roundEnded();
 		if (gameOver)
 			this.endGame();
 		else
@@ -1858,7 +1872,11 @@ class Game {
 	
 	// Sets up and displays the end-game screen
 	async endGame() {
-		Net.trackEvent(mp.active ? "mp-game-completed" : "sp-game-finished");
+		if (mp.replay)
+			mp.replay.finish("done");
+		else
+			Net.trackEvent(mp.active ? "mp-game-completed" : "sp-game-finished");
+		MatchHistory.finish(player_op.health <= 0 && player_me.health <= 0 ? "draw" : player_op.health === 0 ? "win" : "lose");
 		let endScreen = document.getElementById("end-screen");
 		let rows = endScreen.getElementsByTagName("tr");
 		rows[1].children[0].innerHTML = player_me.name;
@@ -1875,10 +1893,12 @@ class Game {
 		
 		// Offline: rematch-with-same-decks / new-AI-opponent. Online: a networked
 		// Play Again (mutual ready-up, same decks) and Leave (disconnect) instead.
-		this.rematch_elem.classList.toggle("hide", mp.active);
-		this.newGame_elem.classList.toggle("hide", mp.active);
-		this.playAgainWrap_elem.classList.toggle("hide", !mp.active);
-		this.leave_elem.classList.toggle("hide", !mp.active);
+		// A replay's results only lead back to the deck builder
+		const replay = !!mp.replay;
+		this.rematch_elem.classList.toggle("hide", mp.active || replay);
+		this.newGame_elem.classList.toggle("hide", mp.active || replay);
+		this.playAgainWrap_elem.classList.toggle("hide", !mp.active || replay);
+		this.leave_elem.classList.toggle("hide", !mp.active || replay);
 		if (mp.active)
 			this.updateRematchButton();
 
@@ -1975,6 +1995,9 @@ class Game {
 	
 	// Returns the client to the deck customization screen
 	returnToCustomization(){
+		// Leaving a match in progress counts as a defeat
+		if (this.state === GameState.PLAYING)
+			MatchHistory.finish("left");
 		this.reset();
 		player_me.reset();
 		player_op.reset();
@@ -2267,8 +2290,7 @@ class UI {
 		document.getElementById("pass-button").addEventListener("click", () => {
 			if (!player_me.takeAction())
 				return;
-			if (mp.active)
-				mp.send({t: "pass"});
+			mp.send({t: "pass"});
 			player_me.passRound();
 			AudioManager.playSFX('pass');
 		}, false);
@@ -2417,8 +2439,7 @@ class UI {
 		} else if (pCard.name === "Decoy") {
 			if (!player_me.takeAction())
 				return;
-			if (mp.active)
-				mp.send({t: "decoy", i: pCard.holder.hand.cards.indexOf(pCard), d: mp.destToWire(row), j: row.cards.indexOf(card)});
+			mp.send({t: "decoy", i: pCard.holder.hand.cards.indexOf(pCard), d: mp.destToWire(row), j: row.cards.indexOf(card)});
 			this.hidePreview(card);
 			this.enablePlayer(false);
 			board.toHand(card, row);
@@ -2448,15 +2469,13 @@ class UI {
 		this.hidePreview();
 		this.enablePlayer(false);
 		if (card.name === "Scorch"){
-			if (mp.active)
-				mp.send({t: "scorch", i: holder.hand.cards.indexOf(card)});
+			mp.send({t: "scorch", i: holder.hand.cards.indexOf(card)});
 			this.hidePreview();
 			await ability_dict["scorch"].activated(card);
 		} else if (card.name === "Decoy") {
 			return;
 		} else {
-			if (mp.active)
-				mp.send({t: "play", i: holder.hand.cards.indexOf(card), d: mp.destToWire(row)});
+			mp.send({t: "play", i: holder.hand.cards.indexOf(card), d: mp.destToWire(row)});
 			await board.moveTo(card, row, card.holder.hand);
 		}
 		holder.endTurn();
@@ -2592,7 +2611,7 @@ class UI {
 					let cards = container.cards.reduce((a,c,i) => !predicate || predicate(c) ? a.concat([i]) : a, []);
 					if (cards.length === 0)
 						break;
-					await action(container, cards[randomInt(cards.length)]);
+					await action(container, cards[GameRNG.ai.int(cards.length)]);
 				}
 			return;
 		}
@@ -2621,12 +2640,13 @@ class UI {
 	// local human, each selection is sent over the wire as it happens; if it is
 	// the remote player, picks are consumed from the wire and applied directly
 	// without opening a carousel. In single-player this behaves exactly like
-	// queueCarousel.
+	// queueCarousel. The local human's picks are recorded either way, and a
+	// replay feeds recorded picks through the remote path.
 	async queueSyncedCarousel(chooser, container, count, action, predicate, bSort, bQuit, title, bRedraw){
 		if (mp.isRemote(chooser)) {
 			for (let picks = 0; ; picks++) {
-				const m = await mp.next("pick", "pickEnd");
-				if (!mp.active || m.t === "pickEnd")
+				const m = await mp.next(mp.roleOf(chooser), "pick", "pickEnd");
+				if (!mp.live || m.t === "pickEnd")
 					return;
 				const card = Number.isInteger(m.i) ? container.cards[m.i] : undefined;
 				if (picks >= count || !card || (predicate && !predicate(card))) {
@@ -2638,13 +2658,12 @@ class UI {
 		}
 		if (chooser.controller instanceof ControllerAI)
 			return await this.queueCarousel(container, count, action, predicate, bSort, bQuit, title, bRedraw);
-		const wrapped = !mp.active ? action : async (c, i) => {
+		const wrapped = async (c, i) => {
 			mp.send({t: "pick", i: i});
 			return await action(c, i);
 		};
 		await this.queueCarousel(container, count, wrapped, predicate, bSort, bQuit, title, bRedraw);
-		if (mp.active)
-			mp.send({t: "pickEnd"});
+		mp.send({t: "pickEnd"});
 	}
 	
 	// Displays a custom confirmation menu 
@@ -2737,8 +2756,8 @@ class UI {
 	async waitForRowSelection(card, chooser = player_me)
 	{
 		if (mp.isRemote(chooser)) {
-			const m = await mp.next("row");
-			if (!mp.active)
+			const m = await mp.next(mp.roleOf(chooser), "row");
+			if (!mp.live)
 				return null;
 			const row = m.d ? mp.destFromWire(m.d) : null;
 			if (m.d && !mp.legalDests(card, chooser).includes(row)) {
@@ -2770,8 +2789,7 @@ class UI {
 		// the play that triggered this is still resolving: no input until the next turn
 		ui.enablePlayer(false);
 		game.placedEffectsActive = false;
-		if (mp.active)
-			mp.send({t: "row", d: selectedRow ? mp.destToWire(selectedRow) : null});
+		mp.send({t: "row", d: selectedRow ? mp.destToWire(selectedRow) : null});
 		return selectedRow;
 	}
 }
@@ -4117,7 +4135,7 @@ async function fade(fadeIn, elem, dur){
 		const startingOpacity = toInteger(elem.style.opacity);
 		const endOpacity = fadeIn ? 1 : 0;
 		const startTime = Date.now();
-		const endTime = startTime + dur;
+		const endTime = startTime + dur * GameSpeed.factor;
 		if (fadeIn)
 			elem.classList.remove('hide');
 		const timer = setInterval(() => {
@@ -4192,7 +4210,7 @@ function asyncAudio(audio)
 
 // Pauses execution until the passed number of milliseconds as expired
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms * GameSpeed.factor));
   //return new Promise(resolve => setTimeout(() => {if (func) func(); return resolve();}, ms));
 }
 
@@ -4210,7 +4228,7 @@ function sleepUntil(predicate, ms) {
 				clearInterval(timer);
 				resolve();
 			}
-		}, ms)
+		}, ms * GameSpeed.factor)
 	});
 }
 

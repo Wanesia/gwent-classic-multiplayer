@@ -15,7 +15,7 @@ var Net = {
 
 	onMessage: null, // cb(data) - game/lobby payloads from the peer
 	onPeerJoined: null, // cb() - a guest joined our room
-	onPeerLeft: null, // cb() - peer left, room destroyed, or relay connection lost
+	onPeerLeft: null, // cb(reason) - "peer": the peer left or the room was destroyed; "self": our relay connection was lost
 	onQmStatus: null, // cb(online) - server player count while waiting in quickmatch
 
 	serverURL() {
@@ -128,7 +128,7 @@ var Net = {
 				this.code = null;
 				this.role = null;
 				if (this.onPeerLeft)
-					this.onPeerLeft();
+					this.onPeerLeft("peer");
 				break;
 		}
 	},
@@ -161,6 +161,6 @@ var Net = {
 		if (this.pending)
 			this.settle(new Error("unreachable"));
 		else if (wasInRoom && this.onPeerLeft)
-			this.onPeerLeft();
+			this.onPeerLeft("self");
 	}
 };

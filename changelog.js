@@ -29,6 +29,7 @@ const Changelog = {
 		const version = md.match(/^## (\d+\.\d+\.\d+)/m);
 		if (!version)
 			return;
+		this.version = version[1]; // stamped on recorded matches
 		this.body.innerHTML = this.render(md);
 		this.label.textContent = "v" + version[1];
 		this.label.classList.remove("hide");
