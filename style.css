@@ -1803,6 +1803,20 @@ main { background-image: url('img/boardtest8.png'); }
 
 .deck-card .card { position : absolute; }
 
+/* Muster: hand cards about to be called lift and pulse, and so does the top of
+   the deck while cards are still to come from it, so it reads where they came from */
+.card.muster-called {
+	margin-bottom: 1vw;
+	animation: muster-pulse 0.6s ease-in-out infinite alternate;
+}
+.cardpile.muster-source > .deck-card:nth-last-child(2) {
+	animation: muster-pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes muster-pulse {
+	from { box-shadow: 0 0 0.3vw 0.05vw rgba(255, 170, 40, 0.5); }
+	to   { box-shadow: 0 0 1vw 0.3vw rgba(255, 170, 40, 0.95); }
+}
+
 .card > div {
 	background-size: contain;
 	background-position: center;

@@ -3,6 +3,8 @@
 class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 
 const DURATION_CARD_PLACEMENT = 1000;
+// How long mustered cards are highlighted before the first one flies to the board
+const DURATION_MUSTER_TELEGRAPH = 600;
 
 const DUR_FADE_STEP = 10;
 
@@ -903,6 +905,8 @@ class Deck extends CardContainer {
 	constructor(faction, elem){
 		super(elem);
 		this.faction = faction;
+		// the pile element outlives the game: a muster abandoned mid-way leaves its glow on
+		elem.classList.remove("muster-source");
 
 		this.counter = document.createElement("div");
 		this.counter.classList = "deck-counter center";
@@ -1448,6 +1452,22 @@ class Board {
 		if (session !== game.session)
 			return abandon();
 		await row.addCard(card);
+	}
+	
+	// Translates a card from its source onto a row, resolving as soon as it is on the
+	// row rather than after its placement effects. Those are returned as a promise
+	// (wrapped, so awaiting this doesn't wait on them), letting the next card set
+	// off while this one's effects run.
+	async landOnRow(card, row_name, player, source) {
+		let row = this.getRow(card, row_name, player);
+		const session = game.session;
+		await translateTo(card, source, row);
+		if (session !== game.session)
+			return abandon();
+		const moved = source.removeCard(card);
+		if (!moved)
+			return console.error("landOnRow: " + card.name + " is no longer in its source");
+		return { placed: row.addCard(moved) };
 	}
 	
 	// Returns the CardCard associated with the row name that the card would be sent to

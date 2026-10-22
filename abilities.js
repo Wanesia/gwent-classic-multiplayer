@@ -126,13 +126,39 @@ var ability_dict = {
 			{
 				cardName = card['muster'];
 			}
-			let pred = c => c.name.startsWith(cardName);
-			let units = card.holder.hand.getCards(pred).map(x => [card.holder.hand, x])
-			.concat(card.holder.deck.getCards(pred).map( x => [card.holder.deck, x] ) );
+			// Cards stay in the hand/deck until they fly, so the ones already called
+			// are skipped: a mustered card that lands runs its own muster meanwhile
+			let pred = c => c.name.startsWith(cardName) && !c.mustering;
+			const hand = card.holder.hand, deck = card.holder.deck;
+			let units = hand.findCards(pred).map(x => [hand, x])
+			.concat(deck.findCards(pred).map( x => [deck, x] ) );
 			if (units.length === 0)
 				return;
-			await card.animate("muster");
-			await Promise.all( units.map( async p =>  await board.addCardToRow(p[1], p[1].row, p[1].holder, p[0])));
+			units.forEach(p => p[1].mustering = true);
+			// Show which cards are being called while the muster glow plays,
+			// rather than removing them before anything moves
+			if (hand.elem)
+				units.filter(p => p[0] === hand).forEach(p => p[1].elem.classList.add("muster-called"));
+			if (units.some(p => p[0] === deck))
+				deck.elem.classList.add("muster-source");
+			const session = game.session;
+			const glow = card.animate("muster");
+			await sleep(DURATION_MUSTER_TELEGRAPH);
+			if (session !== game.session)
+				return abandon();
+			// One at a time, each from its own place in the hand or deck, and each on
+			// the row before the next sets off so it is aimed at a free slot
+			const placing = [];
+			for (const [source, unit] of units) {
+				const landed = await board.landOnRow(unit, unit.row, unit.holder, source);
+				unit.mustering = false;
+				unit.elem.classList.remove("muster-called");
+				if (landed)
+					placing.push(landed.placed);
+			}
+			deck.elem.classList.remove("muster-source");
+			await glow;
+			await Promise.all(placing);
 		}
 	},
 	spy: {
