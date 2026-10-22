@@ -458,7 +458,8 @@ const HistoryUI = {
 		this.modal.querySelector(".fb-close").addEventListener("click", () => this.close());
 		this.modal.addEventListener("click", e => { if (e.target === this.modal) this.close(); });
 		document.addEventListener("keydown", e => {
-			if (e.key === "Escape" && !this.modal.classList.contains("hide")) {
+			// defaultPrevented: the same Escape just left a replay and opened this
+			if (e.key === "Escape" && !e.defaultPrevented && !this.modal.classList.contains("hide")) {
 				e.stopImmediatePropagation();
 				this.askElem.classList.contains("hide") ? this.close() : this.hideAsk();
 			}
@@ -640,7 +641,9 @@ const HistoryUI = {
 			date = new Date(m.ts).toLocaleDateString();
 			time = new Date(m.ts).toLocaleTimeString();
 		}
-		when.append(el("span", "hist-date", date), el("span", "hist-mode", time + " · " + I18N.t("history.mode." + m.mode)));
+		const detail = el("span", "hist-mode");
+		detail.append(el("span", "", time), el("span", "", I18N.t("history.mode." + m.mode)));
+		when.append(el("span", "hist-date", date), detail);
 
 		const side = s => {
 			const wrap = el("div", "hist-side");
@@ -668,8 +671,63 @@ const HistoryUI = {
 			rounds.append(span);
 		}
 
-		row.append(star, result, when, side(m.me), el("span", "hist-vs", I18N.t("history.vs")), side(m.op), rounds);
+		// Watch and download need the replay, which full storage may have cost
+		const tool = (cls, icon, tip, action) => {
+			const b = el("button", "hist-tool " + cls);
+			b.type = "button";
+			b.append(ReplayUI.icon(icon));
+			b.disabled = !m.hasReplay;
+			const text = m.hasReplay ? I18N.t(tip) : I18N.t("replay.noReplay");
+			// a disabled button gets no mouse events: the cell shows its tip
+			const wrap = el("span", "hist-tool-wrap");
+			wrap.append(b);
+			wrap.addEventListener("mouseenter", () => this.showTip(wrap, text));
+			wrap.addEventListener("mouseleave", () => this.hideTip());
+			b.addEventListener("click", action);
+			return wrap;
+		};
+		const tools = el("div", "hist-tools");
+		tools.append(star,
+			tool("hist-watch", "play", "replay.watch", () => this.watch(m)),
+			tool("hist-download", "download", "replay.download", () => this.download(m)));
+
+		row.append(tools, result, when, side(m.me), el("span", "hist-vs", I18N.t("history.vs")), side(m.op), rounds);
 		return row;
+	},
+
+	async watch(m) {
+		let rec = null;
+		try { rec = await HistoryDB.get("replays", m.id); } catch (e) {}
+		if (!rec)
+			return this.notice(I18N.t("replay.noReplay"));
+		this.close();
+		if (!ReplayUI.open(rec))
+			this.open().then(() => this.notice(I18N.t("replay.diverged")));
+	},
+
+	// One match as a file that Import (merge) takes on another device
+	async download(m) {
+		try {
+			const [summary, replay] = await Promise.all([HistoryDB.get("matches", m.id), HistoryDB.get("replays", m.id)]);
+			if (!summary)
+				return;
+			const data = { format: "gwent-classic-history", v: 1, exported: Date.now(), matches: [summary], replays: replay ? [replay] : [] };
+			const stamp = new Date(summary.ts).toISOString().slice(0, 16).replace("T", "-").replace(":", "");
+			this.saveFile(data, "gwent-match-" + stamp + ".json");
+		} catch (e) {
+			this.notice(I18N.t("history.unavailable"));
+		}
+	},
+
+	saveFile(data, name) {
+		const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 	},
 
 	// Inline confirmation inside the window (the game's popup sits under it)
@@ -702,14 +760,7 @@ const HistoryUI = {
 	async exportFile() {
 		try {
 			const data = await MatchHistory.exportData();
-			const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-			const a = document.createElement("a");
-			a.href = URL.createObjectURL(blob);
-			a.download = "gwent-history-" + new Date().toISOString().slice(0, 10) + ".json";
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-			setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+			this.saveFile(data, "gwent-history-" + new Date().toISOString().slice(0, 10) + ".json");
 		} catch (e) {
 			this.notice(I18N.t("history.unavailable"));
 		}

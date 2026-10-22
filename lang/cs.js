@@ -341,5 +341,29 @@ I18N.register("cs", {
 			friend: "s přítelem",
 			quick: "Rychlá hra"
 		}
+	},
+
+	replay: {
+		labelRound: "Kolo {round}",
+		labelMove: "Tah {turn}/{turns}",
+		play: "Přehrát",
+		pause: "Pozastavit",
+		restart: "Od začátku",
+		prevRound: "Konec předchozího kola",
+		prevTurn: "Předchozí tah",
+		nextTurn: "Další tah",
+		nextRound: "Konec kola",
+		exit: "Odejít",
+		exitButton: "Ukončit záznam",
+		done: "Konec zápasu. Vraťte se zpět a pusťte si ho znovu.",
+		ended: "Záznam zde končí: zápas byl předčasně opuštěn.",
+		diverged: "Tento záznam pochází ze starší verze hry a dál ho přehrát nelze.",
+		watch: "Přehrát záznam",
+		noReplay: "K tomuto zápasu není záznam",
+		download: "Stáhnout tento zápas",
+		minimize: "Minimalizovat",
+		expand: "Zobrazit ovládání",
+		move: "Přetažením přesunete",
+		decimal: ","
 	}
 });

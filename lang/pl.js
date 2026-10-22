@@ -341,5 +341,29 @@ I18N.register("pl", {
 			friend: "Z przyjacielem",
 			quick: "Szybki mecz"
 		}
+	},
+
+	replay: {
+		labelRound: "Runda {round}",
+		labelMove: "Ruch {turn}/{turns}",
+		play: "Odtwórz",
+		pause: "Pauza",
+		restart: "Od początku",
+		prevRound: "Koniec poprzedniej rundy",
+		prevTurn: "Poprzedni ruch",
+		nextTurn: "Następny ruch",
+		nextRound: "Koniec rundy",
+		exit: "Wyjdź",
+		exitButton: "Zakończ powtórkę",
+		done: "Koniec meczu. Cofnij, żeby obejrzeć go jeszcze raz.",
+		ended: "Zapis kończy się tutaj: mecz został przerwany.",
+		diverged: "Ta powtórka pochodzi ze starszej wersji gry i dalej nie da się jej odtworzyć.",
+		watch: "Obejrzyj powtórkę",
+		noReplay: "Brak powtórki tego meczu",
+		download: "Pobierz ten mecz",
+		minimize: "Zwiń",
+		expand: "Pokaż sterowanie",
+		move: "Przeciągnij, żeby przesunąć",
+		decimal: ","
 	}
 });

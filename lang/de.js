@@ -341,5 +341,29 @@ I18N.register("de", {
 			friend: "gegen Freund",
 			quick: "Schnelles Spiel"
 		}
+	},
+
+	replay: {
+		labelRound: "Runde {round}",
+		labelMove: "Zug {turn}/{turns}",
+		play: "Abspielen",
+		pause: "Pause",
+		restart: "Von vorn",
+		prevRound: "Ende der vorigen Runde",
+		prevTurn: "Vorheriger Zug",
+		nextTurn: "Nächster Zug",
+		nextRound: "Ende der Runde",
+		exit: "Beenden",
+		exitButton: "Wiederholung beenden",
+		done: "Ende des Spiels. Geh zurück, um es noch einmal anzusehen.",
+		ended: "Die Aufzeichnung endet hier: Das Spiel wurde vorzeitig verlassen.",
+		diverged: "Diese Wiederholung stammt aus einer älteren Version des Spiels und kann nicht weiter abgespielt werden.",
+		watch: "Wiederholung ansehen",
+		noReplay: "Keine Wiederholung für dieses Spiel",
+		download: "Dieses Spiel herunterladen",
+		minimize: "Minimieren",
+		expand: "Steuerung anzeigen",
+		move: "Zum Verschieben ziehen",
+		decimal: ","
 	}
 });

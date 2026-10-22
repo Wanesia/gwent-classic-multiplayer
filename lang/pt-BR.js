@@ -341,5 +341,29 @@ I18N.register("pt-BR", {
 			friend: "vs Amigo",
 			quick: "Partida Rápida"
 		}
+	},
+
+	replay: {
+		labelRound: "Rodada {round}",
+		labelMove: "Jogada {turn}/{turns}",
+		play: "Reproduzir",
+		pause: "Pausar",
+		restart: "Do início",
+		prevRound: "Fim da rodada anterior",
+		prevTurn: "Jogada anterior",
+		nextTurn: "Próxima jogada",
+		nextRound: "Fim da rodada",
+		exit: "Sair",
+		exitButton: "Sair do replay",
+		done: "Fim da partida. Volte para assistir de novo.",
+		ended: "A gravação termina aqui: a partida foi abandonada.",
+		diverged: "Este replay foi gravado em uma versão anterior do jogo e não pode continuar.",
+		watch: "Assistir ao replay",
+		noReplay: "Sem replay desta partida",
+		download: "Baixar esta partida",
+		minimize: "Minimizar",
+		expand: "Mostrar os controles",
+		move: "Arraste para mover",
+		decimal: ","
 	}
 });

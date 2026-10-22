@@ -341,5 +341,29 @@ I18N.register("tr", {
 			friend: "arkadaşa karşı",
 			quick: "Hızlı Maç"
 		}
+	},
+
+	replay: {
+		labelRound: "Tur {round}",
+		labelMove: "Hamle {turn}/{turns}",
+		play: "Oynat",
+		pause: "Duraklat",
+		restart: "Baştan",
+		prevRound: "Önceki turun sonu",
+		prevTurn: "Önceki hamle",
+		nextTurn: "Sonraki hamle",
+		nextRound: "Turun sonu",
+		exit: "Çık",
+		exitButton: "Tekrardan çık",
+		done: "Maçın sonu. Yeniden izlemek için geri git.",
+		ended: "Kayıt burada bitiyor: maç erken terk edildi.",
+		diverged: "Bu tekrar oyunun eski bir sürümünde kaydedildi ve daha ileri oynatılamıyor.",
+		watch: "Tekrarı izle",
+		noReplay: "Bu maçın tekrarı yok",
+		download: "Bu maçı indir",
+		minimize: "Küçült",
+		expand: "Kontrolleri göster",
+		move: "Taşımak için sürükle",
+		decimal: ","
 	}
 });

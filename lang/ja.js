@@ -341,5 +341,29 @@ I18N.register("ja", {
 			friend: "フレンド対戦",
 			quick: "クイックマッチ"
 		}
+	},
+
+	replay: {
+		labelRound: "ラウンド {round}",
+		labelMove: "{turn}/{turns} 手目",
+		play: "再生",
+		pause: "一時停止",
+		restart: "最初から",
+		prevRound: "前のラウンドの終わり",
+		prevTurn: "前の手",
+		nextTurn: "次の手",
+		nextRound: "ラウンドの終わり",
+		exit: "終了",
+		exitButton: "リプレイを終了",
+		done: "対戦終了。戻ってもう一度見られます。",
+		ended: "記録はここで終わります：対戦は途中で終了しました。",
+		diverged: "このリプレイは古いバージョンのゲームで記録されたため、これ以上再生できません。",
+		watch: "リプレイを見る",
+		noReplay: "この対戦のリプレイはありません",
+		download: "この対戦をダウンロード",
+		minimize: "最小化",
+		expand: "操作パネルを表示",
+		move: "ドラッグで移動",
+		decimal: "."
 	}
 });

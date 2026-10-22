@@ -341,5 +341,29 @@ I18N.register("fr", {
 			friend: "contre un ami",
 			quick: "Partie rapide"
 		}
+	},
+
+	replay: {
+		labelRound: "Manche {round}",
+		labelMove: "Coup {turn}/{turns}",
+		play: "Lecture",
+		pause: "Pause",
+		restart: "Depuis le début",
+		prevRound: "Fin de la manche précédente",
+		prevTurn: "Coup précédent",
+		nextTurn: "Coup suivant",
+		nextRound: "Fin de la manche",
+		exit: "Quitter",
+		exitButton: "Quitter le replay",
+		done: "Fin de la partie. Revenez en arrière pour la revoir.",
+		ended: "L'enregistrement s'arrête ici : la partie a été quittée en cours.",
+		diverged: "Ce replay a été enregistré avec une ancienne version du jeu et ne peut pas aller plus loin.",
+		watch: "Voir le replay",
+		noReplay: "Pas de replay pour cette partie",
+		download: "Télécharger cette partie",
+		minimize: "Réduire",
+		expand: "Afficher les commandes",
+		move: "Faire glisser pour déplacer",
+		decimal: ","
 	}
 });

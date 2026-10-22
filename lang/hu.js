@@ -341,5 +341,29 @@ I18N.register("hu", {
 			friend: "baráttal",
 			quick: "Gyors meccs"
 		}
+	},
+
+	replay: {
+		labelRound: "{round}. kör",
+		labelMove: "{turn}/{turns}. lépés",
+		play: "Lejátszás",
+		pause: "Szünet",
+		restart: "Az elejétől",
+		prevRound: "Az előző kör vége",
+		prevTurn: "Előző lépés",
+		nextTurn: "Következő lépés",
+		nextRound: "A kör vége",
+		exit: "Kilépés",
+		exitButton: "Kilépés a visszajátszásból",
+		done: "A meccs vége. Lépj vissza, hogy újra megnézd.",
+		ended: "A felvétel itt véget ér: a meccset idő előtt elhagyták.",
+		diverged: "Ez a visszajátszás a játék egy régebbi verziójával készült, ezért nem játszható tovább.",
+		watch: "Visszajátszás megtekintése",
+		noReplay: "Ehhez a meccshez nincs visszajátszás",
+		download: "Meccs letöltése",
+		minimize: "Kis méret",
+		expand: "Vezérlők megjelenítése",
+		move: "Húzd az áthelyezéshez",
+		decimal: ","
 	}
 });

@@ -341,5 +341,29 @@ I18N.register("es", {
 			friend: "contra un amigo",
 			quick: "Partida rápida"
 		}
+	},
+
+	replay: {
+		labelRound: "Ronda {round}",
+		labelMove: "Jugada {turn}/{turns}",
+		play: "Reproducir",
+		pause: "Pausa",
+		restart: "Desde el principio",
+		prevRound: "Final de la ronda anterior",
+		prevTurn: "Jugada anterior",
+		nextTurn: "Jugada siguiente",
+		nextRound: "Final de la ronda",
+		exit: "Salir",
+		exitButton: "Salir de la repetición",
+		done: "Fin de la partida. Retrocede para verla otra vez.",
+		ended: "La grabación termina aquí: la partida se abandonó antes de acabar.",
+		diverged: "Esta repetición se grabó con una versión anterior del juego y no se puede seguir reproduciendo.",
+		watch: "Ver repetición",
+		noReplay: "No hay repetición de esta partida",
+		download: "Descargar esta partida",
+		minimize: "Minimizar",
+		expand: "Mostrar los controles",
+		move: "Arrastra para mover",
+		decimal: ","
 	}
 });

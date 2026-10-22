@@ -341,5 +341,29 @@ I18N.register("zh-TW", {
 			friend: "好友對戰",
 			quick: "快速配對"
 		}
+	},
+
+	replay: {
+		labelRound: "第 {round} 回合",
+		labelMove: "第 {turn}/{turns} 步",
+		play: "播放",
+		pause: "暫停",
+		restart: "從頭開始",
+		prevRound: "上一回合結束",
+		prevTurn: "上一步",
+		nextTurn: "下一步",
+		nextRound: "本回合結束",
+		exit: "離開",
+		exitButton: "離開重播",
+		done: "對局結束。倒退即可再看一次。",
+		ended: "紀錄到此為止：對局中途離開了。",
+		diverged: "此重播錄製於舊版本遊戲，無法繼續播放。",
+		watch: "觀看重播",
+		noReplay: "此對局沒有重播",
+		download: "下載此對局",
+		minimize: "最小化",
+		expand: "顯示控制列",
+		move: "拖曳以移動",
+		decimal: "."
 	}
 });

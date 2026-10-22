@@ -291,6 +291,7 @@
 			<button id="end-rematch" data-i18n="game.rematch">Rematch</button>
 			<button id="end-newgame" data-i18n="game.newGame">New Game</button>
 			<button id="end-leave" class="hide" data-i18n="game.leave">Leave</button>
+			<button id="end-replay-exit" class="hide" data-i18n="replay.exitButton">Exit replay</button>
 		</div>
 		<span id="end-close" title="View the board" data-i18n-title="game.closeResults">&times;</span>
 	</section>
@@ -320,6 +321,22 @@
 
 
 </main>
+
+<!-- Replay controls (replay.js): outside <main>, which takes no clicks while
+     a replay plays; right of the board, between the decks and graves -->
+<div id="replay-bar" class="hide">
+	<div class="rp-head">
+		<span class="rp-grip" data-title="Drag to move" data-i18n-datatitle="replay.move"></span>
+		<span class="rp-label"></span>
+		<button type="button" class="rp-btn rp-size"></button>
+	</div>
+	<div class="rp-controls"></div>
+	<div class="rp-bottom">
+		<div class="rp-speeds"></div>
+		<button type="button" class="rp-exit" data-i18n="replay.exit">Exit</button>
+	</div>
+	<p class="rp-status hide"></p>
+</div>
 
 <!-- Quick chat (chat.js): outside <main> so it stays usable on the opponent's
      turn, and above the redraw picker and end screen -->

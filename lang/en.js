@@ -287,5 +287,29 @@ I18N.register("en", {
 			friend: "vs Friend",
 			quick: "Quick Match"
 		}
+	},
+
+	replay: {
+		labelRound: "Round {round}",
+		labelMove: "Move {turn}/{turns}",
+		play: "Play",
+		pause: "Pause",
+		restart: "Watch from the start",
+		prevRound: "End of the previous round",
+		prevTurn: "Previous move",
+		nextTurn: "Next move",
+		nextRound: "End of the round",
+		exit: "Exit",
+		exitButton: "Exit replay",
+		done: "End of the match. Go back to watch it again.",
+		ended: "The recording ends here: the match was left early.",
+		diverged: "This replay was recorded on an older version of the game and can't be played further.",
+		watch: "Watch replay",
+		noReplay: "No replay for this match",
+		download: "Download this match",
+		minimize: "Minimize",
+		expand: "Show the controls",
+		move: "Drag to move",
+		decimal: "."
 	}
 });

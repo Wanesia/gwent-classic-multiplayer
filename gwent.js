@@ -6,6 +6,18 @@ class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 // game code with shorter waits
 const GameSpeed = { factor: 1 };
 
+// A wait of no time at all. setTimeout(0) is held back to 4ms once nested and
+// a move makes dozens of waits, so a replay skipping ahead used this instead.
+const zeroDelay = (() => {
+	const channel = new MessageChannel();
+	const waiting = [];
+	channel.port1.onmessage = () => waiting.shift()();
+	return () => new Promise(resolve => {
+		waiting.push(resolve);
+		channel.port2.postMessage(0);
+	});
+})();
+
 const DURATION_CARD_PLACEMENT = 1000;
 // How long mustered cards are highlighted before the first one flies to the board
 const DURATION_MUSTER_TELEGRAPH = 600;
@@ -1545,6 +1557,8 @@ class Game {
 		// Online-only: rematch with the same decks (mutual ready-up) and leave
 		this.playAgain_elem.addEventListener("click", () => lobby.toggleRematch(), false);
 		this.leave_elem.addEventListener("click", () => lobby.leaveFromEndScreen(), false);
+		this.replayExit_elem = document.getElementById("end-replay-exit");
+		this.replayExit_elem.addEventListener("click", () => ReplayUI.exit(), false);
 		// Closing the results uncovers the final board; Escape or the exit
 		// button brings them back
 		this.exit_elem = document.getElementById("exit-game");
@@ -1753,6 +1767,12 @@ class Game {
 	// Starts a new turn. Enables client interraction in client's turn.
 	async startTurn() {
 		const session = this.session;
+		// A replay can pause or stop seeking before each move
+		if (mp.replay) {
+			await mp.replay.gate("turn");
+			if (session !== this.session)
+				return;
+		}
 		await this.runEffects(this.turnStart);
 		if (session !== this.session)
 			return;
@@ -1828,6 +1848,12 @@ class Game {
 		let winner = dif > 0 ? player_me : dif < 0 ? player_op : null;
 		let verdict = {winner: winner, score_me: player_me.total, score_op: player_op.total}
 		this.roundHistory.push(verdict);
+		// ...and on the round's final board, exactly as it was scored
+		if (mp.replay) {
+			await mp.replay.gate("roundEnd");
+			if (session !== this.session)
+				return;
+		}
 		// Losing a round costs a gem (both lose one on a draw); the last gem ends the match
 		const gameOver = (dif <= 0 && player_me.health <= 1) || (dif >= 0 && player_op.health <= 1);
 		
@@ -1915,8 +1941,10 @@ class Game {
 		
 		// Offline: rematch-with-same-decks / new-AI-opponent. Online: a networked
 		// Play Again (mutual ready-up, same decks) and Leave (disconnect) instead.
-		// A replay's results only lead back to the deck builder
+		// A replay's results only lead out of the replay
 		const replay = !!mp.replay;
+		this.customize_elem.classList.toggle("hide", replay);
+		this.replayExit_elem.classList.toggle("hide", !replay);
 		this.rematch_elem.classList.toggle("hide", mp.active || replay);
 		this.newGame_elem.classList.toggle("hide", mp.active || replay);
 		this.playAgainWrap_elem.classList.toggle("hide", !mp.active || replay);
@@ -1999,6 +2027,9 @@ class Game {
 			Carousel.curr?.cancel();
 			return this.showEndScreen();
 		}
+		// Leaving a replay needs no confirmation
+		if (mp.replay && !Popup.curr)
+			return ReplayUI.exit();
 		// The end screen has its own Customize/Rematch/Leave buttons
 		if (Popup.curr || this.state === GameState.END_SCREEN) return;
 		AudioManager.playSFX('warning');
@@ -3777,7 +3808,9 @@ class AudioManager
 
 	static async playSFX(key, waitTime = -1, forceWait = false)
 	{
-		if (Settings.soundEffects.isEnabled())
+		// A replay skipping ahead plays every move at once: keep it silent
+		const skipping = typeof Replay !== "undefined" && mp.replay && Replay.seeking();
+		if (Settings.soundEffects.isEnabled() && !skipping)
 		{
 			return await AudioManager.play(key, waitTime, forceWait);
 		}
@@ -4064,6 +4097,9 @@ async function translateTo(card, container_source, container_dest){
 	let dest = getDestinationElem(card, container_source, container_dest);
 	if (!isInDocument(elem))
 		source.appendChild(elem);
+	// A replay skipping ahead: no flight, and none of the layout reads below
+	if (GameSpeed.factor === 0)
+		return;
 	let x = trueOffsetLeft(dest) - trueOffsetLeft(elem) +dest.offsetWidth/2 - elem.offsetWidth;
 	let y = trueOffsetTop(dest) - trueOffsetTop(elem) +dest.offsetHeight/2 - elem.offsetHeight/2;
 	if (container_dest instanceof Row && container_dest.cards.length !== 0 && !card.isSpecial() ){
@@ -4160,6 +4196,14 @@ async function fade(fadeIn, elem, dur){
 		const endTime = startTime + dur * GameSpeed.factor;
 		if (fadeIn)
 			elem.classList.remove('hide');
+		// No time to fade (a replay skipping ahead): the progress below would
+		// divide by zero and never finish
+		if (endTime <= startTime) {
+			elem.style.opacity = endOpacity;
+			if (!fadeIn)
+				elem.classList.add('hide');
+			return res();
+		}
 		const timer = setInterval(() => {
 			const currTime = Date.now();
 			const op = clamp(startingOpacity, endOpacity, map(startTime, endTime, startingOpacity, endOpacity, currTime));
@@ -4232,6 +4276,8 @@ function asyncAudio(audio)
 
 // Pauses execution until the passed number of milliseconds as expired
 function sleep(ms) {
+  if (GameSpeed.factor === 0)
+    return zeroDelay();
   return new Promise(resolve => setTimeout(resolve, ms * GameSpeed.factor));
   //return new Promise(resolve => setTimeout(() => {if (func) func(); return resolve();}, ms));
 }
@@ -4449,6 +4495,13 @@ class KeyboardControls {
 				e.preventDefault();
 				game.showEndScreen();
 			}
+			return;
+		}
+
+		// Replay controls take the keys while a replay plays
+		if (mp.replay && ReplayUI.isOpen()) {
+			if (!Carousel.curr && !Popup.curr && ReplayUI.onKey(k, e))
+				e.preventDefault();
 			return;
 		}
 

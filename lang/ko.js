@@ -341,5 +341,29 @@ I18N.register("ko", {
 			friend: "친구와 대전",
 			quick: "빠른 대전"
 		}
+	},
+
+	replay: {
+		labelRound: "{round}라운드",
+		labelMove: "{turn}/{turns}수",
+		play: "재생",
+		pause: "일시정지",
+		restart: "처음부터",
+		prevRound: "이전 라운드 끝",
+		prevTurn: "이전 수",
+		nextTurn: "다음 수",
+		nextRound: "라운드 끝",
+		exit: "나가기",
+		exitButton: "리플레이 종료",
+		done: "대전 종료. 뒤로 돌아가 다시 볼 수 있습니다.",
+		ended: "기록이 여기서 끝납니다: 대전이 중간에 종료되었습니다.",
+		diverged: "이 리플레이는 이전 버전의 게임에서 기록되어 더 이상 재생할 수 없습니다.",
+		watch: "리플레이 보기",
+		noReplay: "이 대전의 리플레이가 없습니다",
+		download: "이 대전 다운로드",
+		minimize: "최소화",
+		expand: "컨트롤 표시",
+		move: "끌어서 이동",
+		decimal: "."
 	}
 });

@@ -3831,8 +3831,8 @@ body:has(#end-screen:not(.hide)) #chat-log {
 /* ---------- match history (history.js) ---------- */
 
 .hist-panel {
-	width: 62vw;
-	max-width: 62vw;
+	width: 66vw;
+	max-width: 66vw;
 	max-height: 88vh;
 	display: flex;
 	flex-direction: column;
@@ -3920,7 +3920,7 @@ body:has(#end-screen:not(.hide)) #chat-log {
 }
 .hist-row {
 	display: grid;
-	grid-template-columns: 2.4vw 6.5vw 10.5vw 1fr 1.6vw 1fr 9vw;
+	grid-template-columns: 7.6vw 6.5vw 10.5vw 1fr 1.6vw 1fr 8vw;
 	align-items: center;
 	gap: 0.6vw;
 	padding: 0.4vw 0.6vw;
@@ -3993,6 +3993,11 @@ body:has(#end-screen:not(.hide)) #chat-log {
 .hist-date, .hist-mode {
 	white-space: nowrap;
 }
+/* time and mode, spaced instead of a separator */
+.hist-mode {
+	display: flex;
+	gap: 0.6vw;
+}
 .hist-mode, .hist-faction {
 	font-size: 0.75vw;
 	color: rgba(232, 216, 176, 0.6);
@@ -4050,4 +4055,243 @@ body:has(#end-screen:not(.hide)) #chat-log {
 	margin: 0;
 	font-size: 0.8vw;
 	color: rgba(232, 216, 176, 0.55);
+}
+
+/* ---------- replay controls (replay.js) ----------
+   Right of the board, in the free space between the decks and graves;
+   above the end screen so a finished replay can still be rewound. */
+#replay-bar {
+	position: absolute;
+	top: 12.5vw;
+	right: 0.8vw;
+	width: 18.8vw;
+	z-index: 1002;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6vw;
+	padding: 0.8vw 0.9vw;
+	background: rgba(10, 10, 10, 0.9);
+	border: 1px solid rgba(218, 165, 32, 0.6);
+	border-radius: 0.4vw;
+	box-shadow: 0 0.3vw 1.4vw rgba(0, 0, 0, 0.6);
+	font-family: Arial Narrow, sans-serif;
+	color: #e8d8b0;
+}
+#replay-bar.hide {
+	display: none;
+}
+/* dragged around by pressing anywhere but a button */
+#replay-bar {
+	user-select: none;
+	touch-action: none;
+}
+#replay-bar.rp-dragging {
+	border-color: goldenrod;
+	box-shadow: 0 0.4vw 2vw rgba(0, 0, 0, 0.75), 0 0 1vw rgba(255, 160, 40, 0.2);
+}
+#replay-bar .rp-grip {
+	position: relative;
+	display: flex;
+	align-self: center;
+}
+#replay-bar .rp-grip svg {
+	width: 1vw;
+	height: 1vw;
+	fill: rgba(218, 165, 32, 0.55);
+}
+#replay-bar:hover .rp-grip svg {
+	fill: goldenrod;
+}
+#replay-bar .rp-head .rp-label {
+	margin-left: auto;
+}
+/* round and move side by side, spaced instead of a separator */
+#replay-bar .rp-label {
+	display: flex;
+	gap: 0.6vw;
+}
+#replay-bar .rp-head .rp-btn {
+	flex: none;
+}
+#replay-bar .rp-btn.rp-size {
+	width: 1.7vw;
+	height: 1.7vw;
+}
+#replay-bar .rp-btn.rp-size svg {
+	width: 1.1vw;
+	height: 1.1vw;
+}
+
+/* Folded: grip, play/pause, where we are, unfold */
+#replay-bar.rp-mini {
+	width: auto;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.6vw;
+	padding: 0.45vw 0.6vw;
+}
+#replay-bar.rp-mini .rp-head,
+#replay-bar.rp-mini .rp-controls {
+	display: contents;
+}
+#replay-bar.rp-mini .rp-bottom,
+#replay-bar.rp-mini .rp-status,
+#replay-bar.rp-mini .rp-btn:not(.rp-toggle):not(.rp-size) {
+	display: none;
+}
+#replay-bar.rp-mini .rp-grip { order: 0; }
+#replay-bar.rp-mini .rp-toggle { order: 1; width: 2.1vw; height: 2.1vw; }
+#replay-bar.rp-mini .rp-label { order: 2; margin-left: 0; }
+#replay-bar.rp-mini .rp-size { order: 3; }
+#replay-bar .rp-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.5vw;
+}
+#replay-bar .rp-label {
+	font-size: 0.95vw;
+	white-space: nowrap;
+}
+#replay-bar .rp-controls {
+	display: flex;
+	justify-content: space-between;
+}
+#replay-bar .rp-btn {
+	position: relative;
+	width: 2.5vw;
+	height: 2.5vw;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	background: transparent;
+	border: 1px solid rgba(255, 200, 80, 0.25);
+	border-radius: 2px;
+	transition: border-color .25s ease, background-color .25s ease, box-shadow .25s ease;
+}
+#replay-bar .rp-btn svg {
+	width: 1.5vw;
+	height: 1.5vw;
+	fill: rgba(255, 210, 120, 0.8);
+}
+#replay-bar .rp-btn:hover:not(:disabled) {
+	border-color: rgba(255, 200, 80, 0.6);
+	background: rgba(218, 165, 32, 0.12);
+	box-shadow: 0 0 0.8vw rgba(255, 160, 40, 0.2);
+}
+#replay-bar .rp-btn:hover:not(:disabled) svg {
+	fill: #ffd864;
+}
+#replay-bar .rp-btn:disabled {
+	opacity: 0.35;
+}
+/* the main button stands out */
+#replay-bar .rp-toggle {
+	border-color: rgba(255, 200, 80, 0.55);
+	background: rgba(218, 165, 32, 0.12);
+}
+#replay-bar .rp-bottom {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.5vw;
+}
+#replay-bar .rp-speeds {
+	display: flex;
+	gap: 0.3vw;
+}
+#replay-bar .rp-speed, #replay-bar .rp-exit {
+	padding: 0.25vw 0.55vw;
+	background: transparent;
+	border: 1px solid rgba(255, 200, 80, 0.25);
+	border-radius: 2px;
+	font-family: sans-serif;
+	font-size: 0.75vw;
+	letter-spacing: 0.08em;
+	color: rgba(255, 210, 120, 0.75);
+}
+#replay-bar .rp-exit {
+	text-transform: uppercase;
+}
+#replay-bar .rp-speed:hover, #replay-bar .rp-exit:hover {
+	border-color: rgba(255, 200, 80, 0.6);
+	color: #ffd864;
+}
+#replay-bar .rp-speed.active {
+	background: rgba(218, 165, 32, 0.2);
+	border-color: rgba(255, 200, 80, 0.6);
+	color: #ffd864;
+}
+#replay-bar .rp-status {
+	margin: 0;
+	font-size: 0.85vw;
+	line-height: 1.3;
+	color: rgba(232, 216, 176, 0.8);
+}
+#replay-bar .rp-status.hide {
+	display: none;
+}
+/* Tooltips at the right screen edge grow leftwards */
+#replay-bar [data-title]:hover::after {
+	left: auto;
+	right: 0;
+}
+
+/* Match history row: star, watch, download */
+.hist-tools {
+	display: flex;
+	gap: 0.35vw;
+}
+.hist-tool {
+	width: 2.2vw;
+	height: 2.2vw;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	background: transparent;
+	border: 1px solid rgba(255, 200, 80, 0.25);
+	border-radius: 2px;
+	transition: border-color .25s ease, background-color .25s ease, box-shadow .25s ease;
+}
+.hist-tool svg {
+	width: 1.3vw;
+	height: 1.3vw;
+	fill: rgba(218, 165, 32, 0.7);
+}
+.hist-tool:hover:not(:disabled) {
+	border-color: rgba(255, 200, 80, 0.6);
+	background: rgba(218, 165, 32, 0.12);
+	box-shadow: 0 0 0.8vw rgba(255, 160, 40, 0.2);
+}
+.hist-tool:hover:not(:disabled) svg {
+	fill: #ffd864;
+}
+.hist-tool:disabled {
+	opacity: 0.3;
+}
+.hist-tool-wrap {
+	display: inline-flex;
+}
+
+/* No transitions to wait for while skipping */
+body.replay-seeking main,
+body.replay-seeking main * {
+	transition: none !important;
+	animation: none !important;
+}
+
+/* The still copy of the board shown while a replay skips (replay.js) */
+main.replay-still {
+	z-index: 1001;
+	pointer-events: none;
+	opacity: 1;
+	transition: opacity .3s ease !important;
+}
+main.replay-still.replay-still-out {
+	opacity: 0;
+}
+body.replay-still-icons .settings-button {
+	z-index: 1002 !important;
 }
