@@ -22,6 +22,7 @@ const SUITES = [
 	'e2e-text-chat.js',    // text chat: settings cog, log, sanitizing, mute, shortcuts
 	'e2e-history.js',      // match history: results, window, export/import, full storage
 	'e2e-replay.js',       // recorded matches replay to the same state (vs AI and online)
+	'e2e-replay-ui.js',    // replay player: controls, seeking, leaving, downloading a match
 ];
 
 // Resolves true if something is already accepting connections on the port.
