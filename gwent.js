@@ -2,6 +2,10 @@
 
 class Enum {constructor(val){this.val = val;} toString(){return this.val;}};
 
+// Scales every game delay (sleep, fades, polls): a fast replay runs the same
+// game code with shorter waits
+const GameSpeed = { factor: 1 };
+
 const DURATION_CARD_PLACEMENT = 1000;
 // How long mustered cards are highlighted before the first one flies to the board
 const DURATION_MUSTER_TELEGRAPH = 600;
