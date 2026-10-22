@@ -165,17 +165,23 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		const keptBoard = () => ["host", "guest"].map(role =>
 			board.playerRows(mp.playerOf(role)).map(r => r.cards.map(c => c.name).join("|")).join("/")).join(" vs ");
 		assert(await A.evaluate(keptBoard) === await B.evaluate(keptBoard), 'both clients keep the same final board');
-		// host looks at the board when the guest leaves
+		// host looks at the board, then brings the results back before the guest leaves
 		await A.click('#end-close');
 		assert(await A.evaluate(() => game.viewingBoard), 'host closed the results to view the board');
+		await A.click('#exit-game');
+		assert(await A.evaluate(() => !game.viewingBoard && !game.endScreen.classList.contains('hide')), 'host reopened the results');
 	}
 
-	// --- disconnect handling: guest closes, host gets notified ---
+	// --- disconnect handling: guest closes, host gets notified over the results ---
 	await B.close();
 	await waitFor(A, () => !document.getElementById('popup').classList.contains('hide'), 'host sees disconnect popup');
 	const popupTitle = await A.evaluate(() => document.querySelector('#popup h3').textContent);
 	assert(/Disconnected/i.test(popupTitle), 'popup says opponent disconnected: "' + popupTitle + '"');
-	await A.evaluate(() => Popup.curr.selectYes());
+	assert(await A.evaluate(() => {
+		const r = document.querySelector('#popup button').getBoundingClientRect();
+		return document.getElementById('popup').contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+	}), 'disconnect popup is on top of the results');
+	await A.click('#popup button');
 	await waitFor(A, () => !document.getElementById('lobby').classList.contains('hide'), 'host returned to main menu');
 	assert(await A.evaluate(() => !game.viewingBoard && document.getElementById('exit-game').dataset.title === 'Exit game'), 'leaving resets the board view');
 

@@ -639,7 +639,9 @@ html {
     width: 100%;
     height: calc(100vw * 1080 / 1920);
     background-color: rgba(10,10,10,.95);
-    z-index: 1000;
+    /* Above the end screen, chat and replay bar: a notice like "opponent
+       disconnected" can arrive while the results are showing */
+    z-index: 1100;
     /* background-image: url(img/boardtest10.png); */
     /* background-size: contain; */
 }
