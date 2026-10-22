@@ -20,7 +20,9 @@ node ../server/server.js &                          # relay on :8765
 python3 -m http.server 8077 --directory .. &        # game on :8077
 node relay-protocol.js                               # tests room creation, joining, and message relay on the server
 node e2e-singleplayer.js                             # vs-AI
+node e2e-muster.js                                   # muster: called cards highlighted, fly from their own slot, one at a time
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
+node e2e-muster-online.js                            # online muster: same board, hand, deck order and checksums on both clients
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
 node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
 node e2e-text-chat.js                                # text chat: settings cog, log, sanitizing, mute, T shortcut, no desync
