@@ -119,6 +119,8 @@ I18N.register("zh-CN", {
 		uploadOpponent: "上传对手",
 		clearOpponent: "清除对手",
 		exitGame: "退出游戏",
+		closeResults: "查看牌桌",
+		backToResults: "返回结果",
 		leaderAbility: "领袖能力",
 		redrawTitle: "选择最多 2 张卡牌重抽。",
 		quitTitle: "退出当前游戏？",

@@ -120,6 +120,8 @@ I18N.register("ru", {
 		uploadOpponent: "Загрузить соперника",
 		clearOpponent: "Очистить соперника",
 		exitGame: "Выйти из игры",
+		closeResults: "Посмотреть поле",
+		backToResults: "Вернуться к результатам",
 		leaderAbility: "Способность лидера",
 		redrawTitle: "Выберите до 2 карт для замены.",
 		quitTitle: "Выйти из текущей игры?",

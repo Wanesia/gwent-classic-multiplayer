@@ -119,6 +119,8 @@ I18N.register("pl", {
 		uploadOpponent: "Wczytaj przeciwnika",
 		clearOpponent: "Wyczyść przeciwnika",
 		exitGame: "Wyjdź z gry",
+		closeResults: "Zobacz planszę",
+		backToResults: "Wróć do wyników",
 		leaderAbility: "Zdolność dowódcy",
 		redrawTitle: "Wybierz do 2 kart do wymiany.",
 		quitTitle: "Zakończyć obecną grę?",

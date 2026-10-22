@@ -121,6 +121,8 @@ I18N.register("es-MX", {
 		uploadOpponent: "Subir rival",
 		clearOpponent: "Borrar rival",
 		exitGame: "Salir de la partida",
+		closeResults: "Ver el tablero",
+		backToResults: "Volver a los resultados",
 		leaderAbility: "Habilidad de líder",
 		redrawTitle: "Elige hasta 2 cartas para robar de nuevo.",
 		quitTitle: "¿Salir de la partida actual?",

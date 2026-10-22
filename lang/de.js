@@ -119,6 +119,8 @@ I18N.register("de", {
 		uploadOpponent: "Gegner hochladen",
 		clearOpponent: "Gegner zurücksetzen",
 		exitGame: "Spiel verlassen",
+		closeResults: "Spielfeld ansehen",
+		backToResults: "Zurück zu den Ergebnissen",
 		leaderAbility: "Anführerfähigkeit",
 		redrawTitle: "Wähle bis zu 2 Karten zum Neuziehen.",
 		quitTitle: "Aktuelles Spiel beenden?",

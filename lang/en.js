@@ -120,6 +120,8 @@ I18N.register("en", {
 		uploadOpponent: "Upload opponent",
 		clearOpponent: "Clear opponent",
 		exitGame: "Exit game",
+		closeResults: "View the board",
+		backToResults: "Back to results",
 		leaderAbility: "Leader Ability",
 		redrawTitle: "Choose up to 2 cards to redraw.",
 		quitTitle: "Quit current game?",

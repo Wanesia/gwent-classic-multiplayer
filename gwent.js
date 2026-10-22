@@ -1520,6 +1520,11 @@ class Game {
 		// Online-only: rematch with the same decks (mutual ready-up) and leave
 		this.playAgain_elem.addEventListener("click", () => lobby.toggleRematch(), false);
 		this.leave_elem.addEventListener("click", () => lobby.leaveFromEndScreen(), false);
+		// Closing the results uncovers the final board; Escape or the exit
+		// button brings them back
+		this.exit_elem = document.getElementById("exit-game");
+		document.getElementById("end-close").addEventListener("click", () => this.hideEndScreen(), false);
+		this.viewingBoard = false;
 		this.state = GameState.CUSTOMIZE;
 		this.reset();
 	}
@@ -1542,6 +1547,9 @@ class Game {
 
 		this.placedEffectsActive = false; //TODO replace with propper game state
 		this.pendingRemovals = []; // in-flight 'removed' effects, e.g. Avenger summons
+
+		if (this.viewingBoard)
+			this.setViewingBoard(false);
 
 		// Anything still waiting on the previous game (open or queued card
 		// pickers, a row choice, the AI's turn) checks this and is abandoned.
@@ -1808,15 +1816,18 @@ class Game {
 			notificationKey = "draw-round";
 		}
 
+		// The last round's board stays on the table so it can be looked at after
+		// the match; game.reset() clears it before the next one
+		const gameOver = player_me.health === 0 || player_op.health === 0;
 		await Promise.all([
-			await board.clearRound(),
+			gameOver ? undefined : await board.clearRound(),
 			await ui.notification(notificationKey, 1200)
 		]);
 		if (session !== this.session)
 			return;
 
 		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
-		if (player_me.health === 0 || player_op.health === 0)
+		if (gameOver)
 			this.endGame();
 		else
 		{
@@ -1863,6 +1874,9 @@ class Game {
 			endScreen.children[0].classList.add("end-lose");
 		}
 		
+		// Nobody's turn any more. Card viewers on the kept board would otherwise
+		// treat the last opponent's turn as theirs and not open.
+		this.currPlayer = null;
 		fadeIn(endScreen, 300);
 		ui.enablePlayer(true);
 		this.setState(GameState.END_SCREEN);
@@ -1892,8 +1906,37 @@ class Game {
 		status.replaceChildren(line1, line2);
 	}
 
+	// Hides the results to look at the final board
+	hideEndScreen() {
+		if (this.state !== GameState.END_SCREEN || this.viewingBoard)
+			return;
+		this.setViewingBoard(true);
+		this.endScreen.classList.add("hide");
+	}
+
+	// Brings the results back over the final board
+	showEndScreen() {
+		if (!this.viewingBoard)
+			return;
+		this.setViewingBoard(false);
+		this.endScreen.style.opacity = 1;
+		this.endScreen.classList.remove("hide");
+	}
+
+	setViewingBoard(viewing) {
+		this.viewingBoard = viewing;
+		// Kept in data-i18n-datatitle too, so a language switch keeps the right label
+		const key = viewing ? "game.backToResults" : "game.exitGame";
+		this.exit_elem.setAttribute("data-i18n-datatitle", key);
+		this.exit_elem.setAttribute("data-title", I18N.t(key));
+	}
+
 	exitGame()
 	{
+		if (this.viewingBoard && !Popup.curr) {
+			Carousel.curr?.cancel();
+			return this.showEndScreen();
+		}
 		// The end screen has its own Customize/Rematch/Leave buttons
 		if (Popup.curr || this.state === GameState.END_SCREEN) return;
 		AudioManager.playSFX('warning');
@@ -2340,6 +2383,10 @@ class UI {
 	
 	// Called when the player selects a selectable card
 	async selectCard(card) {
+		// After the match the hand can only be looked at; a placing preview
+		// would highlight rows the card can no longer be played to
+		if (game.state === GameState.END_SCREEN)
+			return this.viewCard(card);
 		let row = this.lastRow;
 		let pCard = this.previewCard;
 		if (card === pCard)
@@ -4330,6 +4377,17 @@ class KeyboardControls {
 			if (k === "Escape" || k === "q" || k === "Backspace") {
 				e.preventDefault();
 				this.hideLegend();
+			}
+			return;
+		}
+
+		// Results closed to look at the final board: Escape brings them back.
+		// An open card viewer handles Escape itself and closes first (its
+		// handler may run before or after this one).
+		if (game.viewingBoard) {
+			if ((k === "Escape" || k === "q" || k === "Backspace") && !e.defaultPrevented && !Carousel.curr && !Popup.curr) {
+				e.preventDefault();
+				game.showEndScreen();
 			}
 			return;
 		}

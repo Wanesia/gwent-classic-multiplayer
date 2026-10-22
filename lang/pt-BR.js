@@ -119,6 +119,8 @@ I18N.register("pt-BR", {
 		uploadOpponent: "Enviar oponente",
 		clearOpponent: "Limpar oponente",
 		exitGame: "Sair do jogo",
+		closeResults: "Ver o campo",
+		backToResults: "Voltar aos resultados",
 		leaderAbility: "Habilidade de Líder",
 		redrawTitle: "Escolha até 2 cartas para trocar.",
 		quitTitle: "Sair do jogo atual?",

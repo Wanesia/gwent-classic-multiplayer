@@ -119,6 +119,8 @@ I18N.register("ja", {
 		uploadOpponent: "対戦相手をアップロード",
 		clearOpponent: "対戦相手をクリア",
 		exitGame: "ゲームを終了",
+		closeResults: "盤面を見る",
+		backToResults: "結果に戻る",
 		leaderAbility: "リーダー能力",
 		redrawTitle: "引き直すカードを最大2枚選んでください。",
 		quitTitle: "現在のゲームを終了しますか？",

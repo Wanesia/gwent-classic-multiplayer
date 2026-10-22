@@ -119,6 +119,8 @@ I18N.register("ar", {
 		uploadOpponent: "رفع الخصم",
 		clearOpponent: "مسح الخصم",
 		exitGame: "الخروج من اللعبة",
+		closeResults: "عرض الطاولة",
+		backToResults: "العودة إلى النتائج",
 		leaderAbility: "قدرة القائد",
 		redrawTitle: "اختر ما يصل إلى بطاقتين لإعادة السحب.",
 		quitTitle: "الخروج من اللعبة الحالية؟",

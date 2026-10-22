@@ -119,6 +119,8 @@ I18N.register("tr", {
 		uploadOpponent: "Rakip yükle",
 		clearOpponent: "Rakibi temizle",
 		exitGame: "Oyundan çık",
+		closeResults: "Tahtayı görüntüle",
+		backToResults: "Sonuçlara dön",
 		leaderAbility: "Lider Yeteneği",
 		redrawTitle: "Yeniden çekmek için en fazla 2 kart seç.",
 		quitTitle: "Mevcut oyundan çıkılsın mı?",
