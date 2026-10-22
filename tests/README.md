@@ -26,4 +26,6 @@ node e2e-muster-online.js                            # online muster: same board
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
 node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
 node e2e-text-chat.js                                # text chat: settings cog, log, sanitizing, mute, T shortcut, no desync
+node e2e-history.js                                  # match history: how each ending is recorded, the window, export/import, full storage
+node e2e-replay.js                                   # a bot plays matches, their recordings must replay to the same state
 ```
