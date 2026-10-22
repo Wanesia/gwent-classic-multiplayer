@@ -1828,10 +1828,17 @@ class Game {
 		let winner = dif > 0 ? player_me : dif < 0 ? player_op : null;
 		let verdict = {winner: winner, score_me: player_me.total, score_op: player_op.total}
 		this.roundHistory.push(verdict);
+		// Losing a round costs a gem (both lose one on a draw); the last gem ends the match
+		const gameOver = (dif <= 0 && player_me.health <= 1) || (dif >= 0 && player_op.health <= 1);
 		
-		await this.runEffects(this.roundEnd);
-		if (session !== this.session)
-			return;
+		// Round-end effects only prepare the next round (a leader's horn wearing
+		// off, Monsters keeping a card). After the last round they would change
+		// the board kept for viewing, so it no longer matched the final score.
+		if (!gameOver) {
+			await this.runEffects(this.roundEnd);
+			if (session !== this.session)
+				return;
+		}
 		
 		player_me.endRound( dif > 0);
 		player_op.endRound( dif < 0);
@@ -1855,7 +1862,6 @@ class Game {
 
 		// The last round's board stays on the table so it can be looked at after
 		// the match; game.reset() clears it before the next one
-		const gameOver = player_me.health === 0 || player_op.health === 0;
 		await Promise.all([
 			gameOver ? undefined : await board.clearRound(),
 			await ui.notification(notificationKey, 1200)
@@ -1865,8 +1871,15 @@ class Game {
 
 		EventManager.roundEnded.dispatch(this.roundCount, player_me.total, player_op.total);
 		MatchHistory.roundEnded();
-		if (gameOver)
+		if (gameOver) {
+			// Decided now: leaving during the pause below mustn't count as leaving
+			MatchHistory.finish(this.matchResult());
+			// A moment on the final board before the results cover it
+			await sleep(1500);
+			if (session !== this.session)
+				return;
 			this.endGame();
+		}
 		else
 		{
 			this.currPlayer = dif < 0 ? player_op : dif > 0 ? player_me : this.firstPlayer;
@@ -1874,13 +1887,18 @@ class Game {
 		}
 	}
 	
+	// The local player's result once a player is out of gems
+	matchResult() {
+		return player_op.health <= 0 && player_me.health <= 0 ? "draw" : player_op.health === 0 ? "win" : "lose";
+	}
+
 	// Sets up and displays the end-game screen
 	async endGame() {
 		if (mp.replay)
 			mp.replay.finish("done");
 		else
 			Net.trackEvent(mp.active ? "mp-game-completed" : "sp-game-finished");
-		MatchHistory.finish(player_op.health <= 0 && player_me.health <= 0 ? "draw" : player_op.health === 0 ? "win" : "lose");
+		MatchHistory.finish(this.matchResult());
 		let endScreen = document.getElementById("end-screen");
 		let rows = endScreen.getElementsByTagName("tr");
 		rows[1].children[0].innerHTML = player_me.name;

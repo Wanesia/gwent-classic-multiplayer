@@ -136,6 +136,32 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		assert(await page.evaluate(() => !game.viewingBoard && board.row.every(r => r.cards.length === 0 && !r.special) && weather.cards.length === 0), 'rematch clears the kept board');
 		assert(await page.getAttribute('#exit-game', 'data-title') === 'Exit game', 'rematch restores the exit button label');
 		await waitFor(page, () => Carousel.curr, 'rematch redraw opened');
+
+		// A leader's horn only lasts until the round ends. After the deciding
+		// round it must stay, so the kept board still adds up to the score shown
+		// on the results screen (the horn used to wear off right after scoring).
+		await page.evaluate(() => Carousel.curr.cancel());
+		await waitFor(page, () => game.roundCount === 1 && game.currPlayer === player_me && player_me.awaitingAction, 'deciding round: my turn');
+		const shown = await page.evaluate(async () => {
+			player_me.health = 1; player_op.health = 1; // this round decides the match
+			const card = player_me.hand.cards.find(c => c.isUnit() && !c.hero && c.abilities.length === 0 && ['close', 'ranged', 'siege'].includes(c.row));
+			if (!card) return { skipped: true };
+			const row = board.getRow(card, card.row, player_me);
+			player_me.takeAction();
+			await board.moveTo(card, row, player_me.hand);
+			await row.leaderHorn();
+			player_me.setPassed(true); player_op.setPassed(true);
+			const total = player_me.total;
+			await game.endRound();
+			const last = game.roundHistory[game.roundHistory.length - 1];
+			const dom = id => Number(document.querySelector('#score-total-' + id).children[0].textContent);
+			return { total, scored: last.score_me, domMe: dom('me'), domOp: dom('op'), op: last.score_op,
+				rowsMe: board.playerRows(player_me).reduce((a, r) => a + Number(r.elem_parent.getElementsByClassName('row-score')[0].textContent), 0) };
+		});
+		assert(!shown.skipped, 'a plain unit to horn was in hand');
+		assert(shown.scored === shown.total && shown.domMe === shown.scored && shown.rowsMe === shown.scored && shown.domOp === shown.op,
+			'final board still shows the scored total with a leader horn (' + JSON.stringify(shown) + ')');
+		assert(await page.evaluate(() => game.state.val === 100 && board.row.some(r => r.special && r.special.name === "Commander's Horn")), 'the horn stays on the kept board');
 	}
 
 	assert(errors.length === 0, 'no js errors' + (errors.length ? ': ' + errors.join(' | ') : ''));

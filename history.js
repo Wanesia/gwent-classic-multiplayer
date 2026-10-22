@@ -455,7 +455,6 @@ const HistoryUI = {
 		this.matches = [];
 
 		document.getElementById("lobby-history-toggle").addEventListener("click", () => this.open());
-		document.getElementById("end-history").addEventListener("click", () => this.open());
 		this.modal.querySelector(".fb-close").addEventListener("click", () => this.close());
 		this.modal.addEventListener("click", e => { if (e.target === this.modal) this.close(); });
 		document.addEventListener("keydown", e => {
@@ -470,6 +469,7 @@ const HistoryUI = {
 			this.render();
 		}));
 		this.moreButton.addEventListener("click", () => { this.shown += this.PAGE; this.render(); });
+		this.listElem.addEventListener("scroll", () => this.hideTip());
 		this.modal.querySelector(".hist-export").addEventListener("click", () => this.exportFile());
 		this.modal.querySelector(".hist-import").addEventListener("click", () => this.fileInput.click());
 		this.fileInput.addEventListener("change", () => this.pickFile());
@@ -504,6 +504,7 @@ const HistoryUI = {
 	},
 
 	close() {
+		this.hideTip();
 		this.modal.classList.add("hide");
 	},
 
@@ -565,8 +566,36 @@ const HistoryUI = {
 			this.moreButton.classList.add("hide");
 			return;
 		}
+		this.hideTip();
 		this.listElem.replaceChildren(...list.slice(0, this.shown).map(m => this.row(m)));
 		this.moreButton.classList.toggle("hide", list.length <= this.shown);
+	},
+
+	// The list scrolls, which would clip a CSS tooltip on its last rows, so
+	// this one lives on the panel and opens above the button when there's no
+	// room below
+	showTip(target, text) {
+		const panel = this.modal.querySelector(".hist-panel");
+		if (!this.tip) {
+			this.tip = document.createElement("div");
+			this.tip.className = "hist-tip";
+			panel.append(this.tip);
+		}
+		this.tip.textContent = text;
+		this.tip.classList.remove("hide");
+		// The game screen is scaled: convert screen pixels to panel pixels
+		const p = panel.getBoundingClientRect(), t = target.getBoundingClientRect();
+		const scale = p.width / panel.offsetWidth || 1;
+		const gap = 4;
+		let top = (t.bottom - p.top) / scale + gap;
+		if (top + this.tip.offsetHeight > panel.clientHeight)
+			top = (t.top - p.top) / scale - this.tip.offsetHeight - gap;
+		this.tip.style.left = (t.left - p.left) / scale + "px";
+		this.tip.style.top = top + "px";
+	},
+
+	hideTip() {
+		this.tip?.classList.add("hide");
 	},
 
 	emptyRow(text) {
@@ -587,7 +616,8 @@ const HistoryUI = {
 
 		const star = el("button", "hist-star" + (m.fav ? " on" : ""), m.fav ? "★" : "☆");
 		star.type = "button";
-		star.title = I18N.t("history.favorite");
+		star.addEventListener("mouseenter", () => this.showTip(star, I18N.t("history.favorite")));
+		star.addEventListener("mouseleave", () => this.hideTip());
 		star.addEventListener("click", async () => {
 			m.fav = !m.fav;
 			star.classList.toggle("on", m.fav);
