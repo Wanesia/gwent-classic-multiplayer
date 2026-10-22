@@ -125,6 +125,7 @@ I18N.register("de", {
 		clearOpponent: "Gegner zurücksetzen",
 		exitGame: "Spiel verlassen",
 		closeResults: "Spielfeld ansehen",
+		toMenu: "Hauptmenü",
 		backToResults: "Zurück zu den Ergebnissen",
 		leaderAbility: "Anführerfähigkeit",
 		redrawTitle: "Wähle bis zu 2 Karten zum Neuziehen.",

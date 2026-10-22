@@ -829,29 +829,49 @@ html {
 
 /* Closes the results to show the final board. Outlined like the action
    buttons below it. */
-#end-screen #end-close {
+/* Top-right of the results: hide them to look at the board (a screenshot),
+   or leave for the main menu. Outlined like the action buttons below. */
+#end-screen #end-corner {
     position: absolute;
     top: 2.5%;
     right: 1.6%;
+    display: flex;
+    gap: 0.6vw;
+}
+
+#end-screen #end-corner button {
     width: 2.6vw;
     height: 2.6vw;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
+    padding: 0;
+    background: transparent;
     border: 1px solid rgba(255,200,80,0.25);
     border-radius: 2px;
-    font-family: sans-serif;
-    font-size: 1.5vw;
-    line-height: 1;
-    color: rgba(255,210,120,0.7);
-    transition: border-color .35s ease, color .35s ease, box-shadow .35s ease;
+    transition: border-color .35s ease, box-shadow .35s ease;
 }
 
-#end-screen #end-close:hover {
+#end-screen #end-corner svg {
+    width: 1.5vw;
+    height: 1.5vw;
+    fill: rgba(255,210,120,0.7);
+    transition: fill .35s ease;
+}
+
+#end-screen #end-corner button:hover {
     border-color: rgba(255,200,80,0.55);
-    color: rgba(255,215,130,1);
     box-shadow: 0 0 1.6vw rgba(255,160,40,0.15);
+}
+
+#end-screen #end-corner button:hover svg {
+    fill: rgba(255,215,130,1);
+}
+
+/* The game's tooltips, grown leftwards from the screen edge */
+#end-screen #end-corner [data-title]:hover::after {
+    left: auto;
+    right: 0;
 }
 
 /* Opponent has asked for a rematch: nudge attention to the still-unfilled button */

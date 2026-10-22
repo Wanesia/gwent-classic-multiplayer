@@ -1563,6 +1563,7 @@ class Game {
 		// button brings them back
 		this.exit_elem = document.getElementById("exit-game");
 		document.getElementById("end-close").addEventListener("click", () => this.hideEndScreen(), false);
+		document.getElementById("end-menu").addEventListener("click", () => this.toMainMenu(), false);
 		this.viewingBoard = false;
 		this.state = GameState.CUSTOMIZE;
 		this.reset();
@@ -1994,6 +1995,18 @@ class Game {
 		line2.textContent = lobby.remoteCustomizing ? I18N.t("lobby.oppCustomizing")
 			: lobby.remoteReady ? I18N.t("lobby.oppReady") : I18N.t("lobby.oppNotReady");
 		status.replaceChildren(line1, line2);
+	}
+
+	// The results' X: straight back to the main menu. Online that leaves the
+	// room like Leave; a replay goes back to the match history.
+	toMainMenu() {
+		if (mp.replay)
+			return ReplayUI.exit();
+		if (lobby.inMultiplayer)
+			return lobby.leaveFromEndScreen();
+		this.returnToCustomization();
+		lobby.statusElem.classList.add("hide");
+		lobby.showMenu();
 	}
 
 	// Hides the results to look at the final board

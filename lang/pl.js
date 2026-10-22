@@ -125,6 +125,7 @@ I18N.register("pl", {
 		clearOpponent: "Wyczyść przeciwnika",
 		exitGame: "Wyjdź z gry",
 		closeResults: "Zobacz planszę",
+		toMenu: "Menu główne",
 		backToResults: "Wróć do wyników",
 		leaderAbility: "Zdolność dowódcy",
 		redrawTitle: "Wybierz do 2 kart do wymiany.",

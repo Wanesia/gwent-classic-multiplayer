@@ -125,6 +125,7 @@ I18N.register("cs", {
 		clearOpponent: "Vymazat soupeře",
 		exitGame: "Ukončit hru",
 		closeResults: "Zobrazit hrací plochu",
+		toMenu: "Hlavní nabídka",
 		backToResults: "Zpět na výsledky",
 		leaderAbility: "Schopnost vůdce",
 		redrawTitle: "Vyberte až 2 karty k opětovnému lízání.",

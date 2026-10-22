@@ -127,6 +127,7 @@ I18N.register("es-MX", {
 		clearOpponent: "Borrar rival",
 		exitGame: "Salir de la partida",
 		closeResults: "Ver el tablero",
+		toMenu: "Menú principal",
 		backToResults: "Volver a los resultados",
 		leaderAbility: "Habilidad de líder",
 		redrawTitle: "Elige hasta 2 cartas para robar de nuevo.",

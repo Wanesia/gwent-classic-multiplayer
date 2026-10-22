@@ -125,6 +125,7 @@ I18N.register("tr", {
 		clearOpponent: "Rakibi temizle",
 		exitGame: "Oyundan çık",
 		closeResults: "Tahtayı görüntüle",
+		toMenu: "Ana menü",
 		backToResults: "Sonuçlara dön",
 		leaderAbility: "Lider Yeteneği",
 		redrawTitle: "Yeniden çekmek için en fazla 2 kart seç.",

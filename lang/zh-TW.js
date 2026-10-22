@@ -125,6 +125,7 @@ I18N.register("zh-TW", {
 		clearOpponent: "清除對手",
 		exitGame: "退出遊戲",
 		closeResults: "查看牌桌",
+		toMenu: "主選單",
 		backToResults: "返回結果",
 		leaderAbility: "領袖能力",
 		redrawTitle: "選擇最多 2 張卡牌重抽。",

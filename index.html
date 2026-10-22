@@ -293,7 +293,10 @@
 			<button id="end-leave" class="hide" data-i18n="game.leave">Leave</button>
 			<button id="end-replay-exit" class="hide" data-i18n="replay.exitButton">Exit replay</button>
 		</div>
-		<span id="end-close" title="View the board" data-i18n-title="game.closeResults">&times;</span>
+		<div id="end-corner">
+			<button type="button" id="end-close" data-title="View the board" data-i18n-datatitle="game.closeResults"><svg viewBox="0 0 24 24"><path d="M6 19h12v2H6z"/></svg></button>
+			<button type="button" id="end-menu" data-title="Main menu" data-i18n-datatitle="game.toMenu"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+		</div>
 	</section>
 	
 	<div id="fullscreen-hint" class="fs-hint hide">
@@ -578,7 +581,7 @@
 
 <section id="history-modal" class="hide">
 	<div class="fb-panel hist-panel">
-		<span class="fb-close" title="Close" data-i18n-title="feedback.close">&times;</span>
+		<span class="fb-close">&times;</span>
 		<h2 data-i18n="history.title">MATCH HISTORY</h2>
 		<div class="hist-filter">
 			<button type="button" data-filter="all" data-i18n="history.filterAll">All</button>

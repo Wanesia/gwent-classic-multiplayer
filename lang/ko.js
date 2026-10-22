@@ -125,6 +125,7 @@ I18N.register("ko", {
 		clearOpponent: "상대 지우기",
 		exitGame: "게임 종료",
 		closeResults: "보드 보기",
+		toMenu: "메인 메뉴",
 		backToResults: "결과로 돌아가기",
 		leaderAbility: "리더 능력",
 		redrawTitle: "다시 뽑을 카드를 최대 2장 선택하세요.",

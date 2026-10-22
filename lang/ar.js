@@ -125,6 +125,7 @@ I18N.register("ar", {
 		clearOpponent: "مسح الخصم",
 		exitGame: "الخروج من اللعبة",
 		closeResults: "عرض الطاولة",
+		toMenu: "القائمة الرئيسية",
 		backToResults: "العودة إلى النتائج",
 		leaderAbility: "قدرة القائد",
 		redrawTitle: "اختر ما يصل إلى بطاقتين لإعادة السحب.",

@@ -125,6 +125,7 @@ I18N.register("it", {
 		clearOpponent: "Cancella avversario",
 		exitGame: "Esci dalla partita",
 		closeResults: "Guarda il tabellone",
+		toMenu: "Menu principale",
 		backToResults: "Torna ai risultati",
 		leaderAbility: "Abilità del comandante",
 		redrawTitle: "Scegli fino a 2 carte da ripescare.",

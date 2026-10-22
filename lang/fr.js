@@ -125,6 +125,7 @@ I18N.register("fr", {
 		clearOpponent: "Effacer l'adversaire",
 		exitGame: "Quitter la partie",
 		closeResults: "Voir le plateau",
+		toMenu: "Menu principal",
 		backToResults: "Retour aux résultats",
 		leaderAbility: "Capacité de chef",
 		redrawTitle: "Choisissez jusqu'à 2 cartes à repiocher.",

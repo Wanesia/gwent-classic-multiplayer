@@ -126,6 +126,7 @@ I18N.register("ru", {
 		clearOpponent: "Очистить соперника",
 		exitGame: "Выйти из игры",
 		closeResults: "Посмотреть поле",
+		toMenu: "Главное меню",
 		backToResults: "Вернуться к результатам",
 		leaderAbility: "Способность лидера",
 		redrawTitle: "Выберите до 2 карт для замены.",

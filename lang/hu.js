@@ -125,6 +125,7 @@ I18N.register("hu", {
 		clearOpponent: "Ellenfél törlése",
 		exitGame: "Kilépés a játékból",
 		closeResults: "Tábla megtekintése",
+		toMenu: "Főmenü",
 		backToResults: "Vissza az eredményekhez",
 		leaderAbility: "Vezérképesség",
 		redrawTitle: "Válassz legfeljebb 2 kártyát újrahúzásra.",

@@ -162,6 +162,11 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		assert(shown.scored === shown.total && shown.domMe === shown.scored && shown.rowsMe === shown.scored && shown.domOp === shown.op,
 			'final board still shows the scored total with a leader horn (' + JSON.stringify(shown) + ')');
 		assert(await page.evaluate(() => game.state.val === 100 && board.row.some(r => r.special && r.special.name === "Commander's Horn")), 'the horn stays on the kept board');
+
+		// The results' X leaves for the main menu (the other button only hides them)
+		await page.click('#end-menu');
+		await waitFor(page, () => !document.getElementById('lobby').classList.contains('hide') && game.state.val === 0, 'X goes back to the main menu');
+		assert(await page.evaluate(() => board.row.every(r => r.cards.length === 0) && document.getElementById('end-screen').classList.contains('hide')), 'the main menu after X: board cleared, results gone');
 	}
 
 	assert(errors.length === 0, 'no js errors' + (errors.length ? ': ' + errors.join(' | ') : ''));

@@ -455,7 +455,9 @@ const HistoryUI = {
 		this.matches = [];
 
 		document.getElementById("lobby-history-toggle").addEventListener("click", () => this.open());
-		this.modal.querySelector(".fb-close").addEventListener("click", () => this.close());
+		const close = this.modal.querySelector(".fb-close");
+		close.addEventListener("click", () => this.close());
+		this.tipOn(close, I18N.t("feedback.close"));
 		this.modal.addEventListener("click", e => { if (e.target === this.modal) this.close(); });
 		document.addEventListener("keydown", e => {
 			// defaultPrevented: the same Escape just left a replay and opened this
@@ -591,12 +593,19 @@ const HistoryUI = {
 		let top = (t.bottom - p.top) / scale + gap;
 		if (top + this.tip.offsetHeight > panel.clientHeight)
 			top = (t.top - p.top) / scale - this.tip.offsetHeight - gap;
-		this.tip.style.left = (t.left - p.left) / scale + "px";
+		// kept inside the window at its right edge
+		const left = Math.min((t.left - p.left) / scale, panel.clientWidth - this.tip.offsetWidth - gap);
+		this.tip.style.left = Math.max(0, left) + "px";
 		this.tip.style.top = top + "px";
 	},
 
 	hideTip() {
 		this.tip?.classList.add("hide");
+	},
+
+	tipOn(elem, text) {
+		elem.addEventListener("mouseenter", () => this.showTip(elem, text));
+		elem.addEventListener("mouseleave", () => this.hideTip());
 	},
 
 	emptyRow(text) {
@@ -617,8 +626,7 @@ const HistoryUI = {
 
 		const star = el("button", "hist-star" + (m.fav ? " on" : ""), m.fav ? "★" : "☆");
 		star.type = "button";
-		star.addEventListener("mouseenter", () => this.showTip(star, I18N.t("history.favorite")));
-		star.addEventListener("mouseleave", () => this.hideTip());
+		this.tipOn(star, I18N.t("history.favorite"));
 		star.addEventListener("click", async () => {
 			m.fav = !m.fav;
 			star.classList.toggle("on", m.fav);
@@ -630,7 +638,7 @@ const HistoryUI = {
 		const result = el("span", "hist-result hist-" + status, I18N.t("history.result." + status));
 		const hint = { left: "history.hintLeft", walkover: "history.hintWalkover", desync: "history.hintDesync" }[status];
 		if (hint)
-			result.title = I18N.t(hint);
+			this.tipOn(result, I18N.t(hint));
 
 		const when = el("div", "hist-when");
 		let date, time;
@@ -653,7 +661,7 @@ const HistoryUI = {
 				thumb.style.backgroundImage = smallURL(leader.deck + "_" + leader.filename);
 			const names = el("div", "hist-names");
 			const name = el("span", "hist-leader", I18N.card(s.leader));
-			name.title = name.textContent; // long leader names are cut off
+			this.tipOn(name, name.textContent); // long leader names are cut off
 			names.append(
 				name,
 				el("span", "hist-faction", I18N.faction(s.faction, "name", factions[s.faction].name)),
@@ -681,8 +689,7 @@ const HistoryUI = {
 			// a disabled button gets no mouse events: the cell shows its tip
 			const wrap = el("span", "hist-tool-wrap");
 			wrap.append(b);
-			wrap.addEventListener("mouseenter", () => this.showTip(wrap, text));
-			wrap.addEventListener("mouseleave", () => this.hideTip());
+			this.tipOn(wrap, text);
 			b.addEventListener("click", action);
 			return wrap;
 		};
