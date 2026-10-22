@@ -1,6 +1,6 @@
 // Single-player test Vs Computer must work exactly as before the multiplayer changes (seeded RNG paths, atomic draw, controller gating).
 const { chromium } = require('playwright-core');
-const URL = 'http://localhost:8077/index.html';
+const URL = 'http://localhost:8077/index.html?server=ws://localhost:8765'; // local relay, so test games stay out of the real server's stats
 
 let failed = false;
 const errors = [];
