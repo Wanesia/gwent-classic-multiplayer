@@ -393,6 +393,61 @@
 
 	<h2 id="card-bank-title" class="card-contianer-title" data-i18n="deck.cardCollection">Card Collection</h2>
 	<h2 id="card-deck-title" class="card-contianer-title" data-i18n="deck.cardsInDeck">Cards in Deck</h2>
+	<p id="card-bank-filter-name" class="card-filter-name" data-i18n="deck.filterAll">All cards</p>
+	<p id="card-deck-filter-name" class="card-filter-name" data-i18n="deck.filterAll">All cards</p>
+	<div id="card-bank-filters" class="card-filters"></div>
+	<div id="card-deck-filters" class="card-filters"></div>
+	<!-- Filter tab icons, drawn after the ones in The Witcher 3's deck builder -->
+	<svg id="deck-filter-icons" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+		<defs>
+			<mask id="filter-icon-all-mask">
+				<rect width="24" height="24" fill="#fff"/>
+				<rect x="7.4" y="5" width="13.2" height="17.2" rx="2.2" fill="#000" transform="rotate(10 14 13.6)"/>
+			</mask>
+		</defs>
+		<symbol id="filter-icon-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+			<g mask="url(#filter-icon-all-mask)"><rect x="3.6" y="2.2" width="11" height="15" rx="1.4" transform="rotate(-10 9.1 9.7)"/></g>
+			<rect x="8.5" y="6.1" width="11" height="15" rx="1.4" transform="rotate(10 14 13.6)"/>
+		</symbol>
+		<symbol id="filter-icon-close" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linecap="round">
+			<polygon points="21,3 19.1,7.1 11.1,15.1 8.9,12.9 16.9,4.9" stroke="none"/>
+			<line x1="6.6" y1="11.6" x2="12.4" y2="17.4" stroke-width="2.2"/>
+			<line x1="9.5" y1="14.5" x2="5" y2="19" stroke-width="2"/>
+			<circle cx="4.1" cy="19.9" r="1.7" stroke="none"/>
+		</symbol>
+		<symbol id="filter-icon-ranged" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round">
+			<path d="M4.5 3.5 C14 3.5 20.5 10 20.5 19.5" stroke-width="2.1"/>
+			<line x1="4.5" y1="3.5" x2="20.5" y2="19.5" stroke-width=".9"/>
+			<line x1="4" y1="20" x2="18" y2="6" stroke-width="1.4"/>
+			<polygon points="20.3,3.7 15.6,5.1 18.9,8.4" fill="currentColor" stroke="none"/>
+			<path d="M6.2 17.8 L3.6 17.2 M6.2 17.8 L6.8 20.4 M7.8 16.2 L5.2 15.6 M7.8 16.2 L8.4 18.8" stroke-width="1.1"/>
+		</symbol>
+		<symbol id="filter-icon-siege" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linecap="round">
+			<circle cx="6.5" cy="19.6" r="2.3" stroke="none"/>
+			<circle cx="17.5" cy="19.6" r="2.3" stroke="none"/>
+			<rect x="2.5" y="15.4" width="19" height="2.6" rx=".9" stroke="none"/>
+			<path d="M10.5 15.6 L15 7.5 L19.5 15.6 M12.6 12 H17.4" fill="none" stroke-width="2"/>
+			<line x1="4.2" y1="5.4" x2="18" y2="15.4" stroke-width="2"/>
+			<path d="M1.6 3 L7.2 3.6 L4.4 7.6 Z" stroke="none"/>
+		</symbol>
+		<symbol id="filter-icon-hero" viewBox="0 0 24 24" fill="currentColor">
+			<path fill-rule="evenodd" d="M12 1.6 C16.4 2.4 19 5.2 19 9.2 V15.4 C19 17.6 16 19.4 12 20 C8 19.4 5 17.6 5 15.4 V9.2 C5 5.2 7.6 2.4 12 1.6 Z M6.6 9.6 H11.2 V11.1 H6.6 Z M12.8 9.6 H17.4 V11.1 H12.8 Z M11.25 12.4 H12.75 V18.2 H11.25 Z"/>
+			<path d="M6.2 18.6 C9.8 20.4 14.2 20.4 17.8 18.6 L19.6 21.6 C14.8 23 9.2 23 4.4 21.6 Z"/>
+		</symbol>
+		<symbol id="filter-icon-weather" viewBox="0 0 24 24" fill="currentColor">
+			<polygon points="12.0,1.5 13.3,7.0 17.2,2.9 15.7,8.3 21.1,6.8 17.0,10.7 22.5,12.0 17.0,13.3 21.1,17.2 15.7,15.7 17.2,21.1 13.3,17.0 12.0,22.5 10.7,17.0 6.8,21.1 8.3,15.7 2.9,17.3 7.0,13.3 1.5,12.0 7.0,10.7 2.9,6.7 8.3,8.3 6.7,2.9 10.7,7.0"/>
+			<circle cx="12" cy="12" r="5.6"/>
+		</symbol>
+		<symbol id="filter-icon-special" viewBox="0 0 24 24" fill="currentColor">
+			<rect x="11.3" y="1" width="1.4" height="4.2"/>
+			<rect x="10" y="2.3" width="4" height="1.2"/>
+			<rect x="7" y="5" width="10" height="1.7" rx=".4"/>
+			<path fill-rule="evenodd" d="M8 6.6 H16 V17.4 H8 Z M9.3 9.4 a1.1 1.1 0 1 0 2.2 0 a1.1 1.1 0 1 0 -2.2 0 Z M12.5 9.4 a1.1 1.1 0 1 0 2.2 0 a1.1 1.1 0 1 0 -2.2 0 Z M9.3 13.6 a1.1 1.1 0 1 0 2.2 0 a1.1 1.1 0 1 0 -2.2 0 Z M12.5 13.6 a1.1 1.1 0 1 0 2.2 0 a1.1 1.1 0 1 0 -2.2 0 Z"/>
+			<rect x="7" y="17.3" width="10" height="1.7" rx=".4"/>
+			<rect x="11.2" y="19" width="1.6" height="2"/>
+			<rect x="9" y="20.8" width="6" height="1.6" rx=".4"/>
+		</symbol>
+	</svg>
 	<div id="card-bank" class="card-array">
 	</div>
 	<div id="card-deck" class="card-array">

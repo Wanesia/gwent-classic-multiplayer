@@ -13,6 +13,7 @@ const RELAY_PORT = 8765;
 const SUITES = [
 	'relay-protocol.js',   // server: room create/join/relay
 	'e2e-singleplayer.js', // vs-AI
+	'e2e-deck-filters.js', // deck builder filter tabs for the collection and the deck
 	'e2e-muster.js',       // muster: highlight, fly from own slot, one card at a time
 	'e2e-multiplayer.js',  // full online match, checksums, disconnect
 	'e2e-muster-online.js', // online muster resolves identically on both clients

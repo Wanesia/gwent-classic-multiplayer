@@ -1862,6 +1862,86 @@ main { background-image: url('img/boardtest8.png'); }
 	white-space: nowrap;
 }
 
+/* Filter tabs above each card panel, as in The Witcher 3's deck builder */
+.card-filter-name {
+	position: absolute;
+	font-size: 1vw;
+	color: #c8c8c8;
+	text-transform: uppercase;
+	letter-spacing: .03em;
+	white-space: nowrap;
+}
+
+#card-bank-filter-name {
+	top: 11.2%;
+	left: 8.5%;
+}
+
+#card-deck-filter-name {
+	top: 11.55%;
+	right: 8.5%;
+	text-align: right;
+}
+
+.card-filters {
+	position: absolute;
+	top: 17.8%;
+	width: 32.2%;
+	display: flex;
+	justify-content: space-between;
+}
+
+#card-bank-filters {
+	left: 9.4%;
+}
+
+#card-deck-filters {
+	left: 59.5%;
+}
+
+.card-filters button {
+	position: relative;
+	width: 2.3vw;
+	height: 2.3vw;
+	padding: 0;
+	border: none;
+	background: none;
+	color: #5f4b3c;
+	cursor: pointer;
+}
+
+.card-filters button:hover {
+	color: #9f7d3e;
+}
+
+.card-filters button.active {
+	color: goldenrod;
+}
+
+.card-filters svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+/* The glow sits on the icon, not the button: a filter on the button would
+   also shadow its tooltip and trap it under the cards below. */
+.card-filters button.active svg {
+	filter: drop-shadow(0 0 .3vw goldenrod);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.card-filters button[data-title]:hover::after {
+		left: 50%;
+		transform: translateX(-50%);
+	}
+}
+
+.card-array .card-lg.filtered-out {
+	display: none;
+}
+
 /* ----------- cards ------------------*/
 
 .card {
