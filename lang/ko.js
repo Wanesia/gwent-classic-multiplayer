@@ -378,6 +378,16 @@ I18N.register("ko", {
 		minimize: "최소화",
 		expand: "컨트롤 표시",
 		move: "끌어서 이동",
-		decimal: "."
+		decimal: ".",
+		showHand: "상대의 손패",
+		showHandTip: "상대의 손패 보기 (O)",
+		showPicks: "카드 선택",
+		showPicksTip: "모든 카드 선택 보기: 다시 뽑기, 부활, 가져온 카드 (C)",
+		handEmpty: "손패 없음",
+		pickRedraw: "다시 뽑기",
+		pickDiscard: "손패에서 버리기",
+		pickDeck: "덱에서 가져온 카드",
+		pickGrave: "버린 카드 더미에서 가져온 카드",
+		pickGraveOp: "상대의 버린 카드 더미에서 가져온 카드"
 	}
 });

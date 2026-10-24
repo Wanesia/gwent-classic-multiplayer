@@ -380,6 +380,16 @@ I18N.register("es-MX", {
 		minimize: "Minimizar",
 		expand: "Mostrar los controles",
 		move: "Arrastra para mover",
-		decimal: ","
+		decimal: ",",
+		showHand: "Mano del rival",
+		showHandTip: "Mostrar la mano del rival (O)",
+		showPicks: "Elecciones de cartas",
+		showPicksTip: "Mostrar cada elección de carta: robos de nuevo, resurrecciones, cartas tomadas (C)",
+		handEmpty: "Sin cartas en la mano",
+		pickRedraw: "Robar de nuevo",
+		pickDiscard: "Descarte de la mano",
+		pickDeck: "Carta del mazo",
+		pickGrave: "Carta de los descartes",
+		pickGraveOp: "Carta de los descartes del rival"
 	}
 });

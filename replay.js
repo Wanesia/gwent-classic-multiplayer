@@ -309,7 +309,14 @@ const ReplayUI = {
 		minimize: "M6 19h12v2H6z",
 		expand: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
 		grip: "M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",
+		hand: "M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z",
+		picks: "M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z",
 	},
+
+	// What the viewer chose to see beyond what the match showed them: the
+	// opponent's hand, and every card choice as it's made (redraws, revives...)
+	showHand: false,
+	showPicks: true,
 
 	init() {
 		this.bar = document.getElementById("replay-bar");
@@ -343,12 +350,15 @@ const ReplayUI = {
 		Replay.listener = () => this.render();
 		Replay.beforeSeek = () => this.freeze();
 
-		// Where the viewer left the controls, and whether folded up
+		// Where the viewer left the controls, whether folded up, what they reveal
 		let saved = null;
 		try { saved = JSON.parse(safeStorage.get("gc-replay-bar")); } catch (e) {}
 		this.mini = !!(saved && saved.mini);
 		this.pos = saved && Number.isFinite(saved.x) && Number.isFinite(saved.y) ? { x: saved.x, y: saved.y } : null;
+		this.showHand = !!(saved && saved.hand);
+		this.showPicks = !(saved && saved.picks === false);
 		this.initDrag();
+		this.initReveal();
 	},
 
 	// ---- a still board while skipping ----
@@ -358,6 +368,8 @@ const ReplayUI = {
 	// position. The copy comes after <main> in the page, so lookups by id and
 	// tag still find the real board.
 	freeze() {
+		this.hidePick();
+		this.handJumped = true;
 		if (this.frozen || !this.isOpen())
 			return; // a seek during a seek keeps the first picture
 		const board = document.querySelector("main");
@@ -399,7 +411,7 @@ const ReplayUI = {
 	},
 
 	save() {
-		safeStorage.set("gc-replay-bar", JSON.stringify({ mini: this.mini, ...(this.pos || {}) }));
+		safeStorage.set("gc-replay-bar", JSON.stringify({ mini: this.mini, hand: this.showHand, picks: this.showPicks, ...(this.pos || {}) }));
 	},
 
 	// Press anywhere but a button and drag; the controls stay on the board
@@ -461,6 +473,300 @@ const ReplayUI = {
 		this.place(box.left, box.top);
 	},
 
+	// ---- revealing what the match didn't show ----
+
+	// Both only look at the game: nothing here changes a card, draws a random
+	// number or alters the order of events, so a replay plays out the same
+	// with them on or off.
+	initReveal() {
+		const chips = { hand: this.bar.querySelector(".rp-show-hand"), picks: this.bar.querySelector(".rp-show-picks") };
+		for (const [name, b] of Object.entries(chips))
+			b.prepend(this.icon(name));
+		chips.hand.addEventListener("click", () => this.setShowHand(!this.showHand));
+		chips.picks.addEventListener("click", () => this.setShowPicks(!this.showPicks));
+		this.chips = chips;
+
+		const hand = this.bar.querySelector(".rp-hand");
+		this.hand = {
+			box: hand,
+			cards: hand.querySelector(".rp-hand-cards"),
+			shield: hand.querySelector(".rp-hand-shield"),
+			name: hand.querySelector(".rp-hand-name"),
+			count: hand.querySelector(".rp-hand-count"),
+			empty: hand.querySelector(".rp-hand-empty"),
+			zoom: hand.querySelector(".rp-hand-zoom"),
+			elems: new Map(), // Card -> its picture here
+		};
+		// The board rewrites the opponent's card count on every change to
+		// their hand: the cue to redraw it here, as it happens
+		new MutationObserver(() => this.queueHand())
+			.observe(document.getElementById("hand-count-op"), { childList: true, characterData: true, subtree: true });
+
+		const pick = document.getElementById("replay-pick");
+		this.pick = {
+			elem: pick,
+			who: pick.querySelector(".rpk-who"),
+			what: pick.querySelector(".rpk-what"),
+			pips: pick.querySelector(".rpk-pips"),
+			slots: [...pick.querySelectorAll(".rpk-slot")],
+			desc: pick.querySelector(".card-description"),
+		};
+		this.pickLock = Promise.resolve();
+		this.pickToken = 0;
+	},
+
+	setShowHand(on) {
+		this.showHand = on;
+		this.handJumped = true; // no glow on cards that were there all along
+		this.render();
+		this.renderHand();
+		this.save();
+	},
+
+	setShowPicks(on) {
+		this.showPicks = on;
+		if (!on)
+			this.hidePick();
+		this.render();
+		this.save();
+	},
+
+	renderChips() {
+		for (const [name, on] of [["hand", this.showHand], ["picks", this.showPicks]]) {
+			this.chips[name].classList.toggle("active", on);
+			this.chips[name].setAttribute("aria-pressed", String(on));
+		}
+	},
+
+	// ---- the opponent's hand ----
+
+	// Redrawn once a frame at most. Not while skipping ahead: the hand shows
+	// where the skip lands, once it's there.
+	queueHand() {
+		if (!this.isOpen())
+			return;
+		if (Replay.seeking()) {
+			this.handJumped = true;
+			return;
+		}
+		if (this.handQueued)
+			return;
+		this.handQueued = true;
+		requestAnimationFrame(() => {
+			this.handQueued = false;
+			this.renderHand();
+		});
+	},
+
+	renderHand() {
+		const h = this.hand;
+		const on = this.showHand && this.isOpen() && !!Replay.session && !!player_op;
+		h.box.classList.toggle("hide", !on);
+		if (!on) {
+			h.elems.clear();
+			h.cards.replaceChildren();
+			this.zoom(null);
+			return;
+		}
+		// New cards glow, unless the hand was just jumped to
+		const glow = !this.handJumped;
+		this.handJumped = false;
+		const cards = [...player_op.hand.cards].sort(Card.compare);
+		const elems = new Map();
+		for (const card of cards) {
+			let el = h.elems.get(card);
+			if (!el) {
+				el = this.handCard(card);
+				el.classList.toggle("rp-new", glow);
+			}
+			elems.set(card, el);
+		}
+		h.elems = elems;
+		// Moving a card's picture restarts its glow: only reorder on a change
+		const want = [...elems.values()];
+		if (want.length !== h.cards.children.length || want.some((el, i) => h.cards.children[i] !== el))
+			h.cards.replaceChildren(...want);
+		if (h.hover && !elems.has(h.hover))
+			this.zoom(null); // the card under the mouse was just played
+		h.name.textContent = player_op.name;
+		h.shield.style.backgroundImage = iconURL("deck_shield_" + player_op.deck_data.faction);
+		h.count.textContent = cards.length;
+		h.empty.classList.toggle("hide", cards.length > 0);
+		this.keepInside();
+	},
+
+	// The board's picture of the card, copied without its click handlers
+	handCard(card) {
+		const slot = document.createElement("div");
+		slot.className = "rp-hand-card";
+		const pic = Card.prototype.createCardElem(card).cloneNode(true);
+		pic.removeAttribute("data-title"); // the enlarged card says it all
+		slot.append(pic);
+		slot.addEventListener("mouseenter", () => this.zoom(card, slot));
+		slot.addEventListener("mouseleave", () => this.zoom(null));
+		slot.addEventListener("animationend", () => slot.classList.remove("rp-new"));
+		return slot;
+	},
+
+	// The card under the mouse, enlarged beside the controls: on their left,
+	// or on their right when they were dragged to the left edge
+	zoom(card, slot) {
+		const h = this.hand;
+		h.hover = card;
+		if (!card) {
+			h.zoom.classList.add("hide");
+			return;
+		}
+		h.zoom.style.backgroundImage = largeURL(card.faction + "_" + card.filename);
+		h.zoom.classList.remove("hide");
+		const bar = this.bar.getBoundingClientRect();
+		const area = document.querySelector("main").getBoundingClientRect();
+		const scale = bar.width / this.bar.offsetWidth || 1; // the board may be scaled to fit
+		const w = h.zoom.offsetWidth, ht = h.zoom.offsetHeight;
+		h.zoom.classList.toggle("rp-zoom-right", bar.left - area.left < (w + 12) * scale);
+		const s = slot.getBoundingClientRect();
+		const box = h.box.getBoundingClientRect();
+		const top = ((s.top + s.height / 2) - box.top) / scale - ht / 2;
+		const min = (area.top - box.top) / scale + 4, max = (area.bottom - box.top) / scale - ht - 4;
+		h.zoom.style.top = Math.max(min, Math.min(max, top)) + "px";
+	},
+
+	// ---- card choices ----
+
+	// A recorded choice of a card (gwent.js, UI.queueSyncedCarousel): the
+	// redraw, a medic's revive, a leader taking a card... Shown the way the
+	// player saw it, the picked card in the middle of a carousel, before
+	// apply() makes the pick. Only waits: the pick and its order are the
+	// recorded ones. Never resolves when the replay was restarted meanwhile.
+	async showPick(o, apply) {
+		const session = Replay.session;
+		if (!this.isOpen() || !this.showPicks || Replay.seeking() || !session)
+			return apply();
+		// One at a time: online, both players redraw at once
+		const prev = this.pickLock;
+		let unlock;
+		this.pickLock = new Promise(r => unlock = r);
+		let applied = false;
+		try {
+			await prev;
+			if (this.showPicks && !Replay.seeking() && Replay.session === session)
+				applied = await this.playPick(o, apply, session);
+		} finally {
+			unlock();
+		}
+		if (Replay.session !== session)
+			return abandon();
+		if (!applied)
+			await apply();
+	},
+
+	// The carousel's moments: the choice, the card leaving, for a redraw the
+	// card that replaced it. Resolves whether it made the pick itself.
+	async playPick(o, apply, session) {
+		const p = this.pick;
+		// cut short by a seek or the choices turned off (the game goes on), or
+		// by a restart (this game is over)
+		const cut = async ms => !(await this.pickWait(session, ms)) || Replay.seeking() || !this.showPicks;
+		this.fillPick(o);
+		const token = ++this.pickToken;
+		p.elem.classList.remove("hide", "rpk-out");
+		if (await cut(1300))
+			return this.hidePick(), false;
+		// the picked card leaves: redrawn and discarded cards drop away, taken ones lift
+		const away = o.redraw || o.container === o.chooser.hand;
+		p.slots[2].classList.add(away ? "rpk-drop" : "rpk-lift");
+		if (await cut(450))
+			return this.hidePick(), false;
+		let applied = false;
+		if (o.redraw) {
+			// A redraw is a swap with the deck: the card that came in shows
+			// where the old one was. Made here, under the lock, so the other
+			// player's redraw waits for it.
+			const before = new Set(o.container.cards);
+			await apply();
+			applied = true;
+			const drawn = o.container.cards.find(c => !before.has(c));
+			if (drawn && Replay.session === session && !Replay.seeking()) {
+				const slot = p.slots[2];
+				slot.classList.remove("rpk-drop");
+				this.fillSlot(slot, drawn, this.hidden(o));
+				slot.classList.add("rpk-drawn");
+				this.describe(drawn, this.hidden(o));
+				if (await cut(800))
+					return this.hidePick(), applied;
+			}
+		}
+		// fades out while the game goes on, unless the next choice comes first
+		p.elem.classList.add("rpk-out");
+		setTimeout(() => {
+			if (token === this.pickToken)
+				this.hidePick();
+		}, 250);
+		return applied;
+	},
+
+	// The opponent's hand and deck are hidden unless the viewer reveals them:
+	// a choice made there then shows only card backs
+	hidden(o) {
+		return o.chooser === player_op && !this.showHand && (o.container === o.chooser.hand || o.container === o.chooser.deck);
+	},
+
+	fillPick(o) {
+		const p = this.pick;
+		const c = o.container, chooser = o.chooser;
+		const what = o.redraw ? "pickRedraw" : c === chooser.hand ? "pickDiscard" : c === chooser.deck ? "pickDeck"
+			: c === chooser.grave ? "pickGrave" : "pickGraveOp";
+		p.elem.style.setProperty("--rpk-t", 1 / Replay.speed);
+		p.who.textContent = chooser.name;
+		p.who.classList.toggle("rpk-op", chooser === player_op);
+		p.what.textContent = I18N.t("replay." + what);
+		p.pips.replaceChildren(...(o.count > 1 ? Array.from({ length: o.count }, (_, i) => {
+			const pip = document.createElement("span");
+			pip.classList.toggle("used", i < o.pick);
+			return pip;
+		}) : []));
+		// the cards the player could choose from, sorted as their carousel was
+		const cards = c.cards.filter(card => !o.predicate || o.predicate(card)).sort(Card.compare);
+		const at = cards.indexOf(c.cards[o.index]);
+		const hidden = this.hidden(o);
+		p.slots.forEach((slot, i) => {
+			slot.className = "rpk-slot" + (i === 2 ? " rpk-center" : "");
+			this.fillSlot(slot, cards[at + i - 2], hidden);
+		});
+		this.describe(cards[at], hidden);
+	},
+
+	fillSlot(slot, card, hidden) {
+		slot.classList.toggle("rpk-empty", !card);
+		slot.style.backgroundImage = !card ? "" : hidden ? iconURL("deck_back_" + card.holder.deck_data.faction, "jpg")
+			: largeURL(card.faction + "_" + card.filename);
+	},
+
+	describe(card, hidden) {
+		const desc = this.pick.desc;
+		if (!card || hidden)
+			return desc.classList.add("hide");
+		ui.setDescription(card, desc);
+	},
+
+	hidePick() {
+		if (this.pick)
+			this.pick.elem.classList.add("hide");
+	},
+
+	// Waits ms of game time (shorter at a higher speed), and on while paused.
+	// A seek or turning the choices off cuts it short. False when the replay
+	// was restarted or left.
+	async pickWait(session, ms) {
+		let left = ms;
+		while (Replay.session === session && !Replay.target && this.showPicks && (left > 0 || Replay.paused)) {
+			await new Promise(r => setTimeout(r, 50));
+			if (!Replay.paused)
+				left -= 50 * Replay.speed;
+		}
+		return Replay.session === session;
+	},
+
 	icon(name) {
 		const ns = "http://www.w3.org/2000/svg";
 		const svg = document.createElementNS(ns, "svg");
@@ -481,6 +787,7 @@ const ReplayUI = {
 		Replay.paused = false;
 		lobby.elem.classList.add("hide");
 		ui.toggleSettings.forEach(e => e.classList.remove("lobby-menu"));
+		this.handJumped = true; // the opening hand comes in at once
 		if (!Replay.start(rec)) {
 			lobby.showMenu();
 			return false;
@@ -498,7 +805,9 @@ const ReplayUI = {
 		this.bar.classList.add("hide");
 		document.body.classList.remove("replay-seeking");
 		this.thaw(true);
+		this.hidePick();
 		Replay.stop();
+		this.renderHand();
 		if (open) {
 			lobby.showMenu();
 			HistoryUI.open();
@@ -529,6 +838,8 @@ const ReplayUI = {
 		const status = { done: "replay.done", ended: "replay.ended", diverged: "replay.diverged" }[r.result];
 		this.status.textContent = status ? I18N.t(status) : "";
 		this.status.classList.toggle("hide", !status);
+		this.renderChips();
+		this.queueHand();
 		// no transitions to wait for while skipping
 		document.body.classList.toggle("replay-seeking", r.seeking() && this.isOpen());
 		if (!r.seeking())
@@ -536,7 +847,7 @@ const ReplayUI = {
 	},
 
 	// Space: play/pause. Arrows: moves, with Shift: rounds. M: fold the
-	// controls. Escape: leave.
+	// controls. O: the opponent's hand. C: card choices. Escape: leave.
 	onKey(k, e) {
 		switch (k) {
 			case " ": Replay.toggle(); return true;
@@ -544,6 +855,13 @@ const ReplayUI = {
 			case "ArrowRight": if (!Replay.result) e.shiftKey ? Replay.nextRound() : Replay.nextTurn(); return true;
 			case "Escape": case "Backspace": this.exit(); return true;
 			case "m": this.setMini(!this.mini); return true;
+			case "o":
+				// folded controls hide the hand: unfold them to show it
+				if (!this.showHand && this.mini)
+					this.setMini(false);
+				this.setShowHand(!this.showHand);
+				return true;
+			case "c": this.setShowPicks(!this.showPicks); return true;
 		}
 		return false;
 	},

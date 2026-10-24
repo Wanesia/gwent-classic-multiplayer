@@ -378,6 +378,16 @@ I18N.register("ar", {
 		minimize: "تصغير",
 		expand: "إظهار عناصر التحكم",
 		move: "اسحب للتحريك",
-		decimal: "."
+		decimal: ".",
+		showHand: "يد الخصم",
+		showHandTip: "إظهار يد الخصم (O)",
+		showPicks: "اختيارات البطاقات",
+		showPicksTip: "إظهار كل اختيار للبطاقات: إعادة السحب والإحياء والبطاقات المأخوذة (C)",
+		handEmpty: "لا بطاقات في اليد",
+		pickRedraw: "إعادة السحب",
+		pickDiscard: "رمي بطاقة من اليد",
+		pickDeck: "بطاقة من المجموعة",
+		pickGrave: "بطاقة من المهملات",
+		pickGraveOp: "بطاقة من مهملات الخصم"
 	}
 });

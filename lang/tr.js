@@ -378,6 +378,16 @@ I18N.register("tr", {
 		minimize: "Küçült",
 		expand: "Kontrolleri göster",
 		move: "Taşımak için sürükle",
-		decimal: ","
+		decimal: ",",
+		showHand: "Rakibin eli",
+		showHandTip: "Rakibin elini göster (O)",
+		showPicks: "Kart seçimleri",
+		showPicksTip: "Her kart seçimini göster: yeniden çekmeler, diriltmeler, alınan kartlar (C)",
+		handEmpty: "Elde kart yok",
+		pickRedraw: "Yeniden çekme",
+		pickDiscard: "Elden iskarta",
+		pickDeck: "Desteden kart",
+		pickGrave: "İskartelerden kart",
+		pickGraveOp: "Rakibin iskartelerinden kart"
 	}
 });

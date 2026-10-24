@@ -4310,6 +4310,8 @@ body:has(#end-screen:not(.hide)) #chat-log {
 }
 #replay-bar.rp-mini .rp-bottom,
 #replay-bar.rp-mini .rp-status,
+#replay-bar.rp-mini .rp-reveal,
+#replay-bar.rp-mini .rp-hand,
 #replay-bar.rp-mini .rp-btn:not(.rp-toggle):not(.rp-size) {
 	display: none;
 }
@@ -4410,6 +4412,332 @@ body:has(#end-screen:not(.hide)) #chat-log {
 #replay-bar [data-title]:hover::after {
 	left: auto;
 	right: 0;
+}
+
+/* What a replay can reveal: the opponent's hand, the card choices */
+#replay-bar .rp-reveal {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3vw;
+	padding-top: 0.6vw;
+	border-top: 1px solid rgba(255, 200, 80, 0.15);
+}
+/* a row each: icon, what it shows, an on/off switch */
+#replay-bar .rp-chip {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.5vw;
+	padding: 0.3vw 0.45vw;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 2px;
+	font-family: sans-serif;
+	font-size: 0.78vw;
+	letter-spacing: 0.03em;
+	text-align: left;
+	color: rgba(255, 210, 120, 0.6);
+	transition: border-color .25s ease, background-color .25s ease, color .25s ease;
+}
+#replay-bar .rp-chip-text {
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#replay-bar .rp-switch {
+	position: relative;
+	flex: none;
+	margin-left: auto;
+	width: 1.9vw;
+	height: 1vw;
+	box-sizing: border-box;
+	border-radius: 0.5vw;
+	border: 1px solid rgba(255, 200, 80, 0.35);
+	background: rgba(255, 255, 255, 0.08);
+	transition: background-color .2s ease, border-color .2s ease;
+}
+#replay-bar .rp-switch::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0.12vw;
+	width: 0.66vw;
+	height: 0.66vw;
+	border-radius: 50%;
+	background: rgba(255, 210, 120, 0.55);
+	transform: translateY(-50%);
+	transition: transform .2s ease, background-color .2s ease;
+}
+#replay-bar .rp-chip.active .rp-switch {
+	border-color: goldenrod;
+	background: rgba(218, 165, 32, 0.45);
+}
+#replay-bar .rp-chip.active .rp-switch::after {
+	background: #ffd864;
+	transform: translate(0.9vw, -50%);
+}
+#replay-bar .rp-chip svg {
+	flex: none;
+	width: 1.05vw;
+	height: 1.05vw;
+	fill: currentColor;
+}
+#replay-bar .rp-chip:hover {
+	border-color: rgba(255, 200, 80, 0.3);
+	background: rgba(218, 165, 32, 0.08);
+	color: #ffd864;
+}
+#replay-bar .rp-chip.active {
+	color: #ffd864;
+}
+
+/* The opponent's hand, under the controls */
+#replay-bar .rp-hand {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45vw;
+}
+#replay-bar .rp-hand.hide {
+	display: none;
+}
+#replay-bar .rp-hand-head {
+	display: flex;
+	align-items: center;
+	gap: 0.45vw;
+	font-size: 0.9vw;
+}
+#replay-bar .rp-hand-shield {
+	flex: none;
+	width: 1.1vw;
+	height: 1.3vw;
+	background: center / contain no-repeat;
+}
+#replay-bar .rp-hand-name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+#replay-bar .rp-hand-count {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.25vw;
+	font-weight: bold;
+	color: goldenrod;
+}
+#replay-bar .rp-hand-count::before {
+	content: "";
+	width: 1vw;
+	height: 1.1vw;
+	background: url('img/icons/icon_card_count.png') center / contain no-repeat;
+}
+/* five a row: a full hand of ten fits in two */
+#replay-bar .rp-hand-cards {
+	display: grid;
+	grid-template-columns: repeat(5, 3.2vw);
+	justify-content: space-between;
+	row-gap: 0.4vw;
+}
+#replay-bar .rp-hand-cards:empty {
+	display: none;
+}
+#replay-bar .rp-hand-card {
+	position: relative;
+	width: 3.2vw;
+	height: 4.57vw;
+	transition: box-shadow .15s ease;
+}
+#replay-bar .rp-hand-card:hover {
+	box-shadow: 0 0 0.8vw goldenrod;
+}
+/* the board's card picture, scaled down whole so its badges stay in place */
+#replay-bar .rp-hand-card > .card {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform: scale(0.719);
+	transform-origin: 0 0;
+	transition: none;
+	pointer-events: none;
+}
+/* the board lays out a card's badges with .panel's relative positioning */
+#replay-bar .rp-hand-card .card div {
+	position: relative;
+}
+/* just drawn: drops in and glows */
+@keyframes rp-hand-new {
+	0%   { opacity: 0; transform: translateY(-0.5vw); box-shadow: 0 0 0 0 rgba(255, 190, 60, 0); }
+	25%  { opacity: 1; transform: none; box-shadow: 0 0 1.1vw 0.25vw rgba(255, 190, 60, 0.9); }
+	100% { box-shadow: 0 0 0 0 rgba(255, 190, 60, 0); }
+}
+#replay-bar .rp-hand-card.rp-new {
+	animation: rp-hand-new 1.6s ease-out;
+}
+#replay-bar .rp-hand-empty {
+	margin: 0;
+	font-size: 0.8vw;
+	color: rgba(232, 216, 176, 0.55);
+}
+/* the card under the mouse, enlarged beside the controls */
+#replay-bar .rp-hand-zoom {
+	position: absolute;
+	right: calc(100% + 1.7vw);
+	width: 11vw;
+	height: 20.8vw;
+	border-radius: 1vw;
+	background-size: cover;
+	box-shadow: 0 0 2vw rgba(0, 0, 0, 0.8), 0 0 0.8vw rgba(255, 190, 60, 0.35);
+	pointer-events: none;
+}
+#replay-bar .rp-hand-zoom.rp-zoom-right {
+	right: auto;
+	left: calc(100% + 1.7vw);
+}
+
+/* A recorded card choice, laid out like the carousel the player had. Above
+   the board, under the replay controls; it takes no clicks. --rpk-t scales
+   its movements with the playback speed. */
+#replay-pick {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: calc(100vw * 1080 / 1920);
+	z-index: 1000;
+	pointer-events: none;
+	--rpk-t: 1;
+	background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8));
+	transition: opacity calc(.2s * var(--rpk-t)) ease;
+	animation: rpk-in calc(.25s * var(--rpk-t)) ease-out;
+}
+#replay-pick.hide {
+	display: none;
+}
+#replay-pick.rpk-out {
+	opacity: 0;
+}
+@keyframes rpk-in {
+	from { opacity: 0; }
+}
+#replay-pick .rpk-title {
+	position: absolute;
+	top: 12%;
+	width: 100%;
+	height: 7.5%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1vw;
+	font-size: 1.75vw;
+	color: tan;
+	background-color: rgba(10, 10, 10, 0.95);
+	box-shadow: 0 0 1vw #ffffff54;
+}
+/* who chooses, coloured like their scores on the board */
+#replay-pick .rpk-who {
+	font-weight: bold;
+	color: goldenrod;
+}
+#replay-pick .rpk-who.rpk-op {
+	color: #9cc3ff;
+}
+#replay-pick .rpk-what::before {
+	content: "";
+	display: inline-block;
+	width: 1px;
+	height: 1.4vw;
+	margin-right: 1vw;
+	vertical-align: middle;
+	background: rgba(255, 255, 255, 0.25);
+}
+#replay-pick .rpk-pips {
+	display: flex;
+	gap: 0.5vw;
+	margin-left: 0.4vw;
+}
+#replay-pick .rpk-pips:empty {
+	display: none;
+}
+#replay-pick .rpk-pips > span {
+	width: 0.8vw;
+	height: 0.8vw;
+	border-radius: 50%;
+	border: 0.12vw solid goldenrod;
+	background-color: rgba(255, 255, 255, 0.12);
+}
+#replay-pick .rpk-pips > span.used {
+	background-color: goldenrod;
+	box-shadow: 0 0 0.6vw goldenrod;
+}
+#replay-pick .rpk-cards {
+	padding: 11.5% 10% 0;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+#replay-pick .rpk-slot {
+	flex: none;
+	width: 11.3vw;
+	height: 21.3vw;
+	border-radius: 1.5vw;
+	background: center / cover no-repeat;
+	filter: brightness(0.55);
+}
+#replay-pick .rpk-slot:nth-child(2n) {
+	width: 13.75vw;
+	height: 25.9vw;
+}
+#replay-pick .rpk-slot:nth-child(1) {
+	margin-left: 5%;
+}
+#replay-pick .rpk-slot:nth-child(5) {
+	margin-right: 5%;
+}
+#replay-pick .rpk-slot.rpk-empty {
+	visibility: hidden;
+}
+/* the chosen card */
+@keyframes rpk-chosen {
+	from { box-shadow: 0 0 2.5vw goldenrod; }
+	to   { box-shadow: 0 0 5vw #ffd864; }
+}
+#replay-pick .rpk-slot.rpk-center {
+	width: 16.1vw;
+	height: 30.4vw;
+	filter: none;
+	border: 0.3vw solid goldenrod;
+	background-origin: border-box;
+	animation: rpk-chosen calc(.65s * var(--rpk-t)) ease-in-out infinite alternate;
+}
+/* redrawn or discarded: drops away */
+#replay-pick .rpk-slot.rpk-center.rpk-drop {
+	animation: none;
+	transform: translateY(6vw) scale(0.6) rotate(-8deg);
+	opacity: 0;
+	filter: grayscale(0.8) brightness(0.5);
+	transition: transform calc(.45s * var(--rpk-t)) cubic-bezier(.55, -0.2, .6, 1), opacity calc(.35s * var(--rpk-t)) ease-in calc(.1s * var(--rpk-t)), filter calc(.4s * var(--rpk-t));
+}
+/* taken (to the hand or the board): lifts away */
+#replay-pick .rpk-slot.rpk-center.rpk-lift {
+	animation: none;
+	transform: translateY(-5vw) scale(1.05);
+	opacity: 0;
+	transition: transform calc(.45s * var(--rpk-t)) ease-in, opacity calc(.4s * var(--rpk-t)) ease-in;
+}
+/* the card a redraw brought in */
+@keyframes rpk-drawn {
+	0%   { opacity: 0; transform: scale(0.78); }
+	60%  { opacity: 1; }
+	100% { opacity: 1; transform: scale(1); }
+}
+#replay-pick .rpk-slot.rpk-center.rpk-drawn {
+	animation: rpk-drawn calc(.42s * var(--rpk-t)) cubic-bezier(.2, .9, .3, 1.1);
+}
+#replay-pick .card-description {
+	left: 35.35%;
+	top: 77%;
 }
 
 /* Match history row: star, watch, download */

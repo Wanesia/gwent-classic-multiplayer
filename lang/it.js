@@ -378,6 +378,16 @@ I18N.register("it", {
 		minimize: "Riduci",
 		expand: "Mostra i comandi",
 		move: "Trascina per spostare",
-		decimal: ","
+		decimal: ",",
+		showHand: "Mano dell'avversario",
+		showHandTip: "Mostra la mano dell'avversario (O)",
+		showPicks: "Scelte di carte",
+		showPicksTip: "Mostra ogni scelta di carta: ripescaggi, resurrezioni, carte prese (C)",
+		handEmpty: "Nessuna carta in mano",
+		pickRedraw: "Ripescaggio",
+		pickDiscard: "Scarto dalla mano",
+		pickDeck: "Carta dal mazzo",
+		pickGrave: "Carta dagli scarti",
+		pickGraveOp: "Carta dagli scarti dell'avversario"
 	}
 });

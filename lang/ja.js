@@ -378,6 +378,16 @@ I18N.register("ja", {
 		minimize: "最小化",
 		expand: "操作パネルを表示",
 		move: "ドラッグで移動",
-		decimal: "."
+		decimal: ".",
+		showHand: "相手の手札",
+		showHandTip: "相手の手札を表示 (O)",
+		showPicks: "カードの選択",
+		showPicksTip: "カードの選択をすべて表示：引き直し、復活、取ったカード (C)",
+		handEmpty: "手札なし",
+		pickRedraw: "引き直し",
+		pickDiscard: "手札から捨てる",
+		pickDeck: "デッキからのカード",
+		pickGrave: "捨て札からのカード",
+		pickGraveOp: "相手の捨て札からのカード"
 	}
 });

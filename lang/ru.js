@@ -379,6 +379,16 @@ I18N.register("ru", {
 		minimize: "Свернуть",
 		expand: "Показать управление",
 		move: "Перетащите, чтобы переместить",
-		decimal: ","
+		decimal: ",",
+		showHand: "Рука соперника",
+		showHandTip: "Показать руку соперника (O)",
+		showPicks: "Выбор карт",
+		showPicksTip: "Показывать каждый выбор карты: замены, воскрешения, взятые карты (C)",
+		handEmpty: "Нет карт в руке",
+		pickRedraw: "Замена",
+		pickDiscard: "Сброс с руки",
+		pickDeck: "Карта из колоды",
+		pickGrave: "Карта из сброса",
+		pickGraveOp: "Карта из сброса соперника"
 	}
 });

@@ -324,6 +324,16 @@ I18N.register("en", {
 		minimize: "Minimize",
 		expand: "Show the controls",
 		move: "Drag to move",
-		decimal: "."
+		decimal: ".",
+		showHand: "Opponent's hand",
+		showHandTip: "Show the opponent's hand (O)",
+		showPicks: "Card choices",
+		showPicksTip: "Show each card choice: redraws, revives, cards taken (C)",
+		handEmpty: "No cards in hand",
+		pickRedraw: "Redraw",
+		pickDiscard: "Discard from hand",
+		pickDeck: "Card from the deck",
+		pickGrave: "Card from the discard pile",
+		pickGraveOp: "Card from the opponent's discard pile"
 	}
 });

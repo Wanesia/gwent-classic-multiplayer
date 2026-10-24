@@ -378,6 +378,16 @@ I18N.register("pl", {
 		minimize: "Zwiń",
 		expand: "Pokaż sterowanie",
 		move: "Przeciągnij, żeby przesunąć",
-		decimal: ","
+		decimal: ",",
+		showHand: "Ręka przeciwnika",
+		showHandTip: "Pokaż rękę przeciwnika (O)",
+		showPicks: "Wybory kart",
+		showPicksTip: "Pokaż każdy wybór karty: wymiany, wskrzeszenia, wzięte karty (C)",
+		handEmpty: "Brak kart w ręce",
+		pickRedraw: "Wymiana",
+		pickDiscard: "Odrzucenie z ręki",
+		pickDeck: "Karta z talii",
+		pickGrave: "Karta ze stosu odrzuconych",
+		pickGraveOp: "Karta ze stosu odrzuconych przeciwnika"
 	}
 });

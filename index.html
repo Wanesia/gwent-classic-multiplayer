@@ -348,7 +348,39 @@
 		<button type="button" class="rp-exit" data-i18n="replay.exit">Exit</button>
 	</div>
 	<p class="rp-status hide"></p>
+	<!-- What the match didn't show: the opponent's hand, the card choices -->
+	<div class="rp-reveal">
+		<button type="button" class="rp-chip rp-show-hand" aria-pressed="false" data-title="Show the opponent's hand (O)" data-i18n-datatitle="replay.showHandTip"><span class="rp-chip-text" data-i18n="replay.showHand">Opponent's hand</span><span class="rp-switch"></span></button>
+		<button type="button" class="rp-chip rp-show-picks" aria-pressed="true" data-title="Show each card choice: redraws, revives, cards taken (C)" data-i18n-datatitle="replay.showPicksTip"><span class="rp-chip-text" data-i18n="replay.showPicks">Card choices</span><span class="rp-switch"></span></button>
+	</div>
+	<div class="rp-hand hide">
+		<div class="rp-hand-head">
+			<span class="rp-hand-shield"></span>
+			<span class="rp-hand-name"></span>
+			<span class="rp-hand-count"></span>
+		</div>
+		<div class="rp-hand-cards"></div>
+		<p class="rp-hand-empty hide" data-i18n="replay.handEmpty">No cards in hand</p>
+		<div class="rp-hand-zoom card-lg hide"></div>
+	</div>
 </div>
+
+<!-- A recorded card choice, shown like the carousel the player had (replay.js) -->
+<section id="replay-pick" class="hide" aria-live="polite">
+	<div class="rpk-title"><span class="rpk-who"></span><span class="rpk-what"></span><span class="rpk-pips"></span></div>
+	<div class="rpk-cards">
+		<div class="rpk-slot"></div>
+		<div class="rpk-slot"></div>
+		<div class="rpk-slot rpk-center"></div>
+		<div class="rpk-slot"></div>
+		<div class="rpk-slot"></div>
+	</div>
+	<div class="card-description">
+		<div></div>
+		<h1></h1>
+		<p></p>
+	</div>
+</section>
 
 <!-- Quick chat (chat.js): outside <main> so it stays usable on the opponent's
      turn, and above the redraw picker and end screen -->

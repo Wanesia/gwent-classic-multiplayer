@@ -378,6 +378,16 @@ I18N.register("zh-CN", {
 		minimize: "最小化",
 		expand: "显示控制栏",
 		move: "拖动以移动",
-		decimal: "."
+		decimal: ".",
+		showHand: "对手的手牌",
+		showHandTip: "显示对手的手牌 (O)",
+		showPicks: "卡牌选择",
+		showPicksTip: "显示每次卡牌选择：重抽、复活、拿取的卡牌 (C)",
+		handEmpty: "手中没有卡牌",
+		pickRedraw: "重抽",
+		pickDiscard: "从手牌中弃掉",
+		pickDeck: "来自卡组的卡牌",
+		pickGrave: "来自弃牌堆的卡牌",
+		pickGraveOp: "来自对手弃牌堆的卡牌"
 	}
 });

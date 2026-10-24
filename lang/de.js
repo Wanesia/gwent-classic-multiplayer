@@ -378,6 +378,16 @@ I18N.register("de", {
 		minimize: "Minimieren",
 		expand: "Steuerung anzeigen",
 		move: "Zum Verschieben ziehen",
-		decimal: ","
+		decimal: ",",
+		showHand: "Hand des Gegners",
+		showHandTip: "Hand des Gegners zeigen (O)",
+		showPicks: "Kartenwahl",
+		showPicksTip: "Jede Kartenwahl zeigen: Neuziehen, Wiederbeleben, genommene Karten (C)",
+		handEmpty: "Keine Karten auf der Hand",
+		pickRedraw: "Neuziehen",
+		pickDiscard: "Abwurf von der Hand",
+		pickDeck: "Karte aus dem Deck",
+		pickGrave: "Karte vom Ablagestapel",
+		pickGraveOp: "Karte vom Ablagestapel des Gegners"
 	}
 });

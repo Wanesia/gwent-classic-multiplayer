@@ -378,6 +378,16 @@ I18N.register("cs", {
 		minimize: "Minimalizovat",
 		expand: "Zobrazit ovládání",
 		move: "Přetažením přesunete",
-		decimal: ","
+		decimal: ",",
+		showHand: "Ruka soupeře",
+		showHandTip: "Zobrazit ruku soupeře (O)",
+		showPicks: "Volby karet",
+		showPicksTip: "Zobrazit každou volbu karty: opětovné lízání, oživení, vzaté karty (C)",
+		handEmpty: "Žádné karty v ruce",
+		pickRedraw: "Opětovné lízání",
+		pickDiscard: "Odhození z ruky",
+		pickDeck: "Karta z balíčku",
+		pickGrave: "Karta z odhazovacího balíčku",
+		pickGraveOp: "Karta z odhazovacího balíčku soupeře"
 	}
 });

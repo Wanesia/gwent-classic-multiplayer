@@ -378,6 +378,16 @@ I18N.register("pt-BR", {
 		minimize: "Minimizar",
 		expand: "Mostrar os controles",
 		move: "Arraste para mover",
-		decimal: ","
+		decimal: ",",
+		showHand: "Mão do oponente",
+		showHandTip: "Mostrar a mão do oponente (O)",
+		showPicks: "Escolhas de cartas",
+		showPicksTip: "Mostrar cada escolha de carta: trocas, ressurreições, cartas pegas (C)",
+		handEmpty: "Nenhuma carta na mão",
+		pickRedraw: "Troca",
+		pickDiscard: "Descarte da mão",
+		pickDeck: "Carta do baralho",
+		pickGrave: "Carta dos descartes",
+		pickGraveOp: "Carta dos descartes do oponente"
 	}
 });

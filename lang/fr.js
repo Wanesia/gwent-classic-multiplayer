@@ -378,6 +378,16 @@ I18N.register("fr", {
 		minimize: "Réduire",
 		expand: "Afficher les commandes",
 		move: "Faire glisser pour déplacer",
-		decimal: ","
+		decimal: ",",
+		showHand: "Main de l'adversaire",
+		showHandTip: "Afficher la main de l'adversaire (O)",
+		showPicks: "Choix de cartes",
+		showPicksTip: "Afficher chaque choix de carte : repioches, résurrections, cartes prises (C)",
+		handEmpty: "Aucune carte en main",
+		pickRedraw: "Repioche",
+		pickDiscard: "Défausse depuis la main",
+		pickDeck: "Carte du deck",
+		pickGrave: "Carte de la défausse",
+		pickGraveOp: "Carte de la défausse adverse"
 	}
 });

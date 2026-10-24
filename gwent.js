@@ -2739,7 +2739,12 @@ class UI {
 					mp.desync();
 					return abandon();
 				}
-				await action(container, m.i);
+				// A replay may show the choice first; it only waits, the pick is the same
+				if (mp.replay)
+					await ReplayUI.showPick({ chooser, container, index: m.i, pick: picks + 1, count, predicate, redraw: bRedraw },
+						() => action(container, m.i));
+				else
+					await action(container, m.i);
 			}
 		}
 		if (chooser.controller instanceof ControllerAI)

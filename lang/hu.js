@@ -378,6 +378,16 @@ I18N.register("hu", {
 		minimize: "Kis méret",
 		expand: "Vezérlők megjelenítése",
 		move: "Húzd az áthelyezéshez",
-		decimal: ","
+		decimal: ",",
+		showHand: "Ellenfél keze",
+		showHandTip: "Az ellenfél kezének mutatása (O)",
+		showPicks: "Kártyaválasztások",
+		showPicksTip: "Minden kártyaválasztás mutatása: újrahúzás, feltámasztás, elvett kártyák (C)",
+		handEmpty: "Nincs kártya a kézben",
+		pickRedraw: "Újrahúzás",
+		pickDiscard: "Eldobás a kézből",
+		pickDeck: "Kártya a pakliból",
+		pickGrave: "Kártya a dobópakliból",
+		pickGraveOp: "Kártya az ellenfél dobópaklijából"
 	}
 });
