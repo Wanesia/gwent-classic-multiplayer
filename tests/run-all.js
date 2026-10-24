@@ -18,6 +18,7 @@ const SUITES = [
 	'e2e-muster-online.js', // online muster resolves identically on both clients
 	'e2e-quickmatch.js',   // find-opponent pairing, search screen, cancel
 	'e2e-rematch.js',      // re-ready + mid-game exit
+	'e2e-afk.js',          // AFK turns: notices, passing the round for the AFK player
 	'e2e-chat.js',         // quick chat opt-in, rate limits, no desync
 	'e2e-text-chat.js',    // text chat: settings cog, log, sanitizing, mute, shortcuts
 	'e2e-history.js',      // match history: results, window, export/import, full storage

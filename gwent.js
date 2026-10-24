@@ -556,6 +556,7 @@ class Player {
 	async startTurn(){
 		this.turnSession = game.session;
 		document.getElementById("stats-" + this.tag).classList.add("current-turn");
+		AfkClock.start(this);
 		if (this.leaderAvailable)
 			this.elem_leader.children[1].classList.remove("hide");
 		
@@ -578,6 +579,7 @@ class Player {
 		if (game.currPlayer !== this || !this.awaitingAction)
 			return false;
 		this.awaitingAction = false;
+		AfkClock.stop();
 		return true;
 	}
 	
@@ -621,6 +623,7 @@ class Player {
 		// in the next one
 		if (this.turnSession !== game.session)
 			return;
+		AfkClock.stop();
 		if (!this.passed && !this.canPlay())
 			this.setPassed(true);
 		if (this === player_me){
@@ -2360,6 +2363,7 @@ class UI {
 			player_me.passRound();
 			AudioManager.playSFX('pass');
 		}, false);
+		document.getElementById("afk-pass-op").addEventListener("click", () => AfkClock.ask(), false);
 		document.getElementById("click-background").addEventListener("click", () => ui.cancel(), false);
 		this.youtube;
 		this.ytActive;

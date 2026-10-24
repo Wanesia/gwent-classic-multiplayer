@@ -298,6 +298,8 @@ html {
 #notif-me-turn { background-image: url('img/icons/notif_me_turn.png'); }
 #notif-op-turn { background-image: url('img/icons/notif_op_turn.png'); }
 #notif-op-redraw { background-image: url('img/icons/notif_op_turn.png'); }
+#notif-me-afk { background-image: url('img/icons/notif_me_turn.png'); }
+#notif-op-afk { background-image: url('img/icons/notif_op_turn.png'); }
 #notif-north { background-image: url('img/icons/notif_north.png'); }
 #notif-monsters { background-image: url('img/icons/notif_monsters.png'); }
 #notif-scoiatael { background-image: url('img/icons/notif_scoiatael.png'); }
@@ -1108,6 +1110,40 @@ main { background-image: url('img/boardtest8.png'); }
 #stats-me > div > div > div {
 	top: 59%;
 }
+
+/* AFK notice under a player's stats (AfkClock), over the weather or leader
+   slot below for as long as the turn stays AFK */
+.stats .afk-note {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	box-sizing: border-box;
+	padding: .25vw .25vw .3vw;
+	background-color: rgba(20,20,20,.85);
+	border-top: 1px solid rgba(218,165,32,.35);
+	color: tan;
+	font-size: .88vw;
+	line-height: 1.3;
+	text-align: center;
+	z-index: 5;
+}
+.stats .afk-note.hide { display: none; }
+.stats .afk-note span { display: block; }
+/* Clickable while the board ignores clicks during the opponent's turn */
+#afk-pass-op {
+	pointer-events: auto;
+	background: none;
+	border: none;
+	padding: 0;
+	color: goldenrod;
+	font: inherit;
+	font-weight: bold;
+	text-decoration: underline;
+	text-underline-offset: .2vw;
+	cursor: pointer;
+}
+#afk-pass-op:hover { color: lightgoldenrodyellow; }
 
 .score-total {
 	top: 25%;

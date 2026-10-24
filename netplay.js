@@ -17,6 +17,7 @@
 //   {t:"row", d}                                       mid-resolution row choice
 //   {t:"sum", h}                                       per-turn state checksum
 //   {t:"desync"}                                       the sender found a mismatch and left
+//   {t:"afk-pass"}                                     asks the AFK player to pass (AfkClock)
 //   {t:"chat", q} {t:"chat-text", s}                   chat (chat.js): these and any other
 //   {t:"chat-state", quick, text}                      "chat-" type bypass the lockstep
 
@@ -49,6 +50,7 @@ class ControllerRemote {
 
 	async startTurn(player) {
 		const m = await mp.next(mp.roleOf(player), "play", "scorch", "decoy", "pass", "leader");
+		AfkClock.stop();
 		const desync = () => { mp.desync(); return new Promise(() => {}); };
 		const validCard = Number.isInteger(m.i) && m.i >= 0 && m.i < player.hand.cards.length;
 		switch (m.t) {
@@ -131,6 +133,7 @@ class MPSession {
 		this.waiter = null;
 		if (w)
 			w();
+		AfkClock.stop();
 		ChatLog.clear();
 		QuickChat.refresh();
 	}
@@ -160,6 +163,9 @@ class MPSession {
 		// rather than one side a walkover
 		if (msg.t === "desync")
 			return this.desync();
+		// Outside the lockstep: what the AFK player does about it is their move
+		if (msg.t === "afk-pass")
+			return AfkClock.request();
 		this.queue.push(msg);
 		const w = this.waiter;
 		if (w) {
@@ -325,3 +331,89 @@ class MPSession {
 }
 
 var mp = new MPSession();
+
+// AFK turns online. A turn that runs past TURN_MS tells both players so, and
+// the waiting player may then ask the AFK one to pass the round. Only the AFK
+// player's own client passes, and only once its own clock has run out too: the
+// pass travels as their normal move, so nobody can pass for someone else.
+var AfkClock = {
+	TURN_MS: 60000,
+	BANNER_MS: 2500,
+	timer: null,
+	side: null, // "me" | "op": whose turn is being timed
+	expired: false,
+	requested: false, // the opponent asked us to pass; done once our time is up
+
+	// An online player's turn starts. Only timed when the opponent's client
+	// understands pass requests: otherwise the warning would promise one.
+	start(player) {
+		this.stop();
+		if (!mp.active || !lobby.peerAfk)
+			return;
+		this.side = player.tag;
+		this.timer = setTimeout(() => this.expire(), this.TURN_MS);
+	},
+
+	// The timed player acted, or the turn or match ended
+	stop() {
+		clearTimeout(this.timer);
+		this.timer = null;
+		this.side = null;
+		this.expired = false;
+		this.requested = false;
+		document.getElementById("afk-me").classList.add("hide");
+		document.getElementById("afk-op").classList.add("hide");
+	},
+
+	expire() {
+		this.expired = true;
+		document.getElementById("afk-" + this.side).classList.remove("hide");
+		if (this.side === "me" && this.requested)
+			return this.passNow();
+		this.banner(this.side);
+	},
+
+	// Both players get one. Shown even with game messages off, and only once the
+	// player can see it: a hidden tab gets it on their return.
+	async banner(side) {
+		if (document.hidden)
+			await new Promise(res => document.addEventListener("visibilitychange", res, { once: true }));
+		if (this.side !== side || !this.expired)
+			return;
+		const name = side + "-afk";
+		await ui.showNotification(name);
+		await sleep(this.BANNER_MS);
+		// Another notification (e.g. the pass) may have taken the bar meanwhile
+		if (ui.notif_elem.children[0].id === "notif-" + name)
+			await ui.hideNotification();
+	},
+
+	// The waiting player clicked "Pass the round for them"
+	ask() {
+		if (this.side !== "op" || !this.expired)
+			return;
+		Net.send({t: "afk-pass"});
+		document.getElementById("afk-op").classList.add("hide");
+	},
+
+	// The opponent asked us to pass. Their clock may run slightly ahead of ours.
+	request() {
+		if (this.side !== "me")
+			return;
+		this.requested = true;
+		if (this.expired)
+			this.passNow();
+	},
+
+	// Exactly what the Pass button does, after closing anything left open
+	passNow() {
+		if (!player_me.takeAction())
+			return;
+		Carousel.curr?.cancel();
+		if (ui.previewCard)
+			ui.cancel();
+		mp.send({t: "pass"});
+		player_me.passRound();
+		AudioManager.playSFX('pass');
+	},
+};

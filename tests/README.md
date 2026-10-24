@@ -24,6 +24,7 @@ node e2e-muster.js                                   # muster: called cards high
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
 node e2e-muster-online.js                            # online muster: same board, hand, deck order and checksums on both clients
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
+node e2e-afk.js                                      # AFK turns: both players told, the waiting one passes the round for the AFK one
 node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
 node e2e-text-chat.js                                # text chat: settings cog, log, sanitizing, mute, T shortcut, no desync
 node e2e-history.js                                  # match history: how each ending is recorded, the window, export/import, full storage

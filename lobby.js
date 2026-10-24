@@ -34,6 +34,7 @@ class Lobby {
 		this.pendingSeed = null;
 		this.leaveAfterNotice = null; // set when the results stay up after a disconnect notice: leaving them goes to the menu
 		this.peerChat = false;
+		this.peerAfk = false; // opponent's client answers AFK pass requests
 		this.peerChatQuick = false; // opponent's chat settings
 		this.peerChatText = false;
 		this.sentChat = null; // our settings as the opponent last heard them
@@ -295,6 +296,7 @@ class Lobby {
 		this.pendingSeed = null;
 		this.leaveAfterNotice = null;
 		this.peerChat = false;
+		this.peerAfk = false;
 		this.peerChatQuick = false;
 		this.peerChatText = false;
 		this.sentChat = null;
@@ -333,6 +335,7 @@ class Lobby {
 			case "lobby-ready":
 				// chat: 1 = their client understands chat messages
 				this.peerChat = m.chat === 1;
+				this.peerAfk = m.afk === 1;
 				this.peerChatQuick = m.chatQuick === true;
 				this.peerChatText = m.chatText === true;
 				this.syncChatState();
@@ -384,10 +387,11 @@ class Lobby {
 		}
 	}
 
-	// chat: 1 = we understand chat messages; chatQuick/chatText = our settings
+	// chat: 1 = we understand chat messages; chatQuick/chatText = our settings;
+	// afk: 1 = we answer AFK pass requests
 	sendReady() {
 		this.sentChat = { quick: Settings.quickChat.isEnabled(), text: Settings.textChat.isEnabled() };
-		Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1, chatQuick: this.sentChat.quick, chatText: this.sentChat.text });
+		Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1, afk: 1, chatQuick: this.sentChat.quick, chatText: this.sentChat.text });
 	}
 
 	// Tells a chat-capable opponent about a toggle since our last lobby-ready
