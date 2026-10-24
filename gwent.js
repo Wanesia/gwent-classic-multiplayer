@@ -2002,7 +2002,7 @@ class Game {
 	toMainMenu() {
 		if (mp.replay)
 			return ReplayUI.exit();
-		if (lobby.inMultiplayer)
+		if (lobby.inMultiplayer || lobby.leaveAfterNotice)
 			return lobby.leaveFromEndScreen();
 		this.returnToCustomization();
 		lobby.statusElem.classList.add("hide");
@@ -2733,8 +2733,8 @@ class UI {
 	}
 	
 	// Displays a custom confirmation menu 
-	async popup(yesName, yes, noName, no, title, description, alpha = .95) {
-		let p = new Popup(yesName, yes, noName, no, title, description, alpha);
+	async popup(yesName, yes, noName, no, title, description, alpha = .95, close = null) {
+		let p = new Popup(yesName, yes, noName, no, title, description, alpha, close);
 		await sleepUntil( () => !Popup.curr) 
 	}
 	
@@ -3177,9 +3177,11 @@ class Carousel {
 
 // Custom confirmation windows
 class Popup {
-	constructor(yesName, yes, noName, no, header, description, alpha = .95){
+	// close: when given, a corner X that dismisses the popup and calls it
+	constructor(yesName, yes, noName, no, header, description, alpha = .95, close = null){
 		this.yes = yes ? yes : ()=>{};
 		this.no = no ? no : ()=>{};
+		this.close = close;
 		
 		this.elem = document.getElementById("popup");
 		let main = this.elem.children[0];
@@ -3187,8 +3189,10 @@ class Popup {
 			Popup.bound = true;
 			main.children[2].children[0].addEventListener("click", () => Popup.curr?.selectYes());
 			main.children[2].children[1].addEventListener("click", () => Popup.curr?.selectNo());
-			// Enter/Escape pick the first button (Resume, OK). Skip the key press
-			// that opened the popup (e.g. Escape opening the quit popup).
+			main.children[3].addEventListener("click", () => Popup.curr?.selectClose());
+			// Enter/Escape pick the first button (Resume, OK), Escape the X when
+			// there is one. Skip the key press that opened the popup (e.g. Escape
+			// opening the quit popup).
 			document.addEventListener("keydown", e => {
 				const p = Popup.curr;
 				// e.repeat: holding Escape would close and reopen the quit popup
@@ -3196,7 +3200,10 @@ class Popup {
 					return;
 				e.preventDefault();
 				e.stopImmediatePropagation();
-				p.selectYes();
+				if (e.key === "Escape" && p.close)
+					p.selectClose();
+				else
+					p.selectYes();
 			});
 		}
 		this.openedAt = performance.now();
@@ -3206,6 +3213,7 @@ class Popup {
 		// passing noName === null creates a single-button popup
 		main.children[2].children[1].classList.toggle("hide", noName === null);
 		main.children[2].children[1].innerHTML = (noName) ? noName : "No";
+		main.children[3].classList.toggle("hide", !close);
 
 		const bgColor = new RGBA(10, 10, 10, alpha);
 		this.elem.style.backgroundColor = bgColor.toString();
@@ -3233,6 +3241,14 @@ class Popup {
 		this.clear();
 		this.no();
 		return false;
+	}
+
+	// Called when client dismisses the popup with the X
+	selectClose() {
+		if (!this.close)
+			return;
+		this.clear();
+		this.close();
 	}
 	
 	// Clears the popup and diables player interraction

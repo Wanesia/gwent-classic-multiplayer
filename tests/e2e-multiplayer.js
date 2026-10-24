@@ -181,8 +181,18 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		const r = document.querySelector('#popup button').getBoundingClientRect();
 		return document.getElementById('popup').contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
 	}), 'disconnect popup is on top of the results');
-	await A.click('#popup button');
+	// the X closes the notice and keeps the results; they then only lead to the menu
+	assert(await A.evaluate(() => !document.getElementById('popup-close').classList.contains('hide')), 'disconnect notice over the results has an X');
+	await A.click('#popup-close');
+	assert(await A.evaluate(() => document.getElementById('popup').classList.contains('hide') && !game.endScreen.classList.contains('hide')), 'closing the notice keeps the results up');
+	assert(await A.evaluate(() => game.playAgainWrap_elem.classList.contains('hide') && game.customize_elem.classList.contains('hide') && !game.leave_elem.classList.contains('hide')), 'after the notice the results offer only Leave');
+	await A.click('#end-close');
+	assert(await A.evaluate(() => game.viewingBoard), 'host can still view the board after the opponent left');
+	await A.keyboard.press('Escape');
+	assert(await A.evaluate(() => !game.viewingBoard && !game.endScreen.classList.contains('hide')), 'Escape brings the results back');
+	await A.click('#end-leave');
 	await waitFor(A, () => !document.getElementById('lobby').classList.contains('hide'), 'host returned to main menu');
+	assert(await A.evaluate(() => !lobby.leaveAfterNotice && !lobby.inMultiplayer && !document.getElementById('deck-customization').classList.contains('mp-locked')), 'leaving after the notice ends the online session');
 	assert(await A.evaluate(() => !game.viewingBoard && document.getElementById('exit-game').dataset.title === 'Exit game'), 'leaving resets the board view');
 
 	assert(errors.A.length === 0, 'no js errors on host' + (errors.A.length ? ': ' + errors.A.join(' | ') : ''));

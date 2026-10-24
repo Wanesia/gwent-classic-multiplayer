@@ -32,6 +32,7 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.leaveAfterNotice = null; // set when the results stay up after a disconnect notice: leaving them goes to the menu
 		this.peerChat = false;
 		this.peerChatQuick = false; // opponent's chat settings
 		this.peerChatText = false;
@@ -292,6 +293,7 @@ class Lobby {
 		this.starting = false;
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
+		this.leaveAfterNotice = null;
 		this.peerChat = false;
 		this.peerChatQuick = false;
 		this.peerChatText = false;
@@ -470,6 +472,10 @@ class Lobby {
 
 	// End-screen "Leave": disconnect from the room and return to the main menu.
 	leaveFromEndScreen() {
+		if (this.leaveAfterNotice) {
+			AudioManager.playSFX("menu_opening");
+			return this.leaveAfterNotice();
+		}
 		if (!this.inMultiplayer)
 			return;
 		AudioManager.playSFX("menu_opening");
@@ -536,11 +542,21 @@ class Lobby {
 		mp.deactivate();
 		Net.leave();
 		AudioManager.playSFX("warning");
-		ui.popup(I18N.t("lobby.returnToMenu"), () => {
+		const toMenu = () => {
 			if (game.state !== GameState.CUSTOMIZE)
 				game.returnToCustomization();
 			this.exitMultiplayer();
-		}, null, null, title, description);
+		};
+		// A finished match can be closed back to: the X keeps the results and
+		// the final board up, and leaving them goes to the menu
+		const keepResults = game.state !== GameState.END_SCREEN ? null : () => {
+			this.leaveAfterNotice = toMenu;
+			game.playAgainWrap_elem.classList.add("hide");
+			game.customize_elem.classList.add("hide");
+			game.leave_elem.classList.remove("hide");
+			ui.enablePlayer(true);
+		};
+		ui.popup(I18N.t("lobby.returnToMenu"), toMenu, null, null, title, description, undefined, keepResults);
 	}
 
 	// The match could not start (e.g. the opponent's deck failed validation)
@@ -554,6 +570,7 @@ class Lobby {
 	// Restores the single-player deck builder UI and shows the main menu
 	exitMultiplayer() {
 		this.inMultiplayer = false;
+		this.leaveAfterNotice = null;
 		this.localReady = false;
 		this.remoteReady = false;
 		this.remoteCustomizing = false;

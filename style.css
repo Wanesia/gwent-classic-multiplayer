@@ -709,6 +709,34 @@ html {
 #popup button:last-child:hover {color: red; }
 #popup button.hide { display: none; }
 
+/* Dismisses a notice that needs no answer, e.g. "opponent disconnected" over
+   the results, so the final board stays viewable */
+#popup > div { position: relative; }
+#popup > div > #popup-close {
+	position: absolute;
+	top: .4vw;
+	right: .4vw;
+	width: 1.6vw;
+	height: 1.6vw;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: 1px solid rgba(255,200,80,0.25);
+	border-radius: 2px;
+	transition: border-color .35s ease;
+}
+#popup > div > #popup-close.hide { display: none; }
+#popup > div > #popup-close svg {
+	width: 1vw;
+	height: 1vw;
+	fill: rgba(255,210,120,0.7);
+}
+#popup > div > #popup-close:hover { border-color: rgba(255,200,80,0.55); box-shadow: none; }
+#popup > div > #popup-close:hover svg { fill: rgba(255,215,130,1); }
+
 /* --------------------- end screen ---------------------------  */
 
 #end-screen {

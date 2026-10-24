@@ -57,6 +57,7 @@ const popup = page => page.evaluate(() => ({
 	open: !document.getElementById('popup').classList.contains('hide'),
 	title: document.querySelector('#popup h3').textContent,
 	body: document.querySelector('#popup p').textContent,
+	closable: !document.getElementById('popup-close').classList.contains('hide'),
 }));
 
 (async () => {
@@ -84,6 +85,7 @@ const popup = page => page.evaluate(() => ({
 		await waitFor(A, () => !document.getElementById('popup').classList.contains('hide'), 'host sees the disconnect popup');
 		const p = await popup(A);
 		assert(/Disconnected/.test(p.title) && /counts as your victory/.test(p.body), 'opponent leaving: popup says it counts as a win ("' + p.body + '")');
+		assert(!p.closable, 'opponent leaving mid-match: the notice has no X, the match is gone');
 		const rec = await latest(A);
 		assert(rec.result === 'walkover' && rec.mode === 'friend', 'opponent leaving mid-match is a walkover for the one who stayed');
 		await A.close();
