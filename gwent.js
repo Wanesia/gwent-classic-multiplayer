@@ -2409,11 +2409,25 @@ class UI {
 		if (enable) main.remove("noclick"); else main.add("noclick");
 	}
 	
+	// Loads the YouTube iframe API, which calls onYouTubeIframeAPIReady when
+	// done. Only called once music is turned on: until then nothing is loaded
+	// from YouTube, so it never sees the IP or sets storage for players who
+	// leave music off.
+	loadYouTube(){
+		if (this.youtubeRequested)
+			return;
+		this.youtubeRequested = true;
+		const script = document.createElement("script");
+		script.src = "https://www.youtube.com/iframe_api";
+		document.head.appendChild(script);
+	}
+
 	// Initializes the youtube background music object
 	initYouTube(){
 		if (this.youtube)
 			return; // already created
 		this.youtube = new YT.Player('youtube', {
+			host: "https://www.youtube-nocookie.com",
 			videoId: "UE9fPWy1_o4",
 			playerVars:  { "autoplay" : Settings.music.isEnabled() ? 1 : 0, "controls" : 0, "loop" : 1, "playlist" : "UE9fPWy1_o4", "rel" : 0, "version" : 3, "modestbranding" : 1 },
 			events: { 'onReady': () => this.applyMusicSetting() }
@@ -2434,6 +2448,8 @@ class UI {
 		const enabled = Settings.music.isEnabled();
 		this.toggleMusic_elem.classList.toggle("fade", !enabled);
 		clearInterval(this.musicRetry);
+		if (enabled)
+			this.loadYouTube();
 		// YouTube blocked (adblock, offline) or not ready yet: onReady applies it later
 		if (typeof YT === "undefined" || typeof this.youtube?.playVideo !== "function")
 			return;
@@ -4340,12 +4356,8 @@ function onYouTubeIframeAPIReady() {
 const eventManager = new EventManager(); 
 let userInteracted = false;
 var ui = new UI();
-// When the YouTube API is cached (any reload, e.g. after changing language) it
-// can finish loading before this script runs and never sees
-// onYouTubeIframeAPIReady, leaving the game without a music player: create it
-// directly in that case.
-if (typeof YT !== "undefined" && YT.loaded)
-	ui.initYouTube();
+if (Settings.music.isEnabled())
+	ui.loadYouTube();
 var board = new Board();
 var weather = new Weather();
 var game = new Game();
