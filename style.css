@@ -3007,7 +3007,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 /* Feedback modal: reuses the shortcut-legend overlay look */
-#feedback-modal, #changelog-modal, #history-modal {
+#feedback-modal, #changelog-modal, #privacy-modal, #history-modal {
 	position: fixed;
 	inset: 0;
 	z-index: 200;
@@ -3016,7 +3016,7 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.7);
 }
-#feedback-modal.hide, #changelog-modal.hide, #history-modal.hide {
+#feedback-modal.hide, #changelog-modal.hide, #privacy-modal.hide, #history-modal.hide {
 	display: none;
 }
 .fb-panel {
@@ -3087,8 +3087,9 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 }
 
 /* Patch notes: version label under the main-menu title, and the panel it
-   opens (rendered from CHANGELOG.md) */
-#changelog-version {
+   opens (rendered from CHANGELOG.md). The privacy link at the bottom of the
+   main menu shares the label's look and the panel. */
+#changelog-version, #privacy-link {
 	position: absolute;
 	top: calc(1.5rem + 20px);
 	left: 50%;
@@ -3098,9 +3099,14 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 	font-size: 12px;
 	letter-spacing: 2px;
 	color: rgba(255, 255, 255, 0.2);
+	white-space: nowrap;
 	cursor: pointer;
 }
-#changelog-version:hover {
+#privacy-link {
+	top: auto;
+	bottom: 1rem;
+}
+#changelog-version:hover, #privacy-link:hover {
 	color: goldenrod;
 	text-decoration: underline;
 }
@@ -3111,6 +3117,8 @@ body.fit-active #lobby-mode.lobby-split:not(.hide) {
 @media (min-width: 1600px) and (min-aspect-ratio: 2/1) {
 	#changelog-version {
 		top: calc(1.5rem + 24px * var(--uw-boost));
+	}
+	#changelog-version, #privacy-link {
 		font-size: calc(12px * var(--uw-boost));
 	}
 }

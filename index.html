@@ -430,6 +430,7 @@
 	<div id="lobby-mode" class="lobby-view lobby-split">
 		<div class="split-title">Gwent Classic</div>
 		<a id="changelog-version" class="hide" title="Patch notes"></a>
+		<a id="privacy-link">Privacy</a>
 		<div class="split-panel" id="split-computer">
 			<div class="split-image"></div>
 			<div class="split-vignette"></div>
@@ -580,6 +581,35 @@
 	</div>
 </section>
 
+<section id="privacy-modal" class="hide">
+	<div class="fb-panel cl-panel">
+		<span class="fb-close" title="Close">&times;</span>
+		<h2>PRIVACY</h2>
+		<div class="cl-body">
+			<p>Gwent Classic is a free, non-commercial fan project. There are no accounts, no ads and no tracking cookies.</p>
+			<h4>Stored in your browser</h4>
+			<ul>
+				<li>Your settings, decks and language, in local storage.</li>
+				<li>Your match history and replays, in IndexedDB.</li>
+			</ul>
+			<p>This stays on your device unless you export it yourself. Clearing this site's data deletes it.</p>
+			<h4>Online play</h4>
+			<ul>
+				<li>Online matches go through our server. It holds your IP address in memory only while needed to limit connections and prevent abuse, and doesn't save it.</li>
+				<li>Server error logs may include IP addresses and are deleted after 14 days.</li>
+				<li>Chat messages are passed straight to your opponent and are not saved.</li>
+				<li>The server counts games played (including against the computer) without your IP address or any other identifier.</li>
+			</ul>
+			<h4>Music</h4>
+			<p>Music is streamed from YouTube. Nothing is loaded from YouTube until you turn music on. From then on YouTube receives your IP address and may store data in your browser, as described in <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
+			<h4>Hosting</h4>
+			<p>The site is hosted on Cloudflare Pages, which processes your IP address to deliver it. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's privacy policy</a>.</p>
+			<h4>Questions</h4>
+			<p>Open an issue on <a href="https://github.com/Wanesia/gwent-classic-multiplayer/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+		</div>
+	</div>
+</section>
+
 <section id="history-modal" class="hide">
 	<div class="fb-panel hist-panel">
 		<span class="fb-close">&times;</span>
@@ -656,6 +686,7 @@
 <script type="text/javascript" src="lobby.js"></script>
 <script type="text/javascript" src="fit-screen.js"></script>
 <script type="text/javascript" src="changelog.js"></script>
+<script type="text/javascript" src="privacy.js"></script>
 <script type="text/javascript" src="history.js"></script>
 <script type="text/javascript" src="replay.js"></script>
 </body>
