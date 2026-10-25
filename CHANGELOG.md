@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.3.0 (2026-10-25)
+
+Every match is now saved to a match history, and you can watch any of them again as a replay. After a match, the final board stays on the table so you can look it over.
+
+### Match history
+- **Every match is recorded:** open *Match history* from the main menu to see your results, factions, leaders and round scores, with statistics and filters. Star the matches you want to keep.
+- **How matches count:** leaving, closing the tab or losing your own connection counts as a defeat, and your opponent dropping out is a walkover win. A desync is listed but not counted, and it now ends the match for both players.
+- **Export and import:** save your history to a file and import it on another device, merged with the history there or replacing it.
+- **Saved only in your browser:** nothing is uploaded, so clearing site data, a private window, or another browser or device means no history. Safari deletes site data after 7 days without a visit. Use *Export* to keep a copy.
+- **When storage runs out,** the oldest unstarred replays are deleted first. Match results and starred matches are always kept.
+
+### Replays
+- **Watch any match** from the match history, against the computer or online. You can also download a single replay as a file, and *Import* adds it on another device.
+- **Controls:** step through moves, jump to the end of a round, play and pause, at 0.5x to 4x speed. Space, the arrow keys (with Shift for whole rounds), M and Escape work too. Fold the controls into a small bar and drag them anywhere on the board.
+- **Opponent's hand:** press **O** to see their real hand as they draw and play cards.
+- **Card choices:** press **C** to see every redraw, revive and leader pick the way the player saw it.
+- **Older replays:** a replay recorded on an older version of the game may stop partway if an update changes how a card plays out.
+
+### End of a match
+- **Look at the final board:** the last round's board stays as it was when both players passed. Hide the results with the minimize button to look at rows, weather and hands in the card viewer, and bring them back with Escape or the exit button.
+- **Back to the main menu:** the X on the results screen now takes you straight to the main menu. Online, that leaves the room.
+- If your opponent leaves while the results are up, close the notice to keep looking at the board.
+
+### Online play
+- **AFK opponents:** if a player takes more than a minute on their turn, both players are told, and the waiting player can pass the round for them.
+
+### Deck builder
+- **Filter tabs:** like in The Witcher 3, the collection and your deck have tabs for all cards, close combat, ranged combat, siege, heroes, weather and special cards. Agile units show under both close and ranged combat.
+
+### Privacy
+- **Privacy notice:** a *Privacy* link at the bottom of the main menu explains what the game stores and sends.
+- **No YouTube without music:** YouTube is only loaded once you turn music on, and it now uses youtube-nocookie.com.
+
+### Fixes
+- **Muster:** called cards no longer vanish and reappear at the end of your hand. They now leave from their own slot one at a time, and the deck counter goes down with each card.
+- A match no longer stops while dealing the cards when your browser still had parts of an older version of the game cached.
+
 ## 1.2.0 (2026-10-08)
 
 Chat with your opponent in online matches. It's on by default; you can turn it off at any time or mute an annoying opponent. Chat isn't filtered, so please try being somewhat respectful.
