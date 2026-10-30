@@ -51,7 +51,7 @@ class ControllerAI {
 		let data_board = this.getBoardData();
 		let weights = player.hand.cards.map(c => 
 			({weight: this.weightCard(c, data_max, data_board), action: async () => await this.playCard(c, data_max, data_board)}) );
-		if (player.leaderAvailable)
+		if (player.canUseLeader())
 			weights.push( {weight: this.weightLeader(player.leader, data_max, data_board), action: async () => await player.activateLeader()} );
 		weights.push( {weight: this.weightPass(), action: async () => await player.passRound()} );
 		// Some leaders weigh -1 when useless; a negative total would make the
@@ -557,7 +557,7 @@ class Player {
 		this.turnSession = game.session;
 		document.getElementById("stats-" + this.tag).classList.add("current-turn");
 		AfkClock.start(this);
-		if (this.leaderAvailable)
+		if (this.canUseLeader())
 			this.elem_leader.children[1].classList.remove("hide");
 		
 		// A replayed local player acts from the recording, not from clicks
@@ -648,7 +648,12 @@ class Player {
 	
 	// Returns true if the Player can make any action other than passing
 	canPlay() {
-		return this.hand.cards.length > 0 || this.leaderAvailable;
+		return this.hand.cards.length > 0 || this.canUseLeader();
+	}
+	
+	// Returns true if the leader is unused and its ability can be activated now
+	canUseLeader() {
+		return this.leaderAvailable && this.leader.abilities.every(x => ability_dict[x].usable?.(this.leader) ?? true);
 	}
 	
 	// Use a leader's Activate ability, then disable the leader
@@ -688,8 +693,8 @@ class Player {
 		
 		if (this.id === 0 && this.leader.activated.length > 0){
 			this.elem_leader.addEventListener("click",
-				async () => await ui.viewCard(this.leader, async () => {
-					if (!this.takeAction())
+				async () => await ui.viewCard(this.leader, !this.canUseLeader() ? undefined : async () => {
+					if (!this.canUseLeader() || !this.takeAction())
 						return;
 					AudioManager.playSFX('open');
 					mp.send({t: "leader"});

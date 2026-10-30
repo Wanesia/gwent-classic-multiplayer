@@ -58,7 +58,7 @@ class ControllerRemote {
 				player.passRound();
 				break;
 			case "leader":
-				if (!player.leaderAvailable)
+				if (!player.canUseLeader())
 					return desync();
 				await player.activateLeader();
 				break;

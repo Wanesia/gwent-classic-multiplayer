@@ -30,7 +30,7 @@ function installBot(page, seed) {
 					if (rows.length) ui.selectRow(rows[rand(rows.length)]);
 				} else if (game.currPlayer === player_me && player_me.awaitingAction && !document.getElementsByTagName('main')[0].classList.contains('noclick')) {
 					const hand = player_me.hand.cards;
-					if (player_me.leaderAvailable && rand(8) === 0) {
+					if (player_me.canUseLeader() && rand(8) === 0) {
 						player_me.elem_leader.click();
 					} else if (!hand.length || (hand.length < 4 && rand(3) === 0) || rand(9) === 0) {
 						document.getElementById('pass-button').click();

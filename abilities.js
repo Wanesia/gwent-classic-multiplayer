@@ -385,6 +385,8 @@ var ability_dict = {
 	},
 	eredin_destroyer: {
 		description: "Discard 2 card and draw 1 card of your choice from your deck.",
+		// Needs 2 cards to discard: with fewer, the player would pick a card from the deck for free
+		usable: card => card.holder.hand.cards.length >= 2,
 		activated: async (card) => {
 			let hand = board.getRow(card, "hand", card.holder);
 			let deck = board.getRow(card, "deck", card.holder);
