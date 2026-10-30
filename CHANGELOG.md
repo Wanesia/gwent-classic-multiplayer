@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.3.1 (2026-10-30)
+
+A small update that makes waiting for an opponent and listening to the music a bit nicer, plus an Eredin fix.
+
+### Quality of life
+- **Match found alert:** while you wait in quick match or with a room code, the tab flashes when an opponent joins, so you can't miss it from another tab.
+- **Horn sound (optional):** a horn also plays when an opponent joins. It's on by default; turn it off, or set its own volume, on the waiting screen. It plays even with sound effects off.
+- **Desktop notification (optional):** off by default. Tick the box on the waiting screen if you want one.
+- **Music panel:** the music button now opens a small player. Play, pause, change the volume or mute, drag through the current track, skip to the next or previous one, or pick any of the five tracks.
+
+### Fixes
+- **Eredin, Destroyer of Worlds** now needs at least 2 cards in hand. Before, with fewer cards you could take any card from your deck for free.
+- With an empty hand and a leader you can't use, you now pass automatically.
+
 ## 1.3.0 (2026-10-25)
 
 Every match is now saved to a match history, and you can watch any of them again as a replay. After a match, the final board stays on the table so you can look it over.
