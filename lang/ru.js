@@ -177,13 +177,26 @@ I18N.register("ru", {
 	},
 
 	settings: {
-		music: "Вкл/выкл музыку",
+		music: "Музыка",
 		sfx: "Вкл/выкл звуковые эффекты",
 		notifications: "Вкл/выкл игровые сообщения",
 		keybinds: "Горячие клавиши",
 		feedback: "Отзыв / сообщить об ошибке",
 		chat: "Настройки чата",
 		language: "Язык"
+	},
+
+	music: {
+		title: "Музыка",
+		play: "Играть",
+		pause: "Пауза",
+		mute: "Выключить звук",
+		unmute: "Включить звук",
+		volume: "Громкость",
+		prev: "Предыдущий трек",
+		next: "Следующий трек",
+		source: "Воспроизводится с YouTube",
+		openOnYouTube: "Открыть на YouTube"
 	},
 
 	chat: {

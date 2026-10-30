@@ -28,6 +28,7 @@ node e2e-rematch.js                                  # post-match re-ready + mid
 node e2e-afk.js                                      # AFK turns: both players told, the waiting one passes the round for the AFK one
 node e2e-chat.js                                     # quick chat opt-in, opponent state, cooldown, picker, no desync
 node e2e-text-chat.js                                # text chat: settings cog, log, sanitizing, mute, T shortcut, no desync
+node e2e-music.js                                    # music panel: nothing from YouTube until play, volume saved, tracks, prev/next, seek
 node e2e-history.js                                  # match history: how each ending is recorded, the window, export/import, full storage
 node e2e-replay.js                                   # a bot plays matches, their recordings must replay to the same state
 node e2e-replay-ui.js                                # the replay player: controls, keys, seeking, leaving, one match downloaded and watched elsewhere

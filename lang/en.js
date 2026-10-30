@@ -177,13 +177,26 @@ I18N.register("en", {
 	},
 
 	settings: {
-		music: "Toggle music",
+		music: "Music",
 		sfx: "Toggle sound effects",
 		notifications: "Toggle game messages",
 		keybinds: "Keyboard shortcuts",
 		feedback: "Feedback / report a bug",
 		chat: "Chat settings",
 		language: "Language"
+	},
+
+	music: {
+		title: "Music",
+		play: "Play",
+		pause: "Pause",
+		mute: "Mute",
+		unmute: "Unmute",
+		volume: "Volume",
+		prev: "Previous track",
+		next: "Next track",
+		source: "Streamed from YouTube",
+		openOnYouTube: "Open on YouTube"
 	},
 
 	chat: {

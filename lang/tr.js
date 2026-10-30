@@ -176,13 +176,26 @@ I18N.register("tr", {
 	},
 
 	settings: {
-		music: "Müziği aç/kapat",
+		music: "Müzik",
 		sfx: "Ses efektlerini aç/kapat",
 		notifications: "Oyun mesajlarını aç/kapat",
 		keybinds: "Klavye kısayolları",
 		feedback: "Geri bildirim / hata bildir",
 		chat: "Sohbet ayarları",
 		language: "Dil"
+	},
+
+	music: {
+		title: "Müzik",
+		play: "Oynat",
+		pause: "Duraklat",
+		mute: "Sesi kapat",
+		unmute: "Sesi aç",
+		volume: "Ses düzeyi",
+		prev: "Önceki parça",
+		next: "Sonraki parça",
+		source: "YouTube'dan yayınlanır",
+		openOnYouTube: "YouTube'da aç"
 	},
 
 	chat: {

@@ -176,13 +176,26 @@ I18N.register("ko", {
 	},
 
 	settings: {
-		music: "음악 켜기/끄기",
+		music: "음악",
 		sfx: "효과음 켜기/끄기",
 		notifications: "게임 메시지 켜기/끄기",
 		keybinds: "키보드 단축키",
 		feedback: "피드백 / 버그 신고",
 		chat: "채팅 설정",
 		language: "언어"
+	},
+
+	music: {
+		title: "음악",
+		play: "재생",
+		pause: "일시정지",
+		mute: "음소거",
+		unmute: "음소거 해제",
+		volume: "음량",
+		prev: "이전 곡",
+		next: "다음 곡",
+		source: "YouTube에서 스트리밍",
+		openOnYouTube: "YouTube에서 열기"
 	},
 
 	chat: {

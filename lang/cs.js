@@ -176,13 +176,26 @@ I18N.register("cs", {
 	},
 
 	settings: {
-		music: "Zapnout/vypnout hudbu",
+		music: "Hudba",
 		sfx: "Zapnout/vypnout zvukové efekty",
 		notifications: "Zapnout/vypnout herní zprávy",
 		keybinds: "Klávesové zkratky",
 		feedback: "Zpětná vazba / nahlásit chybu",
 		chat: "Nastavení chatu",
 		language: "Jazyk"
+	},
+
+	music: {
+		title: "Hudba",
+		play: "Přehrát",
+		pause: "Pozastavit",
+		mute: "Ztlumit",
+		unmute: "Zrušit ztlumení",
+		volume: "Hlasitost",
+		prev: "Předchozí skladba",
+		next: "Další skladba",
+		source: "Přehráváno z YouTube",
+		openOnYouTube: "Otevřít na YouTube"
 	},
 
 	chat: {

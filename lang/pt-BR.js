@@ -176,13 +176,26 @@ I18N.register("pt-BR", {
 	},
 
 	settings: {
-		music: "Alternar música",
+		music: "Música",
 		sfx: "Alternar efeitos sonoros",
 		notifications: "Alternar mensagens do jogo",
 		keybinds: "Atalhos de teclado",
 		feedback: "Feedback / reportar um bug",
 		chat: "Configurações do chat",
 		language: "Idioma"
+	},
+
+	music: {
+		title: "Música",
+		play: "Tocar",
+		pause: "Pausar",
+		mute: "Silenciar",
+		unmute: "Ativar som",
+		volume: "Volume",
+		prev: "Faixa anterior",
+		next: "Próxima faixa",
+		source: "Transmitida do YouTube",
+		openOnYouTube: "Abrir no YouTube"
 	},
 
 	chat: {

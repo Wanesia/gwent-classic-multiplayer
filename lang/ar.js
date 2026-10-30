@@ -176,13 +176,26 @@ I18N.register("ar", {
 	},
 
 	settings: {
-		music: "تشغيل/إيقاف الموسيقى",
+		music: "الموسيقى",
 		sfx: "تشغيل/إيقاف المؤثرات الصوتية",
 		notifications: "تشغيل/إيقاف رسائل اللعبة",
 		keybinds: "اختصارات لوحة المفاتيح",
 		feedback: "ملاحظات / الإبلاغ عن خطأ",
 		chat: "إعدادات الدردشة",
 		language: "اللغة"
+	},
+
+	music: {
+		title: "الموسيقى",
+		play: "تشغيل",
+		pause: "إيقاف مؤقت",
+		mute: "كتم الصوت",
+		unmute: "إلغاء كتم الصوت",
+		volume: "مستوى الصوت",
+		prev: "المقطوعة السابقة",
+		next: "المقطوعة التالية",
+		source: "تُبث من YouTube",
+		openOnYouTube: "فتح على YouTube"
 	},
 
 	chat: {

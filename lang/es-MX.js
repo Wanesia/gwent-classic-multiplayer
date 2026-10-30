@@ -178,13 +178,26 @@ I18N.register("es-MX", {
 	},
 
 	settings: {
-		music: "Activar/desactivar música",
+		music: "Música",
 		sfx: "Activar/desactivar efectos de sonido",
 		notifications: "Activar/desactivar mensajes de juego",
 		keybinds: "Atajos de teclado",
 		feedback: "Comentarios / informar de un error",
 		chat: "Configuración del chat",
 		language: "Idioma"
+	},
+
+	music: {
+		title: "Música",
+		play: "Reproducir",
+		pause: "Pausa",
+		mute: "Silenciar",
+		unmute: "Activar sonido",
+		volume: "Volumen",
+		prev: "Pista anterior",
+		next: "Pista siguiente",
+		source: "Se reproduce desde YouTube",
+		openOnYouTube: "Abrir en YouTube"
 	},
 
 	chat: {

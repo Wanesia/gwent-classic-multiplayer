@@ -605,7 +605,33 @@
 	</div>
 </section>
 
-<div data-title="Toggle music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img></div>
+<div data-title="Music" data-i18n-datatitle="settings.music" id="toggle-music" class="center deck-menu settings-button"><img src="svg/music.svg"></img>
+	<section id="music-panel">
+		<h3 data-i18n="music.title">Music</h3>
+		<div class="music-controls">
+			<button type="button" tabindex="-1" class="music-btn music-play" aria-label="Play">
+				<svg class="music-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+				<svg class="music-icon-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+			</button>
+			<button type="button" tabindex="-1" class="music-btn music-mute" aria-label="Mute">
+				<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path class="music-wave-1" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path class="music-wave-2" d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path class="music-muted-x" d="M15 9l6 6m0-6l-6 6"/></svg>
+			</button>
+			<input type="range" class="music-volume" min="0" max="100" step="5" aria-label="Volume">
+			<span class="music-volume-value"></span>
+		</div>
+		<div class="music-now">
+			<button type="button" tabindex="-1" class="music-btn music-prev" aria-label="Previous track"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+			<div class="music-now-info">
+				<b class="music-now-title"></b>
+				<div class="music-progress"><div class="music-progress-fill"></div></div>
+				<small class="music-now-time"></small>
+			</div>
+			<button type="button" tabindex="-1" class="music-btn music-next" aria-label="Next track"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+		</div>
+		<ol class="music-tracks"></ol>
+		<p class="music-source"><span data-i18n="music.source">Streamed from YouTube</span> · <a href="https://www.youtube.com/watch?v=UE9fPWy1_o4" target="_blank" rel="noopener" tabindex="-1"><span data-i18n="music.openOnYouTube">Open on YouTube</span> ↗</a></p>
+	</section>
+</div>
 <div data-title="Toggle sound effects" data-i18n-datatitle="settings.sfx" id="toggle-sfx" class="center deck-menu settings-button"><img src="svg/sfx.svg"></img></div>
 <div data-title="Toggle game messages" data-i18n-datatitle="settings.notifications" id="toggle-notifications" class="center deck-menu settings-button"><img src="svg/notification.svg"></img></div>
 <div data-title="Chat settings" data-i18n-datatitle="settings.chat" id="toggle-chat-settings" class="center deck-menu settings-button"><img src="svg/cog.svg"></img>
@@ -778,6 +804,7 @@
 <script type="text/javascript" src="gwent.js"></script>
 <script type="text/javascript" src="netplay.js"></script>
 <script type="text/javascript" src="chat.js"></script>
+<script type="text/javascript" src="music.js"></script>
 <script type="text/javascript" src="lobby.js"></script>
 <script type="text/javascript" src="fit-screen.js"></script>
 <script type="text/javascript" src="changelog.js"></script>

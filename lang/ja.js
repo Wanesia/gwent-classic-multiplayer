@@ -176,13 +176,26 @@ I18N.register("ja", {
 	},
 
 	settings: {
-		music: "音楽のオン／オフ",
+		music: "音楽",
 		sfx: "効果音のオン／オフ",
 		notifications: "ゲームメッセージのオン／オフ",
 		keybinds: "キーボードショートカット",
 		feedback: "フィードバック／バグ報告",
 		chat: "チャット設定",
 		language: "言語"
+	},
+
+	music: {
+		title: "音楽",
+		play: "再生",
+		pause: "一時停止",
+		mute: "ミュート",
+		unmute: "ミュート解除",
+		volume: "音量",
+		prev: "前の曲",
+		next: "次の曲",
+		source: "YouTube からストリーミング",
+		openOnYouTube: "YouTube で開く"
 	},
 
 	chat: {

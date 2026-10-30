@@ -171,6 +171,11 @@ html {
 	width: 2.5vw;
 	height: 2.5vw;
 }
+/* The game cursor is set on every element (*), so the icon needs it too */
+.settings-button,
+.settings-button > :is(img, span) {
+	cursor: pointer;
+}
 .settings-button>img{
 	width: 2.5vw;
 	height: 2.5vw;
@@ -3686,17 +3691,18 @@ body:has(#popup:not(.hide)) #chat-layer {
 
 /* ---------- chat settings popover (chat.js) ---------- */
 
-#toggle-chat-settings.open {
+/* Shared by the music panel (music.js) */
+:is(#toggle-chat-settings, #toggle-music).open {
 	z-index: 1002;
 }
-#toggle-chat-settings.open > img {
+:is(#toggle-chat-settings, #toggle-music).open > img {
 	filter: drop-shadow(0px 0px 3px rgba(255, 255, 255, 0.5));
 }
-#toggle-chat-settings.open[data-title]:hover::after {
+:is(#toggle-chat-settings, #toggle-music).open[data-title]:hover::after {
 	display: none;
 }
 
-#chat-settings {
+#chat-settings, #music-panel {
 	display: none;
 	position: absolute;
 	bottom: calc(100% + 0.9vw);
@@ -3710,12 +3716,13 @@ body:has(#popup:not(.hide)) #chat-layer {
 	font-family: Arial Narrow, sans-serif;
 	transform-origin: 1.75vw calc(100% + 0.9vw);
 }
-#toggle-chat-settings.open > #chat-settings {
+#toggle-chat-settings.open > #chat-settings,
+#toggle-music.open > #music-panel {
 	display: block;
 	animation: chat-picker-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
 /* Tail pointing at the cog */
-#chat-settings::after {
+#chat-settings::after, #music-panel::after {
 	content: "";
 	position: absolute;
 	bottom: -0.5vw;
@@ -3728,7 +3735,7 @@ body:has(#popup:not(.hide)) #chat-layer {
 	border-radius: 0;
 	rotate: 45deg;
 }
-#chat-settings h3 {
+#chat-settings h3, #music-panel h3 {
 	margin: 0 0 0.3vw;
 	color: goldenrod;
 	font-size: 1.15vw;
@@ -4796,4 +4803,267 @@ main.replay-still.replay-still-out {
 }
 body.replay-still-icons .settings-button {
 	z-index: 1002 !important;
+}
+
+/* ---------- music panel (music.js) ---------- */
+
+#music-panel {
+	width: 21vw;
+	padding-bottom: 0.6vw;
+}
+.music-btn {
+	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #e8cf96;
+	cursor: pointer;
+}
+/* The global game cursor is set on every element (*), so text and icons inside
+   the panel's buttons would show it over their pointer: take the parent's */
+#music-panel :is(button, a, .music-progress) * {
+	cursor: inherit;
+}
+.music-btn > svg {
+	width: 1.5vw;
+	height: 1.5vw;
+	fill: currentColor;
+}
+.music-btn:hover {
+	color: #fff6dc;
+}
+
+.music-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.6vw;
+	padding: 0.5vw 0;
+	border-top: 0.08vw solid rgba(218, 165, 32, 0.2);
+}
+.music-play {
+	width: 2.6vw;
+	height: 2.6vw;
+	border: 0.1vw solid goldenrod;
+	border-radius: 50%;
+	background-color: #b8860b;
+	color: #fff6dc;
+}
+.music-play:hover {
+	background-color: #d19a0f;
+	color: #fff;
+}
+.music-play > svg {
+	width: 1.3vw;
+	height: 1.3vw;
+}
+.music-play .music-icon-pause,
+.music-play.playing .music-icon-play {
+	display: none;
+}
+.music-play.playing .music-icon-pause {
+	display: block;
+}
+.music-mute .music-muted-x {
+	display: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+.music-mute.quiet .music-wave-2,
+.music-mute.muted :is(.music-wave-1, .music-wave-2) {
+	display: none;
+}
+.music-mute.muted .music-muted-x {
+	display: inline;
+}
+
+/* Gold fill up to the thumb, faint notches at 25/50/75% */
+.music-volume {
+	--vol: 50%;
+	flex: 1;
+	min-width: 0;
+	height: 1.4vw;
+	margin: 0;
+	background: none;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+}
+.music-volume::-webkit-slider-runnable-track {
+	height: 0.4vw;
+	border-radius: 0.2vw;
+	background:
+		linear-gradient(to right, transparent calc(25% - 0.05vw), rgba(12, 10, 7, 0.9) calc(25% - 0.05vw) calc(25% + 0.05vw), transparent calc(25% + 0.05vw) calc(50% - 0.05vw), rgba(12, 10, 7, 0.9) calc(50% - 0.05vw) calc(50% + 0.05vw), transparent calc(50% + 0.05vw) calc(75% - 0.05vw), rgba(12, 10, 7, 0.9) calc(75% - 0.05vw) calc(75% + 0.05vw), transparent calc(75% + 0.05vw)),
+		linear-gradient(to right, goldenrod var(--vol), rgba(70, 64, 52, 0.9) var(--vol));
+}
+.music-volume::-moz-range-track {
+	height: 0.4vw;
+	border-radius: 0.2vw;
+	background:
+		linear-gradient(to right, transparent calc(25% - 0.05vw), rgba(12, 10, 7, 0.9) calc(25% - 0.05vw) calc(25% + 0.05vw), transparent calc(25% + 0.05vw) calc(50% - 0.05vw), rgba(12, 10, 7, 0.9) calc(50% - 0.05vw) calc(50% + 0.05vw), transparent calc(50% + 0.05vw) calc(75% - 0.05vw), rgba(12, 10, 7, 0.9) calc(75% - 0.05vw) calc(75% + 0.05vw), transparent calc(75% + 0.05vw)),
+		linear-gradient(to right, goldenrod var(--vol), rgba(70, 64, 52, 0.9) var(--vol));
+}
+.music-volume::-webkit-slider-thumb {
+	width: 1.1vw;
+	height: 1.1vw;
+	margin-top: -0.35vw;
+	border: 0;
+	border-radius: 50%;
+	background-color: #fff6dc;
+	box-shadow: 0 0.05vw 0.25vw rgba(0, 0, 0, 0.7);
+	-webkit-appearance: none;
+}
+.music-volume::-moz-range-thumb {
+	width: 1.1vw;
+	height: 1.1vw;
+	border: 0;
+	border-radius: 50%;
+	background-color: #fff6dc;
+	box-shadow: 0 0.05vw 0.25vw rgba(0, 0, 0, 0.7);
+}
+.music-volume:hover::-webkit-slider-thumb {
+	background-color: #fff;
+	box-shadow: 0 0 0.4vw rgba(218, 165, 32, 0.9);
+}
+.music-volume:focus-visible {
+	outline: 0.1vw solid goldenrod;
+	outline-offset: 0.2vw;
+}
+.music-volume-value {
+	flex: none;
+	width: 2.6vw;
+	color: #f3dfae;
+	font-size: 1vw;
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+}
+
+.music-now {
+	display: flex;
+	align-items: center;
+	gap: 0.5vw;
+	padding: 0.5vw 0;
+	border-top: 0.08vw solid rgba(218, 165, 32, 0.2);
+}
+.music-now-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25vw;
+}
+.music-now-title {
+	overflow: hidden;
+	color: #f3dfae;
+	font-size: 1.1vw;
+	line-height: 1.2;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.music-now-time {
+	color: rgba(232, 207, 150, 0.6);
+	font-size: 0.85vw;
+	font-variant-numeric: tabular-nums;
+}
+/* Tall hit area around a thin bar */
+.music-progress {
+	position: relative;
+	height: 0.8vw;
+	cursor: pointer;
+}
+.music-progress::before,
+.music-progress-fill {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	height: 0.25vw;
+	translate: 0 -50%;
+	border-radius: 0.125vw;
+}
+.music-progress::before {
+	right: 0;
+	background-color: rgba(70, 64, 52, 0.9);
+}
+.music-progress-fill {
+	background-color: goldenrod;
+}
+.music-progress:hover::before,
+.music-progress:hover .music-progress-fill {
+	height: 0.4vw;
+}
+.music-progress.disabled {
+	cursor: default;
+	pointer-events: none;
+}
+
+.music-tracks {
+	margin: 0;
+	padding: 0.3vw 0 0;
+	border-top: 0.08vw solid rgba(218, 165, 32, 0.2);
+	list-style: none;
+	counter-reset: track;
+}
+.music-tracks button {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5vw;
+	width: 100%;
+	padding: 0.3vw 0.4vw;
+	border: 0;
+	border-radius: 0.3vw;
+	background: none;
+	color: rgba(243, 223, 174, 0.75);
+	font-family: inherit;
+	font-size: 1vw;
+	text-align: start;
+	cursor: pointer;
+	counter-increment: track;
+}
+.music-tracks button::before {
+	content: counter(track);
+	width: 0.8vw;
+	color: rgba(232, 207, 150, 0.45);
+	font-variant-numeric: tabular-nums;
+}
+.music-tracks button > span {
+	flex: 1;
+}
+.music-tracks button > small {
+	color: rgba(232, 207, 150, 0.45);
+	font-size: 0.85vw;
+	font-variant-numeric: tabular-nums;
+}
+.music-tracks button:hover {
+	background-color: rgba(218, 165, 32, 0.12);
+	color: #fff6dc;
+}
+.music-tracks li.current button {
+	color: goldenrod;
+	font-weight: bold;
+}
+.music-tracks li.current button::before {
+	content: "\266A";
+	color: goldenrod;
+}
+.music-source {
+	margin: 0.4vw 0 0;
+	padding-top: 0.4vw;
+	border-top: 0.08vw solid rgba(218, 165, 32, 0.2);
+	color: rgba(232, 207, 150, 0.55);
+	font-size: 0.8vw;
+	line-height: 1.3;
+}
+.music-source > a {
+	color: goldenrod;
+	text-decoration: none;
+	cursor: pointer;
+}
+.music-source > a:hover {
+	color: #fff6dc;
+	text-decoration: underline;
 }

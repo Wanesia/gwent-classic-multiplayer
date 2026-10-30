@@ -176,13 +176,26 @@ I18N.register("hu", {
 	},
 
 	settings: {
-		music: "Zene be/ki",
+		music: "Zene",
 		sfx: "Hangeffektek be/ki",
 		notifications: "Játéküzenetek be/ki",
 		keybinds: "Billentyűparancsok",
 		feedback: "Visszajelzés / hiba jelentése",
 		chat: "Csevegés beállításai",
 		language: "Nyelv"
+	},
+
+	music: {
+		title: "Zene",
+		play: "Lejátszás",
+		pause: "Szünet",
+		mute: "Némítás",
+		unmute: "Némítás feloldása",
+		volume: "Hangerő",
+		prev: "Előző szám",
+		next: "Következő szám",
+		source: "A YouTube-ról szól",
+		openOnYouTube: "Megnyitás a YouTube-on"
 	},
 
 	chat: {

@@ -176,13 +176,26 @@ I18N.register("zh-TW", {
 	},
 
 	settings: {
-		music: "開關音樂",
+		music: "音樂",
 		sfx: "開關音效",
 		notifications: "開關遊戲訊息",
 		keybinds: "鍵盤快速鍵",
 		feedback: "意見回饋 / 回報錯誤",
 		chat: "聊天設定",
 		language: "語言"
+	},
+
+	music: {
+		title: "音樂",
+		play: "播放",
+		pause: "暫停",
+		mute: "靜音",
+		unmute: "取消靜音",
+		volume: "音量",
+		prev: "上一首",
+		next: "下一首",
+		source: "由 YouTube 串流播放",
+		openOnYouTube: "在 YouTube 上開啟"
 	},
 
 	chat: {

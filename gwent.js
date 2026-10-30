@@ -2365,12 +2365,8 @@ class UI {
 		}, false);
 		document.getElementById("afk-pass-op").addEventListener("click", () => AfkClock.ask(), false);
 		document.getElementById("click-background").addEventListener("click", () => ui.cancel(), false);
-		this.youtube;
-		this.ytActive;
-		this.toggleMusic_elem = document.getElementById("toggle-music");
-		this.toggleSettings.push(this.toggleMusic_elem);
-		this.toggleMusic_elem.classList.toggle("fade", !Settings.music.isEnabled());
-		this.toggleMusic_elem.addEventListener("click", () => this.toggleMusic(), false);
+		// Music popover (music.js)
+		this.toggleSettings.push(document.getElementById("toggle-music"));
 		this.toggleNotifications_elem = document.getElementById("toggle-notifications");
 		this.toggleSettings.push(this.toggleNotifications_elem);
 		this.toggleNotifications_elem.addEventListener("click", () => this.toggleNotifications(), false);
@@ -2413,65 +2409,6 @@ class UI {
 		if (enable) main.remove("noclick"); else main.add("noclick");
 	}
 	
-	// Loads the YouTube iframe API, which calls onYouTubeIframeAPIReady when
-	// done. Only called once music is turned on: until then nothing is loaded
-	// from YouTube, so it never sees the IP or sets storage for players who
-	// leave music off.
-	loadYouTube(){
-		if (this.youtubeRequested)
-			return;
-		this.youtubeRequested = true;
-		const script = document.createElement("script");
-		script.src = "https://www.youtube.com/iframe_api";
-		document.head.appendChild(script);
-	}
-
-	// Initializes the youtube background music object
-	initYouTube(){
-		if (this.youtube)
-			return; // already created
-		this.youtube = new YT.Player('youtube', {
-			host: "https://www.youtube-nocookie.com",
-			videoId: "UE9fPWy1_o4",
-			playerVars:  { "autoplay" : Settings.music.isEnabled() ? 1 : 0, "controls" : 0, "loop" : 1, "playlist" : "UE9fPWy1_o4", "rel" : 0, "version" : 3, "modestbranding" : 1 },
-			events: { 'onReady': () => this.applyMusicSetting() }
-		});
-	}
-	
-	// Called when client toggles the music
-	toggleMusic(){
-		Settings.music.toggle();
-		this.applyMusicSetting();
-	}
-
-	// The saved setting is the single source of truth: the icon shows it and the
-	// player is told to follow it. (Deciding from the player's state instead
-	// misread clicks while the video was buffering or failed to start, so the
-	// button could get stuck "on" with no music.)
-	applyMusicSetting(){
-		const enabled = Settings.music.isEnabled();
-		this.toggleMusic_elem.classList.toggle("fade", !enabled);
-		clearInterval(this.musicRetry);
-		if (enabled)
-			this.loadYouTube();
-		// YouTube blocked (adblock, offline) or not ready yet: onReady applies it later
-		if (typeof YT === "undefined" || typeof this.youtube?.playVideo !== "function")
-			return;
-		if (!enabled) {
-			this.youtube.pauseVideo();
-			return;
-		}
-		this.youtube.playVideo();
-		// Browsers may refuse to start audio before the first user interaction:
-		// keep asking until it plays, or until music is turned off again
-		this.musicRetry = setInterval(() => {
-			if (!Settings.music.isEnabled() || this.youtube.getPlayerState() === YT.PlayerState.PLAYING)
-				clearInterval(this.musicRetry);
-			else if (this.youtube.getPlayerState() !== YT.PlayerState.BUFFERING)
-				this.youtube.playVideo();
-		}, 500);
-	}
-
 	toggleNotifications() {
 		Settings.notifications.toggle();
 		const useNotificaitons = Settings.notifications.isEnabled();
@@ -2497,17 +2434,6 @@ class UI {
 			this.toggleSFX_elem.classList.add("fade");
 		}
 	}
-	
-	// Enables or disables backgorund music 
-	setYouTubeEnabled(enable){
-		if (this.ytActive === enable)
-			return;
-		if (enable && !this.mute)
-			ui.youtube.playVideo();
-		else
-			ui.youtube.pauseVideo();
-		this.ytActive = enable;
-}
 	
 	// Called when the player selects a selectable card
 	async selectCard(card) {
@@ -4423,19 +4349,12 @@ function sleepUntil(predicate, ms) {
 	});
 }
 
-// Initializes the interractive YouTube object
-function onYouTubeIframeAPIReady() {
-	ui.initYouTube();
-}
-
 /*----------------------------------------------------*/
 
 
 const eventManager = new EventManager(); 
 let userInteracted = false;
 var ui = new UI();
-if (Settings.music.isEnabled())
-	ui.loadYouTube();
 var board = new Board();
 var weather = new Weather();
 var game = new Game();
