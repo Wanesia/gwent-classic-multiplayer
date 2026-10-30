@@ -576,6 +576,16 @@
 		<div id="room-code" data-title="Click to copy" data-i18n-datatitle="lobby.copyTitle">·····</div>
 		<p id="copy-hint" class="lobby-hint"></p>
 		<p id="create-status" class="lobby-status"></p>
+		<div class="lobby-alerts">
+			<label class="lobby-alert"><input type="checkbox" class="lobby-alert-box" /><span data-i18n="lobby.alertSound">Play a sound when a match is found</span></label>
+			<div class="lobby-alert-volume-row">
+				<input type="range" class="lobby-alert-volume" min="0" max="100" step="5" aria-label="Volume" />
+				<span class="lobby-alert-volume-value"></span>
+				<button type="button" class="lobby-alert-test" data-i18n="lobby.alertTest">Test</button>
+			</div>
+			<label class="lobby-alert lobby-notify"><input type="checkbox" class="lobby-notify-box" /><span data-i18n="lobby.alertNotify">Show a desktop notification when a match is found</span></label>
+			<p class="lobby-hint lobby-notify-hint hide"></p>
+		</div>
 		<button class="mp-back lobby-back" data-target="lobby-mp"><span class="mp-back-icon"></span><span data-i18n="lobby.cancel">Cancel</span></button>
 	</div>
 	<div id="lobby-search" class="lobby-view hide">
@@ -583,6 +593,16 @@
 		<p id="search-hint" class="lobby-hint" data-i18n="lobby.searchHintDefault">You'll be matched with the next player who searches.</p>
 		<p id="search-status" class="lobby-status"></p>
 		<p id="search-online" class="lobby-hint"></p>
+		<div class="lobby-alerts">
+			<label class="lobby-alert"><input type="checkbox" class="lobby-alert-box" /><span data-i18n="lobby.alertSound">Play a sound when a match is found</span></label>
+			<div class="lobby-alert-volume-row">
+				<input type="range" class="lobby-alert-volume" min="0" max="100" step="5" aria-label="Volume" />
+				<span class="lobby-alert-volume-value"></span>
+				<button type="button" class="lobby-alert-test" data-i18n="lobby.alertTest">Test</button>
+			</div>
+			<label class="lobby-alert lobby-notify"><input type="checkbox" class="lobby-notify-box" /><span data-i18n="lobby.alertNotify">Show a desktop notification when a match is found</span></label>
+			<p class="lobby-hint lobby-notify-hint hide"></p>
+		</div>
 		<button class="mp-back lobby-back" data-target="lobby-mp"><span class="mp-back-icon"></span><span data-i18n="lobby.cancel">Cancel</span></button>
 	</div>
 	<div id="lobby-join" class="lobby-view hide">

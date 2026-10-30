@@ -4063,6 +4063,9 @@ class Settings
 	static music = new ToggleOption("gc-music", false);
 	static notifications = new ToggleOption("gc-notifications", true);
 	static soundEffects = new ToggleOption("gc-sound-effects", false);
+	static matchAlert = new ToggleOption("gc-match-alert", true); // ignores the sound effects toggle
+	static matchAlertVolume = new SavedString("gc-match-alert-volume", "80"); // 0-100
+	static matchNotify = new ToggleOption("gc-match-notify", false);
 	static quickChat = new ToggleOption("gc-quick-chat", true);
 	static textChat = new ToggleOption("gc-text-chat", true);
 	static lastFaction = new SavedString("gc-last-faction", "realms"); 

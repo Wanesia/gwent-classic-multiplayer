@@ -68,7 +68,10 @@ class Lobby {
 		addMouseEnterSFXBySelector(".mp-option");
 		addMouseEnterSFXBySelector(".split-panel");
 
-		Net.onPeerJoined = () => this.enterDeckSetup();
+		Net.onPeerJoined = () => {
+			this.enterDeckSetup();
+			MatchAlert.fire();
+		};
 		Net.onPeerLeft = reason => this.handlePeerLeft(reason);
 		EventManager.customizationOpened.bind(() => this.onCustomizationOpened());
 	}
@@ -141,7 +144,7 @@ class Lobby {
 			if (this.abandoned(attempt))
 				return;
 			if (Net.role === "guest") {
-				this.enterDeckSetup();
+				this.enterDeckSetup(); // paired at once: nothing to alert about
 			} else {
 				this.searchStatus.textContent = I18N.t("lobby.searching");
 				this.searchStatus.classList.add("is-waiting");
@@ -582,6 +585,7 @@ class Lobby {
 		this.remoteDeckRaw = null;
 		this.pendingSeed = null;
 		Net.onMessage = null;
+		MatchAlert.stop();
 		this.statusElem.classList.add("hide");
 		document.getElementById("opponent-preview").classList.remove("hide");
 		this.startButton.textContent = I18N.t("lobby.startGame");
@@ -589,6 +593,234 @@ class Lobby {
 		this.showMenu();
 	}
 }
+
+// Match found: sound, desktop notification and, while the player is away, a
+// flashing tab.
+var MatchAlert = {
+	FLASH_MS: 1000,
+	timer: null,
+	title: null,
+	notif: null,
+	hint: null, // i18n key shown under the notification checkbox
+
+	init() {
+		// Own copy, so its volume doesn't affect the in-game horn
+		this.sound = getAudio("horn");
+		this.soundBoxes = [...document.getElementsByClassName("lobby-alert-box")];
+		this.soundBoxes.forEach(b => b.addEventListener("change", () => {
+			Settings.matchAlert.setEnabled(b.checked);
+			this.syncSound();
+		}));
+		this.volumeRows = [...document.getElementsByClassName("lobby-alert-volume-row")];
+		this.volumeRows.forEach(row => {
+			const slider = row.querySelector(".lobby-alert-volume");
+			slider.setAttribute("aria-label", I18N.t("music.volume"));
+			slider.addEventListener("input", () => {
+				Settings.matchAlertVolume.set(slider.value);
+				this.syncSound();
+			});
+			row.querySelector(".lobby-alert-test").addEventListener("click", () => this.playSound());
+		});
+		this.syncSound();
+
+		// Android needs a service worker, iOS a home-screen install
+		this.canNotify = typeof Notification !== "undefined" && window.isSecureContext && !/Android/i.test(navigator.userAgent);
+		this.notifyBoxes = [...document.getElementsByClassName("lobby-notify-box")];
+		this.notifyHints = [...document.getElementsByClassName("lobby-notify-hint")];
+		if (this.canNotify) {
+			this.notifyBoxes.forEach(b => b.addEventListener("change", () => this.toggleNotify(b.checked)));
+			if (navigator.permissions)
+				navigator.permissions.query({ name: "notifications" }).then(st => st.onchange = () => this.syncNotify()).catch(() => {});
+			this.syncNotify();
+		} else
+			document.querySelectorAll(".lobby-notify").forEach(e => e.classList.add("hide"));
+
+		const back = () => {
+			if (this.looking())
+				this.stop();
+			if (this.canNotify)
+				this.syncNotify();
+		};
+		document.addEventListener("visibilitychange", back);
+		window.addEventListener("focus", back);
+	},
+
+	getVolume() {
+		const v = parseInt(Settings.matchAlertVolume.get(), 10);
+		return Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 80;
+	},
+
+	soundOn() {
+		return Settings.matchAlert.isEnabled() && this.getVolume() > 0;
+	},
+
+	syncSound() {
+		const on = Settings.matchAlert.isEnabled();
+		const v = this.getVolume();
+		this.soundBoxes.forEach(b => b.checked = on);
+		this.volumeRows.forEach(row => {
+			const slider = row.querySelector(".lobby-alert-volume");
+			slider.value = v;
+			slider.disabled = !on;
+			slider.style.setProperty("--vol", v + "%");
+			row.querySelector(".lobby-alert-volume-value").textContent = v + "%";
+			row.querySelector(".lobby-alert-test").disabled = !on;
+			row.classList.toggle("off", !on);
+		});
+	},
+
+	playSound() {
+		this.sound.volume = this.getVolume() / 100;
+		this.sound.currentTime = 0;
+		const p = this.sound.play();
+		if (p)
+			p.catch(() => {}); // autoplay blocked
+	},
+
+	looking() {
+		return !document.hidden && document.hasFocus();
+	},
+
+	notifyOn() {
+		return this.canNotify && Settings.matchNotify.isEnabled() && Notification.permission === "granted";
+	},
+
+	// Kept on while blocked, so unblocking re-ticks the box
+	syncNotify() {
+		const perm = Notification.permission;
+		if (perm === "granted")
+			this.hint = null;
+		else if (perm === "denied" && Settings.matchNotify.isEnabled())
+			this.hint = "lobby.notifyBlocked";
+		this.notifyBoxes.forEach(b => b.checked = this.notifyOn());
+		this.showHint(this.hint);
+	},
+
+	showHint(key) {
+		this.notifyHints.forEach(h => {
+			h.classList.toggle("hide", !key);
+			if (key) {
+				h.setAttribute("data-i18n", key);
+				h.textContent = I18N.t(key);
+			}
+		});
+	},
+
+	async toggleNotify(on) {
+		this.hint = null;
+		Settings.matchNotify.setEnabled(on);
+		if (on && Notification.permission === "default") {
+			this.notifyBoxes.forEach(b => b.checked = true);
+			this.showHint("lobby.notifyAsk");
+			let perm;
+			try {
+				perm = await Notification.requestPermission();
+			} catch (e) {}
+			perm = perm || Notification.permission;
+			if (perm === "default") {
+				// Dismissed: the browser can ask again
+				Settings.matchNotify.disable();
+				this.hint = "lobby.notifyDismissed";
+			}
+		}
+		this.syncNotify();
+	},
+
+	fire() {
+		if (this.soundOn())
+			this.playSound();
+		if (this.looking())
+			return;
+		this.flash();
+		if (this.notifyOn())
+			this.notify();
+	},
+
+	notify() {
+		try {
+			const n = new Notification(I18N.t("lobby.matchFoundTitle"), {
+				body: I18N.t("lobby.matchFoundBody", { ready: I18N.t("lobby.ready") }),
+				icon: "favicon.ico",
+				tag: "gwent-match",
+				requireInteraction: true,
+				silent: this.soundOn(), // our sound already plays
+			});
+			n.onclick = () => {
+				window.focus();
+				this.stop();
+			};
+			this.notif = n;
+		} catch (e) {
+			this.notif = null;
+		}
+	},
+
+	warningIcon() {
+		if (this.warnIcon === undefined) {
+			const c = document.createElement("canvas");
+			c.width = c.height = 32;
+			const g = c.getContext("2d");
+			g.fillStyle = "#d4553f";
+			g.beginPath();
+			g.roundRect ? g.roundRect(0, 0, 32, 32, 6) : g.rect(0, 0, 32, 32);
+			g.fill();
+			g.fillStyle = "#fff";
+			g.font = "bold 28px sans-serif";
+			g.textAlign = "center";
+			g.textBaseline = "middle";
+			g.fillText("!", 16, 18);
+			try {
+				this.warnIcon = c.toDataURL("image/png");
+			} catch (e) {
+				this.warnIcon = null;
+			}
+		}
+		return this.warnIcon;
+	},
+
+	// Icon (and theme colour) flips every tick, title every second tick
+	flash() {
+		if (this.timer)
+			return;
+		this.title = document.title;
+		this.icon = document.querySelector("link[rel~='icon']");
+		this.iconHref = this.icon && this.icon.getAttribute("href");
+		this.theme = document.querySelector("meta[name='theme-color']");
+		this.themeColor = this.theme && this.theme.getAttribute("content");
+		const warn = this.warningIcon();
+		const msg = I18N.t("lobby.matchFoundTitle");
+		let n = 0;
+		const tick = () => {
+			const red = n % 2 === 0;
+			if (n % 4 === 0 || n % 4 === 2)
+				document.title = n % 4 === 0 ? msg : this.title;
+			if (this.icon && warn)
+				this.icon.setAttribute("href", red ? warn : this.iconHref);
+			if (this.theme)
+				this.theme.setAttribute("content", red ? "#d4553f" : this.themeColor);
+			n++;
+		};
+		tick();
+		this.timer = setInterval(tick, this.FLASH_MS);
+	},
+
+	stop() {
+		if (this.notif) {
+			this.notif.close();
+			this.notif = null;
+		}
+		if (!this.timer)
+			return;
+		clearInterval(this.timer);
+		this.timer = null;
+		document.title = this.title;
+		if (this.icon)
+			this.icon.setAttribute("href", this.iconHref);
+		if (this.theme)
+			this.theme.setAttribute("content", this.themeColor);
+	},
+};
+MatchAlert.init();
 
 var lobby = new Lobby();
 ui.toggleSettings.forEach(e => e.classList.add('lobby-menu'));
