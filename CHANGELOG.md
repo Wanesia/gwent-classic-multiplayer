@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.2 (2026-11-05)
+
+A small fix to the redraw at the start of a match.
+
+### Fixes
+- **Redraw:** cards you send back now go to the bottom of your deck. Before, you could get the same card straight back, or draw it again from a spy right away.
+- If you have two copies of a card, you can still draw the other copy. Muster can still call a card from the bottom of your deck.
+- **Replays:** you can still watch your older matches. They play back with the old redraw rules.
+
 ## 1.3.1 (2026-10-30)
 
 A small update that makes waiting for an opponent and listening to the music a bit nicer, plus an Eredin fix.
