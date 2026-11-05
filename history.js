@@ -16,6 +16,10 @@ const HISTORY_RESULTS = ["win", "lose", "draw", "left", "walkover", "desync"];
 const HISTORY_MODES = ["ai", "friend", "quick"];
 const HISTORY_ROLES = ["host", "guest"];
 const HISTORY_MSG_TYPES = ["play", "scorch", "decoy", "pass", "leader", "pick", "pickEnd", "row", "first"];
+// Stamped on every recording: a rules change that would alter how older matches
+// play out raises this, and keeps the old behaviour for the recordings before it.
+// 1: redrawn cards go under the deck (before: shuffled in, no "rules" field)
+const REPLAY_RULES = 1;
 
 // The replay being recorded: human choices and per-turn checksums
 const MatchLog = {
@@ -168,7 +172,7 @@ const MatchHistory = {
 			me: side(player_me), op: side(player_op), rounds: [], fav: false,
 		};
 		const replay = {
-			id, v: 1, seed: GameRNG.seed, online: mp.active,
+			id, v: 1, rules: REPLAY_RULES, seed: GameRNG.seed, online: mp.active,
 			localRole: mp.localRole(), aiRole: ai ? mp.roleOf(player_op) : null,
 			decks: {
 				[mp.roleOf(player_me)]: this.deckRecord(player_me.deck_data),
@@ -417,6 +421,8 @@ const HistoryValidate = {
 	replay(r) {
 		if (!r || typeof r !== "object" || !this.id(r.id) || r.v !== 1 || !this.int(r.seed, 0, 4294967295))
 			return null;
+		if (r.rules !== undefined && !this.int(r.rules, 1, 9999))
+			return null;
 		if (!HISTORY_ROLES.includes(r.localRole) || (r.aiRole !== null && !HISTORY_ROLES.includes(r.aiRole)) || typeof r.online !== "boolean")
 			return null;
 		if (!r.decks || typeof r.decks !== "object" || !Array.isArray(r.log) || r.log.length > 5000 || !Array.isArray(r.sums) || r.sums.length > 1000)
@@ -433,7 +439,7 @@ const HistoryValidate = {
 		}
 		if (!r.sums.every(h => typeof h === "string" && /^[0-9a-f]{1,8}$/.test(h)))
 			return null;
-		return { id: r.id, v: 1, seed: r.seed, online: r.online, localRole: r.localRole, aiRole: r.aiRole, decks, log, sums: r.sums.slice() };
+		return { id: r.id, v: 1, rules: r.rules, seed: r.seed, online: r.online, localRole: r.localRole, aiRole: r.aiRole, decks, log, sums: r.sums.slice() };
 	},
 };
 

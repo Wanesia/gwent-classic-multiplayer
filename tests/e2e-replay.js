@@ -4,6 +4,7 @@
 // is then replayed and the state checksum compared after every turn.
 const { chromium } = require('playwright-core');
 const { installBot } = require('./bot');
+const oldRecordings = require('./fixtures/replays-before-rules-1.json');
 const BASE = 'http://localhost:8077/index.html';
 const URL = BASE + '?server=ws://localhost:8765';
 
@@ -89,6 +90,7 @@ async function playVsAI(page, faction, seed) {
 		assert(rec.summary.status === 'done' && ['win', 'lose', 'draw'].includes(rec.summary.result), faction + ': recorded as finished (' + rec.summary.result + ')');
 		assert(rec.summary.mode === 'ai' && rec.replay.aiRole === 'guest' && rec.replay.seed === seed, faction + ': recorded mode, AI role and seed');
 		assert(rec.replay.log.length > 0 && rec.replay.sums.length > 0, faction + ': ' + rec.replay.log.length + ' choices and ' + rec.replay.sums.length + ' checksums recorded');
+		assert(rec.replay.rules === await page.evaluate(() => REPLAY_RULES), faction + ': stamped with the current rules');
 		await replayAndCompare(page, rec, faction + ' #' + seed, g.finalSum);
 	}
 
@@ -115,6 +117,25 @@ async function playVsAI(page, faction, seed) {
 	badSums.sums = badSums.sums.map(() => 'deadbeef');
 	const r2 = await page.evaluate(async rec => { const r = await Replay.run(rec, { speed: 0.02 }); Replay.stop(); return r; }, badSums);
 	assert(r2.result === 'diverged' && r2.turns === 1, 'a checksum mismatch stops the replay at the first turn');
+
+	// Matches recorded before redrawn cards went under the deck (1.3.1, three vs
+	// the computer and both sides of an online one) still play to the end. Each
+	// of them can only do so with the old shuffle: without it they all stop.
+	for (const rec of oldRecordings) {
+		const label = 'old recording ' + rec.replay.seed + ' (' + (rec.replay.online ? 'online, ' + rec.replay.localRole : 'vs AI') + ')';
+		await replayAndCompare(page, rec, label);
+		const newRules = await page.evaluate(async rec => { const r = await Replay.run({ ...rec, rules: 1 }, { speed: 0.02 }); Replay.stop(); return r; }, rec.replay);
+		assert(newRules.result === 'diverged', label + ': needs the old shuffle (' + newRules.result + ' with the current rules)');
+	}
+
+	// The rules survive an export and import, and only valid ones get in
+	const validated = await page.evaluate(({ rec, old }) => ({
+		kept: HistoryValidate.replay(rec).rules,
+		old: HistoryValidate.replay(old).rules,
+		bad: [0, -1, 1.5, '1', null].map(rules => HistoryValidate.replay({ ...rec, rules })),
+	}), { rec: left.replay, old: oldRecordings[0].replay });
+	assert(validated.kept === 1 && validated.old === undefined, 'the import keeps a recording\'s rules, and old ones stay without');
+	assert(validated.bad.every(r => r === null), 'an import with invalid rules is refused');
 
 	// After a replay the next real match is recorded normally
 	assert(await page.evaluate(() => !mp.replay && GameSpeed.factor === 1 && player_me.controller.constructor === Controller), 'replay fully detached');

@@ -17,6 +17,7 @@
 class ReplaySession {
 	constructor(rec, ctl) {
 		this.online = rec.online;
+		this.oldRedraw = !(rec.rules >= 1); // see REPLAY_RULES
 		this.localRole = rec.localRole;
 		this.queues = { host: [], guest: [] };
 		for (const [role, msg] of rec.log)

@@ -976,15 +976,32 @@ class Deck extends CardContainer {
 		}
 	}
 	
-	// Draws a card and sends it to the container before adding a card from the
-	// container back to the deck.
+	// Puts a card under the deck: the last one to be drawn
+	addCardBottom(card){
+		this.cards.push(card);
+		this.addCardElement();
+		this.resize();
+	}
+	
+	// Sends the top card to the container and puts the given card from the
+	// container under the deck. Drawing first keeps it from coming straight back.
 	// NOTE: Used only in mulligan and adds card out of order
 	swap(container, card){
 		if (!card)
 			return;
 		const index = container.cards.indexOf(card);
-		this.addCard(container.removeCard(card));
+		// Matches recorded before redrawn cards went under the deck only replay
+		// the same with the shuffle they were played with
+		if (mp.replay?.oldRedraw) {
+			this.addCard(container.removeCard(card));
+			container.addCard(this.removeCard(0), index);
+			return;
+		}
+		if (this.cards.length === 0)
+			return;
+		const redrawn = container.removeCard(card);
 		const drawnCard = this.removeCard(0);
+		this.addCardBottom(redrawn);
 		container.addCard(drawnCard, index);
 	}
 	

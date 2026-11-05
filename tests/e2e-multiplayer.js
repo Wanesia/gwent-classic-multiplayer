@@ -87,7 +87,11 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	// --- redraw: swap one card on the host, none on the guest ---
 	await waitFor(A, () => Carousel.curr, 'host redraw carousel open');
 	await waitFor(B, () => Carousel.curr, 'guest redraw carousel open');
-	await A.evaluate(() => Carousel.curr.select(new Event('click')));
+	const redrawn = await A.evaluate(() => {
+		const c = Carousel.curr, name = c.container.cards[c.indices[c.index]].name;
+		c.select(new Event('click'));
+		return name;
+	});
 	await A.evaluate(() => Carousel.curr && Carousel.curr.cancel());
 	await B.evaluate(() => Carousel.curr.cancel());
 
@@ -102,6 +106,10 @@ async function waitFor(page, fn, label, timeout = 30000) {
 		return JSON.stringify(aHand) === JSON.stringify(bView);
 	};
 	assert(await handsMatch(), 'host hand identical on both clients after redraw');
+	const decks = p => p.evaluate(() => [player_me, player_op].map(p => p.deck.cards.map(c => c.name)));
+	const [aDecks, bDecks] = [await decks(A), await decks(B)];
+	assert(JSON.stringify(aDecks[0]) === JSON.stringify(bDecks[1]) && JSON.stringify(aDecks[1]) === JSON.stringify(bDecks[0]), 'both decks in the same order on both clients after redraw');
+	assert(aDecks[0].at(-1) === redrawn, 'the redrawn card is under the host deck (' + redrawn + ')');
 
 	// coin toss agrees (host-first on A must equal op-first... i.e. same logical player)
 	const firstA = await A.evaluate(() => mp.roleOf(game.firstPlayer));

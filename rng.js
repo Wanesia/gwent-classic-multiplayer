@@ -43,7 +43,7 @@ function deriveSeed(base, label) {
 // Shared randomness streams, reset at the start of every game. Deck shuffles
 // get one stream per logical player ("host"/"guest" roles; in single-player
 // the local player is "host") so that the order in which the two clients
-// build and redraw their decks cannot interleave the streams. All other
+// build their decks cannot interleave the streams. All other
 // mid-game randomness draws from the "game" stream in lockstep order.
 // The computer opponent's choices draw from their own "ai" stream, so a
 // recorded single-player match replays with the same AI decisions.
