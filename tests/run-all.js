@@ -14,6 +14,7 @@ const SUITES = [
 	'relay-protocol.js',   // server: room create/join/relay
 	'e2e-singleplayer.js', // vs-AI
 	'e2e-deck-filters.js', // deck builder filter tabs for the collection and the deck
+	'e2e-deck-tabs.js',    // the game in several tabs: decks saved in one reach the others, online stays in sync
 	'e2e-muster.js',       // muster: highlight, fly from own slot, one card at a time
 	'e2e-redraw.js',       // redraw: cards sent back go under the deck, can't come straight back
 	'e2e-multiplayer.js',  // full online match, checksums, disconnect

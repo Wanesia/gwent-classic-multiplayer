@@ -21,6 +21,7 @@ python3 -m http.server 8077 --directory .. &        # game on :8077
 node relay-protocol.js                               # tests room creation, joining, and message relay on the server
 node e2e-singleplayer.js                             # vs-AI
 node e2e-deck-filters.js                             # deck builder filter tabs: which cards each tab shows, per panel, reset on faction change
+node e2e-deck-tabs.js                                # the game in several tabs: a deck saved in one reaches the others (also from the back/forward cache), online stays in sync
 node e2e-muster.js                                   # muster: called cards highlighted, fly from their own slot, one at a time
 node e2e-redraw.js                                   # redraw: cards sent back go under the deck, can't come straight back
 node e2e-multiplayer.js                              # full online match, checksums, disconnect

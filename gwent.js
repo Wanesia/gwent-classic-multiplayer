@@ -3264,6 +3264,27 @@ class DeckMaker {
 		document.getElementById("add-file").addEventListener("change", () => this.uploadPlayerDeck(), false);
 		document.getElementById("start-game").addEventListener("click", () => this.startNewGame(), false);
 		document.getElementById("start-game").addEventListener("mouseenter", CLICK_EVENT_SFX, false);
+
+		// Decks saved in another tab (no key: storage cleared), or this tab saves its stale copy back over them
+		window.addEventListener("storage", e => this.reloadSavedDecks(s => e.key === null || e.key === s.key));
+		// Pages restored from the back/forward cache missed those; blocked storage reads as empty
+		window.addEventListener("pageshow", e => {
+			if (e.persisted)
+				this.reloadSavedDecks(s => safeStorage.get(s.key) !== null);
+		});
+	}
+
+	// Reloads the saved decks which() picks and redraws the one on show
+	reloadSavedDecks(which)
+	{
+		const decks = [...Object.keys(factions).map(f => Settings.getFactionSettings(f)), Settings.opponentDeckCustom];
+		const changed = decks.filter(s => which(s) && s.reload());
+		if (changed.includes(Settings.getFactionSettings(this.faction)))
+			this.loadFactionDeck(this.faction);
+		if (changed.includes(Settings.opponentDeckCustom)) {
+			this.opponentData = Settings.opponentDeckCustom.get();
+			this.updatedCustomOpponent();
+		}
 	}
 
 	loadFactionDeck(faction, force = false)
@@ -3947,19 +3968,32 @@ class SavedObject
 		this.key = key;
 		if (typeof defaultValue === "string" || defaultValue instanceof String)
 			defaultValue = JSON.parse(defaultValue);
-		// Corrupt or invalid saved data falls back to the default instead of
-		// breaking the app on every load.
+		this.defaultValue = defaultValue;
+		this.isValid = isValid;
+		this.obj = this.load();
+		this.action = action;
+	}
+	// Corrupt or invalid saved data falls back to the default instead of
+	// breaking the app on every load.
+	load()
+	{
 		const raw = safeStorage.get(this.key);
 		let saved = null;
 		if (raw !== null) {
 			try { saved = JSON.parse(raw); } catch (e) {}
-			if (saved === null || !isValid(saved)) {
+			if (saved === null || !this.isValid(saved)) {
 				saved = null;
 				safeStorage.remove(this.key);
 			}
 		}
-		this.obj = saved !== null ? saved : defaultValue;
-		this.action = action;
+		return saved !== null ? saved : structuredClone(this.defaultValue); // edits to obj must not reach the default
+	}
+	// Re-reads the saved value; returns whether it changed
+	reload()
+	{
+		const before = JSON.stringify(this.obj);
+		this.obj = this.load();
+		return JSON.stringify(this.obj) !== before;
 	}
 	get()
 	{

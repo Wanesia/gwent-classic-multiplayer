@@ -38,6 +38,7 @@ class Lobby {
 		this.peerChatQuick = false; // opponent's chat settings
 		this.peerChatText = false;
 		this.sentChat = null; // our settings as the opponent last heard them
+		this.sentDeck = null; // our deck as the opponent last got it
 		this.issuedSeeds = new Set(); // every seed offered since the last match started
 		this.attempt = 0; // bumped by Back so a still-pending create/join/search is dropped
 		this.searchHintTimer = null;
@@ -394,7 +395,9 @@ class Lobby {
 	// afk: 1 = we answer AFK pass requests
 	sendReady() {
 		this.sentChat = { quick: Settings.quickChat.isEnabled(), text: Settings.textChat.isEnabled() };
-		Net.send({ t: "lobby-ready", deck: JSON.parse(dm.deckToJSON()), chat: 1, afk: 1, chatQuick: this.sentChat.quick, chatText: this.sentChat.text });
+		// Played as sent: another tab can change the deck builder while we wait
+		this.sentDeck = JSON.parse(dm.deckToJSON());
+		Net.send({ t: "lobby-ready", deck: this.sentDeck, chat: 1, afk: 1, chatQuick: this.sentChat.quick, chatText: this.sentChat.text });
 	}
 
 	// Tells a chat-capable opponent about a toggle since our last lobby-ready
@@ -424,7 +427,7 @@ class Lobby {
 	}
 
 	beginMatch(seed) {
-		const localRaw = JSON.parse(dm.deckToJSON());
+		const localRaw = this.sentDeck; // the deck the opponent got
 		const remoteRaw = this.remoteDeckRaw;
 		// A rematch starts straight from the end screen: clear the finished game
 		// and hide the scoreboard before the fresh match spins up.
