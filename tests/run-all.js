@@ -12,6 +12,7 @@ const RELAY_PORT = 8765;
 
 const SUITES = [
 	'relay-protocol.js',   // server: room create/join/relay
+	'player-stats.js',     // server: anonymous player counts saved and reported (own relay on :8766)
 	'e2e-singleplayer.js', // vs-AI
 	'e2e-deck-filters.js', // deck builder filter tabs for the collection and the deck
 	'e2e-deck-tabs.js',    // the game in several tabs: decks saved in one reach the others, online stays in sync

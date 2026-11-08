@@ -1,0 +1,71 @@
+// Player counts: starts its own relay on a spare port with a temporary stats
+// file, sends visits and heartbeats like the game does, stops the relay and
+// checks the daily totals it saved, then runs the report on them.
+const { spawn, execFileSync } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const WebSocket = require('ws');
+
+const PORT = 8766;
+const ROOT = path.join(__dirname, '..');
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gwent-stats-'));
+const FILE = path.join(dir, 'stats.json');
+
+function assert(cond, label) {
+	console.log((cond ? 'PASS' : 'FAIL') + ' ' + label);
+	if (!cond) process.exitCode = 1;
+}
+
+const post = body => fetch(`http://localhost:${PORT}/event`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+(async () => {
+	const relay = spawn('node', [path.join(ROOT, 'server', 'server.js')], { env: { ...process.env, PORT, STATS_FILE: FILE }, stdio: ['ignore', 'pipe', 'inherit'] });
+	await new Promise(res => relay.stdout.on('data', d => { if (String(d).includes('server-start')) res(); }));
+
+	await post({ type: 'visit', day: true, week: true, month: true, first: true });   // brand new player
+	await post({ type: 'visit', day: true, week: false, month: false, first: false }); // back from last week
+	await post({ type: 'visit', day: false, week: false, month: false, first: false }); // second visit today
+	await post({ type: 'visit' });                                                     // storage blocked
+	await post({ type: 'here' });
+	await post({ type: 'sp-game-started' });
+	await post({ type: 'visit', id: 'abc', day: 'yes' });                              // junk fields ignored
+
+	const a = new WebSocket(`ws://localhost:${PORT}`);
+	await new Promise(res => a.on('open', res));
+	a.send(JSON.stringify({ type: 'quickmatch' }));
+	await new Promise(res => a.once('message', res));
+	const b = new WebSocket(`ws://localhost:${PORT}`);
+	await new Promise(res => b.on('open', res));
+	b.send(JSON.stringify({ type: 'quickmatch' }));
+	await new Promise(res => b.once('message', res));
+
+	relay.kill('SIGINT');
+	await new Promise(res => relay.on('exit', res));
+
+	const stats = JSON.parse(fs.readFileSync(FILE, 'utf8'));
+	const day = stats.days[new Date().toISOString().slice(0, 10)];
+	assert(day, 'saved today\'s totals on SIGINT');
+	assert(day.visits === 5, 'every page load counted: ' + day.visits);
+	assert(day.players === 2 && day.weekFirsts === 1 && day.monthFirsts === 1 && day.newPlayers === 1, 'first-of-day/week/month flags added up');
+	assert(day.noStorage === 1, 'visit without storage counted apart');
+	assert(day.events['sp-game-started'] === 1 && day.events['game-started-quickmatch'] === 1, 'games counted by kind');
+	assert(day.peakSockets === 2 && day.peakGames === 1, 'relay peaks sampled');
+	assert(!JSON.stringify(stats).includes('abc') && !/127\.0\.0\.1|::1/.test(JSON.stringify(stats)), 'no identifiers or IPs stored');
+
+	// Restarting keeps the totals and adds to them
+	const relay2 = spawn('node', [path.join(ROOT, 'server', 'server.js')], { env: { ...process.env, PORT, STATS_FILE: FILE }, stdio: ['ignore', 'pipe', 'inherit'] });
+	await new Promise(res => relay2.stdout.on('data', d => { if (String(d).includes('server-start')) res(); }));
+	await post({ type: 'visit', day: true, week: true, month: true, first: true });
+	relay2.kill('SIGINT');
+	await new Promise(res => relay2.on('exit', res));
+	const after = JSON.parse(fs.readFileSync(FILE, 'utf8')).days[new Date().toISOString().slice(0, 10)];
+	assert(after.visits === 6 && after.players === 3, 'totals survive a restart');
+
+	const report = execFileSync('node', [path.join(ROOT, 'scripts', 'player-stats.js')], { env: { ...process.env, STATS_FILE: FILE } }).toString();
+	assert(report.includes('Last 14 days') && report.includes('Weeks') && report.includes('Months'), 'report prints');
+
+	fs.rmSync(dir, { recursive: true, force: true });
+	a.terminate();
+	b.terminate();
+})();

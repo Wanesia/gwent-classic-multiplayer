@@ -2,10 +2,13 @@
 
 // Relay server for gwent-classic online multiplayer.
 // Pairs two clients by a short room code — or automatically via quickmatch —
-// and forwards "msg" frames between them verbatim. Holds no game logic and no
-// persistent state; a room dies as soon as either side leaves or disconnects.
+// and forwards "msg" frames between them verbatim. Holds no game logic; a room
+// dies as soon as either side leaves or disconnects. The only thing kept on
+// disk is anonymous daily totals (see "Player counts" below).
 
+const fs = require("fs");
 const http = require("http");
+const path = require("path");
 const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 8765;
@@ -21,6 +24,7 @@ const MSG_RATE = 25;
 const MSG_BURST = 50;
 const MAX_BUFFER = 1024 * 1024;
 const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "mode-qm", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
+const PRESENCE_EVENTS = new Set(["visit", "here"]); // counted, not logged: one per player every 5 minutes
 const EVENT_MAX_PER_IP = 60;
 const EVENT_MAX_IPS = 5000;
 const EVENT_WINDOW_MS = 60 * 1000;
@@ -73,9 +77,11 @@ const server = http.createServer((req, res) => {
 		req.on("end", () => {
 			if (aborted) return;
 			try {
-				const { type } = JSON.parse(body);
-				if (VALID_EVENTS.has(type))
-					log(type);
+				const event = JSON.parse(body);
+				if (VALID_EVENTS.has(event.type))
+					log(event.type);
+				else if (PRESENCE_EVENTS.has(event.type))
+					countPresence(event);
 			} catch (_) {}
 			res.writeHead(204);
 			res.end();
@@ -99,6 +105,116 @@ const wss = new WebSocketServer({
 function log(event, fields = {}) {
 	const parts = Object.entries(fields).map(([k, v]) => `${k}=${v}`).join("  ");
 	console.log(`[${new Date().toISOString()}] ${event.padEnd(14)} ${parts}`);
+	if (event !== "server-start")
+		countEvent(fields.mode ? `${event}-${fields.mode}` : event);
+}
+
+// Player counts. Clients never send an ID: each browser remembers which UTC
+// day, ISO week and month it last reported (stats.js) and flags a visit as its
+// first of each. Adding the flags up gives players per day, week and month.
+// Heartbeats ("here", one per open game every 5 minutes) give players online
+// at once. Only daily totals are kept, in STATS_FILE; the report is
+// scripts/player-stats.js.
+const STATS_FILE = process.env.STATS_FILE || path.join(__dirname, "stats.json");
+const ONLINE_WINDOW_MS = 5 * 60 * 1000; // must match the client heartbeat
+const STATS_SAVE_MS = 60 * 1000;
+
+const stats = loadStats();
+let statsDirty = false;
+let onlineWindow = Math.floor(Date.now() / ONLINE_WINDOW_MS);
+let onlineCount = 0;
+
+function loadStats() {
+	try {
+		const data = JSON.parse(fs.readFileSync(STATS_FILE, "utf8"));
+		if (data && typeof data.days === "object")
+			return data;
+	} catch (e) {
+		if (e.code === "ENOENT")
+			return { days: {}, now: null };
+	}
+	// Unreadable: keep it for a look by hand rather than overwrite it
+	const aside = `${STATS_FILE}.bad-${Date.now()}`;
+	try { fs.renameSync(STATS_FILE, aside); } catch (_) {}
+	console.error(`stats file unreadable, moved to ${aside}`);
+	return { days: {}, now: null };
+}
+
+function saveStats() {
+	if (!statsDirty)
+		return;
+	const tmp = STATS_FILE + ".tmp";
+	try {
+		fs.writeFileSync(tmp, JSON.stringify(stats));
+		fs.renameSync(tmp, STATS_FILE);
+		statsDirty = false;
+	} catch (e) {
+		console.error("saving stats failed:", e.message);
+	}
+}
+
+function dayStats(time = Date.now()) {
+	const day = new Date(time).toISOString().slice(0, 10);
+	statsDirty = true;
+	return stats.days[day] ||= {
+		visits: 0, // page loads
+		players: 0, // browsers seen for the first time this day
+		weekFirsts: 0, // ... this ISO week; summed over a week = players that week
+		monthFirsts: 0, // ... this month; summed over a month = players that month
+		newPlayers: 0, // browsers with nothing of ours stored yet
+		noStorage: 0, // visits from browsers that can't remember anything (counted in visits only)
+		peakOnline: 0, // most heartbeats in one 5-minute window
+		onlineByHour: new Array(24).fill(0), // the same, per UTC hour
+		peakSockets: 0, // most relay connections at once (online lobby + matches)
+		peakGames: 0, // most online matches at once
+		events: {},
+	};
+}
+
+function countEvent(name) {
+	const events = dayStats().events;
+	events[name] = (events[name] || 0) + 1;
+}
+
+function countPresence(event) {
+	rollOnlineWindow();
+	onlineCount++;
+	if (event.type !== "visit")
+		return;
+	const day = dayStats();
+	day.visits++;
+	if (event.day === undefined)
+		day.noStorage++;
+	if (event.day === true) day.players++;
+	if (event.week === true) day.weekFirsts++;
+	if (event.month === true) day.monthFirsts++;
+	if (event.first === true) day.newPlayers++;
+}
+
+// A window's count is only complete once it has ended, so it's recorded then
+function rollOnlineWindow() {
+	const current = Math.floor(Date.now() / ONLINE_WINDOW_MS);
+	if (current === onlineWindow)
+		return;
+	const start = onlineWindow * ONLINE_WINDOW_MS;
+	const day = dayStats(start);
+	const hour = new Date(start).getUTCHours();
+	day.peakOnline = Math.max(day.peakOnline, onlineCount);
+	day.onlineByHour[hour] = Math.max(day.onlineByHour[hour], onlineCount);
+	// The window right after it ended is empty only if nobody played
+	stats.now = { online: current === onlineWindow + 1 ? onlineCount : 0, at: new Date(start + ONLINE_WINDOW_MS).toISOString() };
+	onlineWindow = current;
+	onlineCount = 0;
+}
+
+function sampleRelay() {
+	const day = dayStats();
+	let games = 0;
+	for (const room of rooms.values())
+		if (room.startedAt)
+			games++;
+	day.peakSockets = Math.max(day.peakSockets, wss.clients.size);
+	day.peakGames = Math.max(day.peakGames, games);
 }
 
 function makeCode() {
@@ -185,6 +301,7 @@ wss.on("connection", (ws, req) => {
 		return;
 	}
 	ipCounts.set(ip, (ipCounts.get(ip) || 0) + 1);
+	sampleRelay();
 	ws.ip = ip;
 	ws.isAlive = true;
 	ws.room = null;
@@ -234,6 +351,7 @@ wss.on("connection", (ws, req) => {
 					send(ws, { type: "joined", code: match.code });
 					send(match.host, { type: "peer-joined" });
 					log("game-started", { code: match.code, mode: "quickmatch" });
+					sampleRelay();
 				} else {
 					const code = makeCode();
 					rooms.set(code, { code: code, host: ws, guest: null, quickmatch: true, startedAt: null, createdAt: Date.now(), messages: 0 });
@@ -259,6 +377,7 @@ wss.on("connection", (ws, req) => {
 				send(ws, { type: "joined", code: code });
 				send(room.host, { type: "peer-joined" });
 				log("game-started", { code });
+				sampleRelay();
 				break;
 			}
 			case "msg": {
@@ -315,5 +434,17 @@ setInterval(() => {
 }, 30000);
 
 setInterval(() => { eventHits = new Map(); }, EVENT_WINDOW_MS);
+
+setInterval(() => {
+	rollOnlineWindow();
+	saveStats();
+}, STATS_SAVE_MS);
+
+// pm2 stops the process with SIGINT
+for (const signal of ["SIGINT", "SIGTERM"])
+	process.on(signal, () => {
+		saveStats();
+		process.exit(0);
+	});
 
 server.listen(PORT, "127.0.0.1", () => log("server-start", { port: PORT }));

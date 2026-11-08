@@ -19,6 +19,7 @@ Start the relay server and serve the game over HTTP, then run the suites:
 node ../server/server.js &                          # relay on :8765
 python3 -m http.server 8077 --directory .. &        # game on :8077
 node relay-protocol.js                               # tests room creation, joining, and message relay on the server
+node player-stats.js                                 # player counts: visits and heartbeats add up, saved on stop, kept on restart, report prints
 node e2e-singleplayer.js                             # vs-AI
 node e2e-deck-filters.js                             # deck builder filter tabs: which cards each tab shows, per panel, reset on faction change
 node e2e-deck-tabs.js                                # the game in several tabs: a deck saved in one reaches the others (also from the back/forward cache), online stays in sync

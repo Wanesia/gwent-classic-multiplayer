@@ -732,6 +732,7 @@
 			<ul>
 				<li>Your settings, decks and language, in local storage.</li>
 				<li>Your match history and replays, in IndexedDB.</li>
+				<li>The last day, week and month you opened the game, so it can be counted once in each (see below).</li>
 			</ul>
 			<p>This stays on your device unless you export it yourself. Clearing this site's data deletes it.</p>
 			<h4>Online play</h4>
@@ -741,6 +742,8 @@
 				<li>Chat messages are passed straight to your opponent and are not saved.</li>
 				<li>The server counts games played (including against the computer) without your IP address or any other identifier.</li>
 			</ul>
+			<h4>Player counts</h4>
+			<p>To know how many people play, the game tells the server when you open it, and whether that's your first visit today, this week and this month. While the game is open, it also tells the server every 5 minutes that someone is playing. No ID is sent with this, and the server doesn't store your IP address or anything else that could tell you apart. It keeps only daily totals.</p>
 			<h4>Music</h4>
 			<p>Music is streamed from YouTube. Nothing is loaded from YouTube until you turn music on. From then on YouTube receives your IP address and may store data in your browser, as described in <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
 			<h4>Hosting</h4>
@@ -831,6 +834,7 @@
 <script type="text/javascript" src="privacy.js"></script>
 <script type="text/javascript" src="history.js"></script>
 <script type="text/javascript" src="replay.js"></script>
+<script type="text/javascript" src="stats.js"></script>
 </body>
 
 </html>

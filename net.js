@@ -144,9 +144,17 @@ var Net = {
 			p.resolve(val);
 	},
 
-	trackEvent(type) {
+	// A copy of the game served locally (development, tests) only reports to
+	// the real server when told to with ?server=, so it stays out of the stats
+	trackingEnabled() {
+		return location.hostname !== "localhost" || this.serverURL() !== this.DEFAULT_URL;
+	},
+
+	trackEvent(type, fields) {
+		if (!this.trackingEnabled())
+			return;
 		const url = this.serverURL().replace(/^wss:/, "https:").replace(/^ws:/, "http:") + "/event";
-		fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type }) })
+		fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, ...fields }), keepalive: true })
 			.catch(() => {});
 	},
 
