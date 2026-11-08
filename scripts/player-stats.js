@@ -56,7 +56,7 @@ const days = Object.keys(stats.days).sort();
 
 console.log("=== Gwent players (per browser, UTC) ===");
 if (stats.now)
-	console.log(`Online now: ${stats.now.online} (5 minutes to ${stats.now.at.slice(11, 16)})`);
+	console.log(`Online now: ${stats.now.online} (at ${stats.now.at.slice(11, 16)})`);
 console.log(`Counting since ${days[0] || "-"}\n`);
 
 if (DAYS) {

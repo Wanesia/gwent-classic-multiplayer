@@ -24,7 +24,7 @@ const MSG_RATE = 25;
 const MSG_BURST = 50;
 const MAX_BUFFER = 1024 * 1024;
 const VALID_EVENTS = new Set(["mode-sp", "mode-mp", "mode-qm", "sp-game-started", "sp-game-finished", "mp-game-completed"]);
-const PRESENCE_EVENTS = new Set(["visit", "here"]); // counted, not logged: one per player every 5 minutes
+const PRESENCE_EVENTS = new Set(["visit", "here", "bye"]); // counted, not logged
 const EVENT_MAX_PER_IP = 60;
 const EVENT_MAX_IPS = 5000;
 const EVENT_WINDOW_MS = 60 * 1000;
@@ -55,41 +55,48 @@ const server = http.createServer((req, res) => {
 		res.end();
 		return;
 	}
-	if (req.method === "POST" && req.url === "/event") {
-		const ip = clientIp(req);
-		const hits = eventHits.get(ip) || 0;
-		if (hits >= EVENT_MAX_PER_IP || (hits === 0 && eventHits.size >= EVENT_MAX_IPS)) {
-			res.writeHead(429);
-			res.end();
-			return;
-		}
-		eventHits.set(ip, hits + 1);
-		let body = "";
-		let aborted = false;
-		req.on("data", chunk => {
-			if (aborted) return;
-			body += chunk;
-			if (body.length > 256) {
-				aborted = true;
-				req.destroy();
-			}
-		});
-		req.on("end", () => {
-			if (aborted) return;
-			try {
-				const event = JSON.parse(body);
-				if (VALID_EVENTS.has(event.type))
-					log(event.type);
-				else if (PRESENCE_EVENTS.has(event.type))
-					countPresence(event);
-			} catch (_) {}
-			res.writeHead(204);
-			res.end();
-		});
+	const isEvent = req.method === "POST" && req.url === "/event";
+	const isPresence = req.method === "GET" && req.url === "/presence";
+	if (!isEvent && !isPresence) {
+		res.writeHead(404);
+		res.end();
 		return;
 	}
-	res.writeHead(404);
-	res.end();
+	const ip = clientIp(req);
+	const hits = eventHits.get(ip) || 0;
+	if (hits >= EVENT_MAX_PER_IP || (hits === 0 && eventHits.size >= EVENT_MAX_IPS)) {
+		res.writeHead(429);
+		res.end();
+		return;
+	}
+	eventHits.set(ip, hits + 1);
+	if (isPresence) {
+		res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+		res.end(JSON.stringify(presence()));
+		return;
+	}
+	let body = "";
+	let aborted = false;
+	req.on("data", chunk => {
+		if (aborted) return;
+		body += chunk;
+		if (body.length > 256) {
+			aborted = true;
+			req.destroy();
+		}
+	});
+	req.on("end", () => {
+		if (aborted) return;
+		try {
+			const event = JSON.parse(body);
+			if (VALID_EVENTS.has(event.type))
+				log(event.type);
+			else if (PRESENCE_EVENTS.has(event.type))
+				countPresence(event);
+		} catch (_) {}
+		res.writeHead(204);
+		res.end();
+	});
 });
 
 const wss = new WebSocketServer({
@@ -113,16 +120,15 @@ function log(event, fields = {}) {
 // day, ISO week and month it last reported (stats.js) and flags a visit as its
 // first of each. Adding the flags up gives players per day, week and month.
 // Heartbeats ("here", one per open game every 5 minutes) give players online
-// at once. Only daily totals are kept, in STATS_FILE; the report is
+// at once; a page closing or reloading takes its heartbeat back ("bye"). Only daily totals are kept, in STATS_FILE; the report is
 // scripts/player-stats.js.
 const STATS_FILE = process.env.STATS_FILE || path.join(__dirname, "stats.json");
 const ONLINE_WINDOW_MS = 5 * 60 * 1000; // must match the client heartbeat
+const FORGET_TOLERANCE_MS = 10 * 1000;
 const STATS_SAVE_MS = 60 * 1000;
 
 const stats = loadStats();
 let statsDirty = false;
-let onlineWindow = Math.floor(Date.now() / ONLINE_WINDOW_MS);
-let onlineCount = 0;
 
 function loadStats() {
 	try {
@@ -163,7 +169,7 @@ function dayStats(time = Date.now()) {
 		monthFirsts: 0, // ... this month; summed over a month = players that month
 		newPlayers: 0, // browsers with nothing of ours stored yet
 		noStorage: 0, // visits from browsers that can't remember anything (counted in visits only)
-		peakOnline: 0, // most heartbeats in one 5-minute window
+		peakOnline: 0, // most players online at once
 		onlineByHour: new Array(24).fill(0), // the same, per UTC hour
 		peakSockets: 0, // most relay connections at once (online lobby + matches)
 		peakGames: 0, // most online matches at once
@@ -177,8 +183,10 @@ function countEvent(name) {
 }
 
 function countPresence(event) {
-	rollOnlineWindow();
-	onlineCount++;
+	if (event.type === "bye")
+		return forgetHeartbeat(event.ago);
+	noteHeartbeat();
+	samplePresence();
 	if (event.type !== "visit")
 		return;
 	const day = dayStats();
@@ -191,20 +199,64 @@ function countPresence(event) {
 	if (event.first === true) day.newPlayers++;
 }
 
-// A window's count is only complete once it has ended, so it's recorded then
-function rollOnlineWindow() {
-	const current = Math.floor(Date.now() / ONLINE_WINDOW_MS);
-	if (current === onlineWindow)
+function samplePresence() {
+	const online = presence().online;
+	const day = dayStats();
+	const hour = new Date().getUTCHours();
+	day.peakOnline = Math.max(day.peakOnline, online);
+	day.onlineByHour[hour] = Math.max(day.onlineByHour[hour], online);
+	stats.now = { online: online, at: new Date().toISOString() };
+}
+
+// Every open game sends a heartbeat every 5 minutes, so the heartbeats of the
+// last 5 minutes count the games open now.
+const MAX_HEARTBEATS = 20000;
+const heartbeats = []; // times, oldest first
+
+function noteHeartbeat() {
+	pruneHeartbeats();
+	if (heartbeats.length < MAX_HEARTBEATS)
+		heartbeats.push(Date.now());
+}
+
+// A closing page says how long ago its last heartbeat was; without an ID, the
+// heartbeat closest to that time is taken as its own.
+function forgetHeartbeat(ago) {
+	if (typeof ago !== "number" || !(ago >= 0) || ago > ONLINE_WINDOW_MS)
 		return;
-	const start = onlineWindow * ONLINE_WINDOW_MS;
-	const day = dayStats(start);
-	const hour = new Date(start).getUTCHours();
-	day.peakOnline = Math.max(day.peakOnline, onlineCount);
-	day.onlineByHour[hour] = Math.max(day.onlineByHour[hour], onlineCount);
-	// The window right after it ended is empty only if nobody played
-	stats.now = { online: current === onlineWindow + 1 ? onlineCount : 0, at: new Date(start + ONLINE_WINDOW_MS).toISOString() };
-	onlineWindow = current;
-	onlineCount = 0;
+	pruneHeartbeats();
+	const target = Date.now() - ago;
+	let best = -1;
+	for (let i = 0; i < heartbeats.length; i++) {
+		const off = Math.abs(heartbeats[i] - target);
+		if (off <= FORGET_TOLERANCE_MS && (best < 0 || off < Math.abs(heartbeats[best] - target)))
+			best = i;
+	}
+	if (best >= 0)
+		heartbeats.splice(best, 1);
+}
+
+function pruneHeartbeats() {
+	const cutoff = Date.now() - ONLINE_WINDOW_MS;
+	let old = 0;
+	while (old < heartbeats.length && heartbeats[old] < cutoff)
+		old++;
+	heartbeats.splice(0, old);
+}
+
+function presence() {
+	pruneHeartbeats();
+	let games = 0, waiting = 0;
+	for (const room of rooms.values()) {
+		if (room.startedAt)
+			games++;
+		else if (room.quickmatch && room.host.readyState === room.host.OPEN)
+			waiting++;
+	}
+	return {
+		online: Math.max(heartbeats.length, games * 2 + waiting), // relay counts are live, heartbeats lag
+		waiting: waiting > 0,
+	};
 }
 
 function sampleRelay() {
@@ -357,7 +409,6 @@ wss.on("connection", (ws, req) => {
 					rooms.set(code, { code: code, host: ws, guest: null, quickmatch: true, startedAt: null, createdAt: Date.now(), messages: 0 });
 					ws.room = code;
 					send(ws, { type: "created", code: code });
-					send(ws, { type: "qm-status", online: wss.clients.size });
 					log("qm-waiting", { code });
 				}
 				break;
@@ -428,15 +479,12 @@ setInterval(() => {
 		ws.isAlive = false;
 		ws.ping();
 	}
-	for (const room of rooms.values())
-		if (room.quickmatch && !room.guest)
-			send(room.host, { type: "qm-status", online: wss.clients.size });
 }, 30000);
 
 setInterval(() => { eventHits = new Map(); }, EVENT_WINDOW_MS);
 
 setInterval(() => {
-	rollOnlineWindow();
+	samplePresence();
 	saveStats();
 }, STATS_SAVE_MS);
 
