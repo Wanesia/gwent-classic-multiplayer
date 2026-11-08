@@ -1,5 +1,5 @@
 // End-to-end quickmatch test: pages find each other via the Find Opponent
-// button. Covers pairing into the ready-up flow, the online count and
+// button. Covers pairing into the ready-up flow, the
 // "no one's around" fallback on the search screen, cancelling a search,
 // the match-found alerts, and that a quickmatch pairing starts an actual match.
 const { chromium } = require('playwright-core');
@@ -71,8 +71,6 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	await A.click('#lobby-quick-button');
 	await waitFor(A, () => document.getElementById('search-status').textContent.startsWith('Searching'), 'A shows searching status');
 	assert(await A.evaluate(() => Net.role === 'host' && Net.code !== null), 'A parked as waiting host');
-	await waitFor(A, () => document.getElementById('search-online').textContent.includes('online'), 'A shows online count');
-	assert(await A.evaluate(() => document.getElementById('search-online').textContent === 'No other players online right now'), 'A alone: count says no other players');
 	await waitFor(A, () => document.getElementById('search-hint').textContent.startsWith("No one's around"), 'A fallback hint after waiting');
 
 	// Match-found alerts

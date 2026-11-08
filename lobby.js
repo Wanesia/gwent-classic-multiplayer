@@ -19,7 +19,6 @@ class Lobby {
 		this.createStatus = document.getElementById("create-status");
 		this.searchStatus = document.getElementById("search-status");
 		this.searchHint = document.getElementById("search-hint");
-		this.searchOnline = document.getElementById("search-online");
 		this.joinError = document.getElementById("join-error");
 		this.joinInput = document.getElementById("join-code");
 		this.joinSubtitle = document.getElementById("join-subtitle");
@@ -132,10 +131,8 @@ class Lobby {
 		Net.trackEvent("mode-qm");
 		this.showView("lobby-search");
 		this.searchHint.textContent = I18N.t("lobby.searchHintDefault");
-		this.searchOnline.textContent = "";
 		this.searchStatus.textContent = I18N.t("lobby.connecting");
 		this.searchStatus.classList.remove("is-waiting");
-		Net.onQmStatus = n => this.showOnlineCount(n);
 		const attempt = ++this.attempt;
 		try {
 			await Net.connect();
@@ -162,16 +159,9 @@ class Lobby {
 		}
 	}
 
-	showOnlineCount(online) {
-		const others = Math.max(0, online - 1);
-		this.searchOnline.textContent = others === 0 ? I18N.t("lobby.onlineNone") :
-			others === 1 ? I18N.t("lobby.onlineOne") : I18N.t("lobby.onlineMany", {n: others});
-	}
-
 	stopSearchExtras() {
 		clearTimeout(this.searchHintTimer);
 		this.searchHintTimer = null;
-		Net.onQmStatus = null;
 	}
 
 	async createGame() {

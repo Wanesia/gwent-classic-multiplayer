@@ -522,6 +522,13 @@
 
 <section id="lobby">
 	<h1 id="lobby-title">Gwent Classic</h1>
+	<div id="menu-presence" class="hide">
+		<span class="presence-online"><span class="presence-dot"></span><span class="presence-count"></span></span>
+		<button type="button" class="presence-waiting hide">
+			<span class="presence-waiting-text"><span aria-hidden="true">&#9876;&#xFE0E;</span> <span data-i18n="lobby.presenceWaiting">Someone is looking for an opponent</span></span>
+			<span class="presence-waiting-cta"><span data-i18n="lobby.playNow">Play Now</span><span class="presence-arrow" aria-hidden="true">&#8250;</span></span>
+		</button>
+	</div>
 	<div id="lobby-mode" class="lobby-view lobby-split">
 		<div class="split-title">Gwent Classic</div>
 		<a id="changelog-version" class="hide" title="Patch notes"></a>
@@ -554,7 +561,8 @@
 			<button id="lobby-quick-button" class="mp-option">
 				<span class="mp-option-tag" data-i18n="lobby.quickTag">Quick Match</span>
 				<span class="mp-option-heading" data-i18n="lobby.quickHeading">Find Opponent</span>
-				<span class="mp-option-desc" data-i18n="lobby.quickDesc">vs Random Player</span>
+				<span class="mp-option-desc quick-desc" data-i18n="lobby.quickDesc">vs Random Player</span>
+				<span class="mp-option-desc quick-waiting hide"><span class="presence-dot"></span><span data-i18n="lobby.quickWaiting">Someone is waiting: instant match</span></span>
 			</button>
 			<div class="mp-options-divider"></div>
 			<button id="lobby-create-button" class="mp-option">
@@ -592,7 +600,6 @@
 		<div class="mp-subtitle" data-i18n="lobby.quickTag">Quick Match</div>
 		<p id="search-hint" class="lobby-hint" data-i18n="lobby.searchHintDefault">You'll be matched with the next player who searches.</p>
 		<p id="search-status" class="lobby-status"></p>
-		<p id="search-online" class="lobby-hint"></p>
 		<div class="lobby-alerts">
 			<label class="lobby-alert"><input type="checkbox" class="lobby-alert-box" /><span data-i18n="lobby.alertSound">Play a sound when a match is found</span></label>
 			<div class="lobby-alert-volume-row">
@@ -743,7 +750,7 @@
 				<li>The server counts games played (including against the computer) without your IP address or any other identifier.</li>
 			</ul>
 			<h4>Player counts</h4>
-			<p>To know how many people play, the game tells the server when you open it, and whether that's your first visit today, this week and this month. While the game is open, it also tells the server every 5 minutes that someone is playing. No ID is sent with this, and the server doesn't store your IP address or anything else that could tell you apart. It keeps only daily totals.</p>
+			<p>To know how many people play, the game tells the server when you open and close it, and whether that's your first visit today, this week and this month. While the game is open, it also tells the server every 5 minutes that someone is playing. The game shows players how many people are online and whether someone is waiting for a Quick Match. No ID is sent with this, and the server doesn't store your IP address or anything else that could tell you apart. It keeps only daily totals.</p>
 			<h4>Music</h4>
 			<p>Music is streamed from YouTube. Nothing is loaded from YouTube until you turn music on. From then on YouTube receives your IP address and may store data in your browser, as described in <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</p>
 			<h4>Hosting</h4>
@@ -835,6 +842,7 @@
 <script type="text/javascript" src="history.js"></script>
 <script type="text/javascript" src="replay.js"></script>
 <script type="text/javascript" src="stats.js"></script>
+<script type="text/javascript" src="presence.js"></script>
 </body>
 
 </html>

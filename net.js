@@ -16,7 +16,6 @@ var Net = {
 	onMessage: null, // cb(data) - game/lobby payloads from the peer
 	onPeerJoined: null, // cb() - a guest joined our room
 	onPeerLeft: null, // cb(reason) - "peer": the peer left or the room was destroyed; "self": our relay connection was lost
-	onQmStatus: null, // cb(online) - server player count while waiting in quickmatch
 
 	serverURL() {
 		const param = new URLSearchParams(window.location.search).get("server");
@@ -120,10 +119,6 @@ var Net = {
 				if (this.code && this.onPeerJoined)
 					this.onPeerJoined();
 				break;
-			case "qm-status":
-				if (this.onQmStatus)
-					this.onQmStatus(msg.online);
-				break;
 			case "peer-left":
 				this.code = null;
 				this.role = null;
@@ -150,12 +145,27 @@ var Net = {
 		return location.hostname !== "localhost" || this.serverURL() !== this.DEFAULT_URL;
 	},
 
+	httpURL(path) {
+		return this.serverURL().replace(/^wss:/, "https:").replace(/^ws:/, "http:") + path;
+	},
+
 	trackEvent(type, fields) {
 		if (!this.trackingEnabled())
-			return;
-		const url = this.serverURL().replace(/^wss:/, "https:").replace(/^ws:/, "http:") + "/event";
-		fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, ...fields }), keepalive: true })
+			return Promise.resolve();
+		return fetch(this.httpURL("/event"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, ...fields }), keepalive: true })
 			.catch(() => {});
+	},
+
+	// Who is around: {online, waiting}, or null
+	async presence() {
+		if (!this.trackingEnabled())
+			return null;
+		try {
+			const res = await fetch(this.httpURL("/presence"), { cache: "no-store" });
+			return res.ok ? await res.json() : null;
+		} catch (e) {
+			return null;
+		}
 	},
 
 	// Losing the relay connection mid-room is equivalent to the peer leaving:
