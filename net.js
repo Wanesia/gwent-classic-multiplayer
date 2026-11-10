@@ -126,7 +126,7 @@ var Net = {
 					this.onPeerLeft("peer");
 				break;
 			case "maintenance":
-				Maintenance.set(msg.in);
+				Maintenance.set(msg.in, msg.message);
 				break;
 		}
 	},
@@ -159,7 +159,7 @@ var Net = {
 			.catch(() => {});
 	},
 
-	// Who is around: {online, waiting, maintenanceIn?}, or null
+	// Who is around: {online, waiting, maintenanceIn?, maintenanceMessage?}, or null
 	async presence() {
 		if (!this.trackingEnabled())
 			return null;

@@ -27,8 +27,9 @@ online:
 
 MIN ?= 10
 maintenance:
-	@node -e 'require("fs").writeFileSync("server/maintenance.json", JSON.stringify({ at: Date.now() + $(MIN) * 60000 }) + "\n")'
+	@node -e 'require("fs").writeFileSync("server/maintenance.json", JSON.stringify({ at: Date.now() + $(MIN) * 60000, ...(process.env.MSG ? { message: process.env.MSG } : {}) }) + "\n")'
 	@echo "Players told: restart in $(MIN) min (at $$(date -d '+$(MIN) min' +%H:%M)). Cancel with: make maintenance-off"
+	@node -e 'if (process.env.MSG) console.log("Message: " + JSON.stringify(process.env.MSG))'
 
 maintenance-off:
 	@rm -f server/maintenance.json

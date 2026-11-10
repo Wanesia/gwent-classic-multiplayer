@@ -2301,8 +2301,18 @@ main { background-image: url('img/boardtest8.png'); }
 	text-shadow: 0 1px 3px rgba(0,0,0,0.9);
 	pointer-events: none;
 }
-#maintenance.hide {
+#maintenance.hide, #maintenance .hide {
 	display: none;
+}
+#maintenance > span {
+	display: block;
+}
+.maintenance-message {
+	margin-top: max(2px, 0.2vw);
+	font-size: 0.9em;
+	color: #f0e2c0;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
 }
 
 /* Online count, under the language picker where the menu art is empty */

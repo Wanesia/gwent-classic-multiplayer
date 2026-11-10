@@ -1,7 +1,8 @@
 // Restart notice (`make maintenance`): starts its own relay on a spare port
 // with a temporary notice file, writes and removes the file like the Makefile
 // does, and checks what players see: the relay frame for everyone connected,
-// /presence for the lobby, the countdown at the top of the screen, cancelling,
+// /presence for the lobby, the countdown at the top of the screen, a message
+// of our own under it (changed while the server runs), cancelling,
 // "restarting" once due, and the file gone (or ignored) after the restart.
 // Off the lobby (deck builder vs computer) the banner asks every 30 seconds,
 // so this takes about a minute.
@@ -56,11 +57,22 @@ function startRelay() {
 }
 
 const stopRelay = relay => new Promise(res => { relay.on('exit', res); relay.kill('SIGINT'); });
-const announce = ms => fs.writeFileSync(FILE, JSON.stringify({ at: Date.now() + ms }) + '\n');
+// Like `make maintenance MIN=… MSG=…`; returns the time of the restart
+function announce(ms, message) {
+	const at = Date.now() + ms;
+	fs.writeFileSync(FILE, JSON.stringify(message ? { at, message } : { at }) + '\n');
+	return at;
+}
 const presence = () => fetch(`http://localhost:${PORT}/presence`).then(r => r.json());
+// The countdown line, or null while the banner is hidden
 const banner = page => page.evaluate(() => {
 	const el = document.getElementById('maintenance');
-	return el.classList.contains('hide') ? null : el.textContent;
+	return el.classList.contains('hide') ? null : el.querySelector('.maintenance-countdown').textContent;
+});
+// The line of our own under it, or null when there is none
+const message = page => page.evaluate(() => {
+	const el = document.querySelector('#maintenance .maintenance-message');
+	return el.offsetParent === null ? null : el.textContent;
 });
 
 // Connects and keeps every message, so none is missed between awaits
@@ -112,7 +124,7 @@ let relay;
 	await builder.waitForFunction(() => Presence.view === null);
 
 	// ---------- announced ----------
-	announce(10 * 60 * 1000);
+	const at = announce(10 * 60 * 1000);
 	const frame = await idle.next('maintenance');
 	assert(frame.in > 9.5 * 60 * 1000 && frame.in <= 10 * 60 * 1000, `connected players are told within seconds (${frame.in} ms left)`);
 	const p = await presence();
@@ -123,6 +135,7 @@ let relay;
 	await waitFor(host, () => !document.getElementById('maintenance').classList.contains('hide'), 'host in a room sees the banner');
 	await waitFor(guest, () => !document.getElementById('maintenance').classList.contains('hide'), 'guest in a room sees the banner');
 	assert(await banner(host) === 'Server restart in 10 min. Online matches will be cut off.', 'countdown text: ' + await banner(host));
+	assert(await message(host) === null && !('message' in frame), 'no MSG: no line of our own');
 	assert(await host.evaluate(() => getComputedStyle(document.getElementById('maintenance')).pointerEvents === 'none'), 'clicks go through the banner');
 	await waitFor(builder, () => !document.getElementById('maintenance').classList.contains('hide'), 'deck builder vs computer sees the banner without reloading', 35000);
 	assert(await builder.evaluate(() => !Net.connected), '... without connecting to the relay');
@@ -144,6 +157,22 @@ let relay;
 	await waitFor(de, () => !document.getElementById('maintenance').classList.contains('hide'), 'German player sees the banner');
 	assert(await banner(de) === 'Serverneustart in 10 Min. Online-Partien werden abgebrochen.', 'in their language: ' + await banner(de));
 
+	// ---------- a message of our own, changed while the server runs ----------
+	announce(at - Date.now(), 'Card balance update, back in 5 minutes');
+	assert((await idle.next('maintenance')).message === 'Card balance update, back in 5 minutes', 'the message reaches connected players');
+	await waitFor(host, () => document.querySelector('#maintenance .maintenance-message').textContent === 'Card balance update, back in 5 minutes', 'player in a room sees the message');
+	assert(await banner(host) === 'Server restart in 10 min. Online matches will be cut off.', '... under the countdown, which stays translated');
+	await de.evaluate(() => Presence.refresh());
+	assert(await message(de) === 'Card balance update, back in 5 minutes' && (await banner(de)).startsWith('Serverneustart'), 'on the menu too, as written, under the German countdown');
+	announce(at - Date.now(), '<b>Back at 20:00</b>');
+	await idle.next('maintenance');
+	await waitFor(host, () => document.querySelector('#maintenance .maintenance-message').textContent === '<b>Back at 20:00</b>', 'an edited message replaces the old one');
+	assert(await host.evaluate(() => !document.querySelector('#maintenance b')), '... shown as text, never as markup');
+	if (SHOTS) await host.screenshot({ path: path.join(SHOTS, 'message.png') });
+	announce(at - Date.now());
+	await idle.next('maintenance');
+	await waitFor(host, () => document.querySelector('#maintenance .maintenance-message').offsetParent === null, 'message removed: its line goes, the countdown stays');
+
 	// ---------- cancelled ----------
 	fs.rmSync(FILE);
 	assert((await idle.next('maintenance')).in === null, 'cancelling tells connected players');
@@ -156,7 +185,7 @@ let relay;
 	// ---------- due ----------
 	announce(1500);
 	await idle.next('maintenance');
-	await waitFor(host, () => document.getElementById('maintenance').textContent.startsWith('The server is restarting'), 'once due: "restarting"', 8000);
+	await waitFor(host, () => document.querySelector('#maintenance .maintenance-countdown').textContent.startsWith('The server is restarting'), 'once due: "restarting"', 8000);
 
 	// In a match vs the computer: the banner over the board
 	const sp = await (await browser.newContext()).newPage();

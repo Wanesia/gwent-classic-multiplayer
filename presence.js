@@ -47,7 +47,7 @@ var Presence = {
 	async refresh() {
 		this.counts = await Net.presence();
 		if (this.counts)
-			Maintenance.set(this.counts.maintenanceIn);
+			Maintenance.set(this.counts.maintenanceIn, this.counts.maintenanceMessage);
 		this.render();
 	},
 

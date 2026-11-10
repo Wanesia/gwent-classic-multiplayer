@@ -257,48 +257,70 @@ function presence() {
 		online: Math.max(heartbeats.length, games * 2 + waiting), // relay counts are live, heartbeats lag
 		waiting: waiting > 0,
 	};
-	if (maintenanceAt !== null)
+	if (maintenance) {
 		counts.maintenanceIn = maintenanceIn();
+		if (maintenance.message)
+			counts.maintenanceMessage = maintenance.message;
+	}
 	return counts;
 }
 
-// Restart notice. `make maintenance MIN=10` writes MAINTENANCE_FILE with the
-// time of the restart ({"at": ms since epoch}); players are told how long is
-// left: the lobby through /presence, everyone connected through a
-// "maintenance" frame (old clients ignore both). Stopping the server removes
-// the file, so the restart it announced doesn't announce itself again; a time
-// from before this process started is a leftover (a crash skips the removal).
+// Restart notice. `make maintenance MIN=10 MSG="..."` writes MAINTENANCE_FILE
+// with the time of the restart and an optional message, shown as written
+// under the countdown ({"at": ms since epoch, "message": "..."}). Both can be
+// edited while the server runs. Players are told how long is left: the lobby
+// through /presence, everyone connected through a "maintenance" frame (old
+// clients ignore both). Stopping the server removes the file, so the restart
+// it announced doesn't announce itself again; a time from before this process
+// started is a leftover (a crash skips the removal).
 const MAINTENANCE_FILE = process.env.MAINTENANCE_FILE || path.join(__dirname, "maintenance.json");
 const MAINTENANCE_CHECK_MS = 5000;
+const MAINTENANCE_MESSAGE_MAX = 200;
 const processStartedAt = Date.now();
-let maintenanceAt = null;
+let maintenance = null; // {at, message}, null when no restart is planned
 
 function readMaintenance() {
+	let data;
 	try {
-		const at = JSON.parse(fs.readFileSync(MAINTENANCE_FILE, "utf8")).at;
-		return Number.isFinite(at) && at > processStartedAt ? at : null;
+		data = JSON.parse(fs.readFileSync(MAINTENANCE_FILE, "utf8"));
 	} catch (e) {
 		return null; // no file: no restart planned
 	}
+	if (!data || !Number.isFinite(data.at) || data.at <= processStartedAt)
+		return null;
+	const message = typeof data.message === "string" ? data.message.trim().slice(0, MAINTENANCE_MESSAGE_MAX) : "";
+	return { at: data.at, message };
 }
 
 // Milliseconds until the restart; 0 once it is due. Relative, so a player's
 // wrong clock doesn't matter.
 function maintenanceIn() {
-	return Math.max(0, maintenanceAt - Date.now());
+	return Math.max(0, maintenance.at - Date.now());
+}
+
+function maintenanceFrame() {
+	if (!maintenance)
+		return { type: "maintenance", in: null };
+	const frame = { type: "maintenance", in: maintenanceIn() };
+	if (maintenance.message)
+		frame.message = maintenance.message;
+	return frame;
 }
 
 function checkMaintenance() {
-	const at = readMaintenance();
-	if (at === maintenanceAt)
+	const next = readMaintenance();
+	if (JSON.stringify(next) === JSON.stringify(maintenance))
 		return;
-	maintenanceAt = at;
-	if (at === null)
+	maintenance = next;
+	if (!next)
 		log("maintenance", { cancelled: true });
+	else if (next.message)
+		log("maintenance", { at: new Date(next.at).toISOString(), clients: wss.clients.size, message: JSON.stringify(next.message) });
 	else
-		log("maintenance", { at: new Date(at).toISOString(), clients: wss.clients.size });
+		log("maintenance", { at: new Date(next.at).toISOString(), clients: wss.clients.size });
+	const frame = maintenanceFrame();
 	for (const ws of wss.clients)
-		send(ws, { type: "maintenance", in: at === null ? null : maintenanceIn() });
+		send(ws, frame);
 }
 
 function sampleRelay() {
@@ -402,8 +424,8 @@ wss.on("connection", (ws, req) => {
 	ws.tokens = MSG_BURST;
 	ws.lastRefill = Date.now();
 	ws.on("pong", () => ws.isAlive = true);
-	if (maintenanceAt !== null)
-		send(ws, { type: "maintenance", in: maintenanceIn() });
+	if (maintenance)
+		send(ws, maintenanceFrame());
 	// Oversized or invalid-UTF-8 frames surface as 'error'; unhandled, it
 	// would crash the whole process.
 	ws.on("error", () => ws.terminate());
