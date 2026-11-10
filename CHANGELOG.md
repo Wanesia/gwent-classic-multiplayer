@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.4.0 (2026-11-10)
+
+See how many players are around before you look for a match, and get a warning before the server restarts. Also a fix for decks when the game is open in more than one tab.
+
+### Online play
+- **Players online:** the menu screens show how many people have the game open. It's hidden when you're the only one.
+- **Someone is waiting:** when another player is searching in Quick Match, the main menu and the Vs Player screen say so. Click **Play now** to be paired with them right away.
+- **Restart warnings:** before the server restarts, a countdown appears at the top of every screen, so you don't start an online match that would be cut off. If you're in the middle of an online match when the server restarts, that match will end. Matches against the computer don't need the server at all, so you can keep playing them during a restart.
+- The "other players online" line on the Quick Match search screen is gone. The count at the top right replaces it.
+
+### Privacy
+- **Player counts:** the game now tells the server when you open and close it, and every 5 minutes while it's open. That's how the game counts players per day, week and month, and how many people are online right now. No ID is sent, and nothing that could tell you apart is stored. *Privacy* on the main menu has the details.
+
+### Fixes
+- **Deck builder:** with the game open in two tabs, a deck you edited could go back to the old cards. The other tab still had the old deck, played it, and saved it back over your changes. Open tabs now stay in sync: a deck saved in one tab shows up in the others.
+
 ## 1.3.2 (2026-11-05)
 
 A small fix to the redraw at the start of a match.
