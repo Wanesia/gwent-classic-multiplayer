@@ -526,7 +526,7 @@
 		<span class="presence-online"><span class="presence-dot"></span><span class="presence-count"></span></span>
 		<button type="button" class="presence-waiting hide">
 			<span class="presence-waiting-text"><span aria-hidden="true">&#9876;&#xFE0E;</span> <span data-i18n="lobby.presenceWaiting">Someone is looking for an opponent</span></span>
-			<span class="presence-waiting-cta"><span data-i18n="lobby.playNow">Play Now</span><span class="presence-arrow" aria-hidden="true">&#8250;</span></span>
+			<span class="presence-waiting-cta"><span class="presence-cta-label" data-i18n="lobby.playNow">Play Now</span><svg class="presence-arrow" viewBox="0 0 8 12" aria-hidden="true"><path d="M2 1.5 6.5 6 2 10.5" /></svg></span>
 		</button>
 	</div>
 	<div id="lobby-mode" class="lobby-view lobby-split">
@@ -561,8 +561,7 @@
 			<button id="lobby-quick-button" class="mp-option">
 				<span class="mp-option-tag" data-i18n="lobby.quickTag">Quick Match</span>
 				<span class="mp-option-heading" data-i18n="lobby.quickHeading">Find Opponent</span>
-				<span class="mp-option-desc quick-desc" data-i18n="lobby.quickDesc">vs Random Player</span>
-				<span class="mp-option-desc quick-waiting hide"><span class="presence-dot"></span><span data-i18n="lobby.quickWaiting">Someone is waiting: instant match</span></span>
+				<span class="mp-option-desc" data-i18n="lobby.quickDesc">vs Random Player</span>
 			</button>
 			<div class="mp-options-divider"></div>
 			<button id="lobby-create-button" class="mp-option">

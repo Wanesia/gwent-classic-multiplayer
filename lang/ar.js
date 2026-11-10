@@ -32,7 +32,6 @@ I18N.register("ar", {
 		searchNoOne: "لا يوجد أحد الآن. تابع الانتظار، أو ادعُ صديقًا برمز، أو العب ضد الحاسوب.",
 		presenceOnline: "متصل: {n}",
 		presenceWaiting: "هناك من يبحث عن خصم",
-		quickWaiting: "هناك من ينتظر: مباراة فورية",
 		alertSound: "تشغيل صوت عند العثور على مباراة",
 		alertTest: "تجربة",
 		matchFoundTitle: "تم العثور على خصم!",

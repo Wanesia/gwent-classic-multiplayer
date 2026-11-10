@@ -32,7 +32,6 @@ I18N.register("hu", {
 		searchNoOne: "Jelenleg nincs itt senki. Várj tovább, hívj meg egy barátot egy kóddal, vagy játssz a gép ellen.",
 		presenceOnline: "Online: {n}",
 		presenceWaiting: "Valaki ellenfelet keres",
-		quickWaiting: "Valaki vár: azonnali meccs",
 		alertSound: "Hang lejátszása, ha meccs található",
 		alertTest: "Teszt",
 		matchFoundTitle: "Ellenfél megtalálva!",

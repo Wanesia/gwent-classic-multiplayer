@@ -1,7 +1,6 @@
 // Who is around, as players see it: the online count on every lobby screen,
 // "someone is looking for an opponent" on the main menu and Vs Player screen
-// only (clicking it pairs at once), the Quick Match option lighting up, and
-// reloads not adding players.
+// only (clicking it pairs at once), and reloads not adding players.
 const { chromium } = require('playwright-core');
 const WebSocket = require('ws');
 
@@ -61,9 +60,6 @@ async function waitingPlayer() {
 		const el = document.getElementById('menu-presence');
 		return Presence.counts.online < 2 ? el.classList.contains('hide') : /^Online: \d+$/.test(el.querySelector('.presence-count').textContent);
 	}), 'online count hidden when alone, "Online: n" otherwise');
-	await A.click('#split-player');
-	assert(await A.evaluate(() => !document.getElementById('lobby-quick-button').classList.contains('someone-waiting'))
-		&& await A.isVisible('#lobby-quick-button .quick-desc') && await A.isHidden('#lobby-quick-button .quick-waiting'), 'nobody waiting: Quick Match as usual');
 	assert(beats.length && beats[0].type === 'visit' && !('state' in beats[0]) && !('id' in beats[0]), 'visit sends no ID or screen');
 
 	// Reloading doesn't add players: the old page takes its heartbeat back
@@ -97,11 +93,9 @@ async function waitingPlayer() {
 		.every(e => getComputedStyle(e).cursor === 'pointer')), 'the whole button shows the pointer cursor, text and "Play Now" included');
 
 	await B.click('#split-player');
-	await waitFor(B, () => document.getElementById('lobby-quick-button').classList.contains('someone-waiting'), 'B: Quick Match highlighted on the Vs Player screen');
-	assert(await B.isHidden('#lobby-quick-button .quick-desc') && await B.isVisible('#lobby-quick-button .quick-waiting')
-		&& (await B.textContent('#lobby-quick-button .quick-waiting')).includes('instant match'), 'Quick Match says "instant match" instead of "vs Random Player"');
-
+	await waitFor(B, () => Presence.view === 'lobby-mp', 'B: on the Vs Player screen');
 	assert(await B.isVisible('#menu-presence .presence-waiting') && await B.isVisible('#menu-presence .presence-count'), 'Vs Player screen: online count and "looking for an opponent" too');
+	assert((await B.textContent('#lobby-quick-button')).includes('vs Random Player'), 'the Quick Match option itself stays as usual');
 
 	// Waiting for a friend: the count stays, the offer goes
 	await B.click('#lobby-create-button');

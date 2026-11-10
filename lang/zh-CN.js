@@ -32,7 +32,6 @@ I18N.register("zh-CN", {
 		searchNoOne: "现在没有人。继续等待、用代码邀请好友，或对战电脑。",
 		presenceOnline: "在线：{n}",
 		presenceWaiting: "有人正在寻找对手",
-		quickWaiting: "有人在等待：立即开局",
 		alertSound: "找到对局时播放提示音",
 		alertTest: "试听",
 		matchFoundTitle: "找到对手！",

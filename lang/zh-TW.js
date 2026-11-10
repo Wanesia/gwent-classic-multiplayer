@@ -32,7 +32,6 @@ I18N.register("zh-TW", {
 		searchNoOne: "現在沒有人。繼續等待、用代碼邀請好友，或對戰電腦。",
 		presenceOnline: "線上：{n}",
 		presenceWaiting: "有人正在尋找對手",
-		quickWaiting: "有人在等待：立即開局",
 		alertSound: "找到對局時播放提示音",
 		alertTest: "試聽",
 		matchFoundTitle: "找到對手！",

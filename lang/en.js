@@ -33,7 +33,6 @@ I18N.register("en", {
 		searchNoOne: "No one's around right now. Keep waiting, invite a friend with a code, or play vs Computer.",
 		presenceOnline: "Online: {n}",
 		presenceWaiting: "Someone is looking for an opponent",
-		quickWaiting: "Someone is waiting: instant match",
 		alertSound: "Play a sound when a match is found",
 		alertTest: "Test",
 		matchFoundTitle: "Opponent found!",

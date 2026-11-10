@@ -33,7 +33,6 @@ I18N.register("ru", {
 		searchNoOne: "Сейчас никого нет. Подождите, пригласите друга по коду или сыграйте против компьютера.",
 		presenceOnline: "В сети: {n}",
 		presenceWaiting: "Кто-то ищет соперника",
-		quickWaiting: "Кто-то ждёт: игра сразу",
 		alertSound: "Звуковой сигнал, когда матч найден",
 		alertTest: "Проверить",
 		matchFoundTitle: "Соперник найден!",

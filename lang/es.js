@@ -32,7 +32,6 @@ I18N.register("es", {
 		searchNoOne: "Ahora mismo no hay nadie. Sigue esperando, invita a un amigo con un código o juega contra la máquina.",
 		presenceOnline: "En línea: {n}",
 		presenceWaiting: "Alguien busca un rival",
-		quickWaiting: "Alguien está esperando: partida al instante",
 		alertSound: "Reproducir un sonido al encontrar partida",
 		alertTest: "Probar",
 		matchFoundTitle: "¡Rival encontrado!",

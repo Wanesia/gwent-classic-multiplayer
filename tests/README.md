@@ -27,7 +27,7 @@ node e2e-muster.js                                   # muster: called cards high
 node e2e-redraw.js                                   # redraw: cards sent back go under the deck, can't come straight back
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
 node e2e-maintenance.js                              # restart notice (make maintenance): players in a room and on the menu see the countdown, cancel, removed on restart (own relay on :8767)
-node e2e-presence.js                                 # who's around: online count and "someone is looking for an opponent" on the menu, click pairs at once, Quick Match lit up
+node e2e-presence.js                                 # who's around: online count and "someone is looking for an opponent" on the menu, click pairs at once
 node e2e-muster-online.js                            # online muster: same board, hand, deck order and checksums on both clients
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit
 node e2e-afk.js                                      # AFK turns: both players told, the waiting one passes the round for the AFK one

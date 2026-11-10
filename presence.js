@@ -10,9 +10,6 @@ var Presence = {
 	elem: document.getElementById("menu-presence"),
 	count: document.querySelector("#menu-presence .presence-count"),
 	waitingButton: document.querySelector("#menu-presence .presence-waiting"),
-	quickOption: document.getElementById("lobby-quick-button"),
-	quickDesc: document.querySelector("#lobby-quick-button .quick-desc"),
-	quickWaiting: document.querySelector("#lobby-quick-button .quick-waiting"),
 	counts: null, // {online, waiting}, null when unknown
 	view: null, // id of the lobby screen shown
 
@@ -62,9 +59,6 @@ var Presence = {
 		if (c)
 			this.count.textContent = I18N.t("lobby.presenceOnline", { n: c.online });
 		this.waitingButton.classList.toggle("hide", !offer);
-		this.quickOption.classList.toggle("someone-waiting", offer);
-		this.quickDesc.classList.toggle("hide", offer);
-		this.quickWaiting.classList.toggle("hide", !offer);
 	},
 };
 

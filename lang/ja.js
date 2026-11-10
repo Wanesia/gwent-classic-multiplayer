@@ -32,7 +32,6 @@ I18N.register("ja", {
 		searchNoOne: "今は誰もいません。待ち続けるか、コードで友達を招待するか、コンピューターと対戦してください。",
 		presenceOnline: "オンライン：{n}",
 		presenceWaiting: "対戦相手を探しているプレイヤーがいます",
-		quickWaiting: "待機中のプレイヤーあり：すぐに対戦",
 		alertSound: "マッチが見つかったら音を鳴らす",
 		alertTest: "テスト",
 		matchFoundTitle: "対戦相手が見つかりました！",

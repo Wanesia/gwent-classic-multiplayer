@@ -32,7 +32,6 @@ I18N.register("cs", {
 		searchNoOne: "Momentálně tu nikdo není. Vyčkejte, pozvěte přítele pomocí kódu nebo hrajte proti počítači.",
 		presenceOnline: "Online: {n}",
 		presenceWaiting: "Někdo hledá soupeře",
-		quickWaiting: "Někdo čeká: hra hned",
 		alertSound: "Přehrát zvuk při nalezení zápasu",
 		alertTest: "Vyzkoušet",
 		matchFoundTitle: "Soupeř nalezen!",

@@ -32,7 +32,6 @@ I18N.register("ko", {
 		searchNoOne: "지금은 아무도 없습니다. 계속 기다리거나, 코드로 친구를 초대하거나, 컴퓨터와 대전하세요.",
 		presenceOnline: "온라인: {n}",
 		presenceWaiting: "상대를 찾는 플레이어가 있습니다",
-		quickWaiting: "대기 중인 플레이어 있음: 바로 대전",
 		alertSound: "매치를 찾으면 소리 재생",
 		alertTest: "테스트",
 		matchFoundTitle: "상대를 찾았습니다!",

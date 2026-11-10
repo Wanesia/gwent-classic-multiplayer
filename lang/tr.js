@@ -32,7 +32,6 @@ I18N.register("tr", {
 		searchNoOne: "Şu anda kimse yok. Beklemeye devam et, bir kodla arkadaşını davet et ya da bilgisayara karşı oyna.",
 		presenceOnline: "Çevrimiçi: {n}",
 		presenceWaiting: "Biri rakip arıyor",
-		quickWaiting: "Biri bekliyor: hemen maç",
 		alertSound: "Maç bulunduğunda ses çal",
 		alertTest: "Dene",
 		matchFoundTitle: "Rakip bulundu!",
