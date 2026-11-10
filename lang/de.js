@@ -410,5 +410,9 @@ I18N.register("de", {
 		pickDeck: "Karte aus dem Deck",
 		pickGrave: "Karte vom Ablagestapel",
 		pickGraveOp: "Karte vom Ablagestapel des Gegners"
+	},
+	maintenance: {
+		soon: "Serverneustart in {min} Min. Online-Partien werden abgebrochen.",
+		now: "Der Server startet neu. Online-Spiele sind gleich wieder da."
 	}
 });

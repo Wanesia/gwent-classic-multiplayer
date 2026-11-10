@@ -26,6 +26,7 @@ node e2e-deck-tabs.js                                # the game in several tabs:
 node e2e-muster.js                                   # muster: called cards highlighted, fly from their own slot, one at a time
 node e2e-redraw.js                                   # redraw: cards sent back go under the deck, can't come straight back
 node e2e-multiplayer.js                              # full online match, checksums, disconnect
+node e2e-maintenance.js                              # restart notice (make maintenance): players in a room and on the menu see the countdown, cancel, removed on restart (own relay on :8767)
 node e2e-presence.js                                 # who's around: online count and "someone is looking for an opponent" on the menu, click pairs at once, Quick Match lit up
 node e2e-muster-online.js                            # online muster: same board, hand, deck order and checksums on both clients
 node e2e-rematch.js                                  # post-match re-ready + mid-game exit

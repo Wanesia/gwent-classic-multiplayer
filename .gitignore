@@ -4,3 +4,4 @@ tests/package-lock.json
 server/package-lock.json
 server/stats.json
 server/stats.json.*
+server/maintenance.json

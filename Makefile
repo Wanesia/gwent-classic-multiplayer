@@ -1,7 +1,7 @@
 PM2_APP := gwent-server
 PORT := 8765
 
-.PHONY: stats stats-week stats-month stats-all players logs online
+.PHONY: stats stats-week stats-month stats-all players logs online maintenance maintenance-off
 
 stats:
 	GWENT_APP=$(PM2_APP) bash scripts/gwent-stats.sh
@@ -24,3 +24,12 @@ logs:
 
 online:
 	@echo "$$(ss -Htn state established '( sport = :$(PORT) )' | wc -l) open connections"
+
+MIN ?= 10
+maintenance:
+	@node -e 'require("fs").writeFileSync("server/maintenance.json", JSON.stringify({ at: Date.now() + $(MIN) * 60000 }) + "\n")'
+	@echo "Players told: restart in $(MIN) min (at $$(date -d '+$(MIN) min' +%H:%M)). Cancel with: make maintenance-off"
+
+maintenance-off:
+	@rm -f server/maintenance.json
+	@echo "Restart notice cancelled"

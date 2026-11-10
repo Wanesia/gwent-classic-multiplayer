@@ -412,5 +412,9 @@ I18N.register("es-MX", {
 		pickDeck: "Carta del mazo",
 		pickGrave: "Carta de los descartes",
 		pickGraveOp: "Carta de los descartes del rival"
+	},
+	maintenance: {
+		soon: "El servidor se reinicia en {min} min. Las partidas en línea se interrumpirán.",
+		now: "El servidor se está reiniciando. El juego en línea regresa en un momento."
 	}
 });

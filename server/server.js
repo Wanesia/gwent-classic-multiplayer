@@ -112,7 +112,7 @@ const wss = new WebSocketServer({
 function log(event, fields = {}) {
 	const parts = Object.entries(fields).map(([k, v]) => `${k}=${v}`).join("  ");
 	console.log(`[${new Date().toISOString()}] ${event.padEnd(14)} ${parts}`);
-	if (event !== "server-start")
+	if (event !== "server-start" && event !== "maintenance")
 		countEvent(fields.mode ? `${event}-${fields.mode}` : event);
 }
 
@@ -253,10 +253,52 @@ function presence() {
 		else if (room.quickmatch && room.host.readyState === room.host.OPEN)
 			waiting++;
 	}
-	return {
+	const counts = {
 		online: Math.max(heartbeats.length, games * 2 + waiting), // relay counts are live, heartbeats lag
 		waiting: waiting > 0,
 	};
+	if (maintenanceAt !== null)
+		counts.maintenanceIn = maintenanceIn();
+	return counts;
+}
+
+// Restart notice. `make maintenance MIN=10` writes MAINTENANCE_FILE with the
+// time of the restart ({"at": ms since epoch}); players are told how long is
+// left: the lobby through /presence, everyone connected through a
+// "maintenance" frame (old clients ignore both). Stopping the server removes
+// the file, so the restart it announced doesn't announce itself again; a time
+// from before this process started is a leftover (a crash skips the removal).
+const MAINTENANCE_FILE = process.env.MAINTENANCE_FILE || path.join(__dirname, "maintenance.json");
+const MAINTENANCE_CHECK_MS = 5000;
+const processStartedAt = Date.now();
+let maintenanceAt = null;
+
+function readMaintenance() {
+	try {
+		const at = JSON.parse(fs.readFileSync(MAINTENANCE_FILE, "utf8")).at;
+		return Number.isFinite(at) && at > processStartedAt ? at : null;
+	} catch (e) {
+		return null; // no file: no restart planned
+	}
+}
+
+// Milliseconds until the restart; 0 once it is due. Relative, so a player's
+// wrong clock doesn't matter.
+function maintenanceIn() {
+	return Math.max(0, maintenanceAt - Date.now());
+}
+
+function checkMaintenance() {
+	const at = readMaintenance();
+	if (at === maintenanceAt)
+		return;
+	maintenanceAt = at;
+	if (at === null)
+		log("maintenance", { cancelled: true });
+	else
+		log("maintenance", { at: new Date(at).toISOString(), clients: wss.clients.size });
+	for (const ws of wss.clients)
+		send(ws, { type: "maintenance", in: at === null ? null : maintenanceIn() });
 }
 
 function sampleRelay() {
@@ -360,6 +402,8 @@ wss.on("connection", (ws, req) => {
 	ws.tokens = MSG_BURST;
 	ws.lastRefill = Date.now();
 	ws.on("pong", () => ws.isAlive = true);
+	if (maintenanceAt !== null)
+		send(ws, { type: "maintenance", in: maintenanceIn() });
 	// Oversized or invalid-UTF-8 frames surface as 'error'; unhandled, it
 	// would crash the whole process.
 	ws.on("error", () => ws.terminate());
@@ -488,11 +532,15 @@ setInterval(() => {
 	saveStats();
 }, STATS_SAVE_MS);
 
+setInterval(checkMaintenance, MAINTENANCE_CHECK_MS);
+
 // pm2 stops the process with SIGINT
 for (const signal of ["SIGINT", "SIGTERM"])
 	process.on(signal, () => {
 		saveStats();
+		fs.rmSync(MAINTENANCE_FILE, { force: true });
 		process.exit(0);
 	});
 
+checkMaintenance();
 server.listen(PORT, "127.0.0.1", () => log("server-start", { port: PORT }));

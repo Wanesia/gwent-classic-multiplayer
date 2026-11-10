@@ -410,5 +410,9 @@ I18N.register("tr", {
 		pickDeck: "Desteden kart",
 		pickGrave: "İskartelerden kart",
 		pickGraveOp: "Rakibin iskartelerinden kart"
+	},
+	maintenance: {
+		soon: "Sunucu {min} dk sonra yeniden başlatılacak. Çevrimiçi maçlar yarıda kalacak.",
+		now: "Sunucu yeniden başlatılıyor. Çevrimiçi oyun birazdan geri dönecek."
 	}
 });

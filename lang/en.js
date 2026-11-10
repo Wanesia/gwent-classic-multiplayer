@@ -356,5 +356,9 @@ I18N.register("en", {
 		pickDeck: "Card from the deck",
 		pickGrave: "Card from the discard pile",
 		pickGraveOp: "Card from the opponent's discard pile"
+	},
+	maintenance: {
+		soon: "Server restart in {min} min. Online matches will be cut off.",
+		now: "The server is restarting. Online play will be back shortly."
 	}
 });

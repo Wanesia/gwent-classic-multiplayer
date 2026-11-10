@@ -410,5 +410,9 @@ I18N.register("it", {
 		pickDeck: "Carta dal mazzo",
 		pickGrave: "Carta dagli scarti",
 		pickGraveOp: "Carta dagli scarti dell'avversario"
+	},
+	maintenance: {
+		soon: "Riavvio del server tra {min} min. Le partite online verranno interrotte.",
+		now: "Il server si sta riavviando. Il gioco online tornerà a breve."
 	}
 });

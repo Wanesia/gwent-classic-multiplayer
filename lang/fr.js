@@ -410,5 +410,9 @@ I18N.register("fr", {
 		pickDeck: "Carte du deck",
 		pickGrave: "Carte de la défausse",
 		pickGraveOp: "Carte de la défausse adverse"
+	},
+	maintenance: {
+		soon: "Redémarrage du serveur dans {min} min. Les parties en ligne seront interrompues.",
+		now: "Le serveur redémarre. Le jeu en ligne revient dans un instant."
 	}
 });

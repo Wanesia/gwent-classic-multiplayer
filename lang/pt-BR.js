@@ -410,5 +410,9 @@ I18N.register("pt-BR", {
 		pickDeck: "Carta do baralho",
 		pickGrave: "Carta dos descartes",
 		pickGraveOp: "Carta dos descartes do oponente"
+	},
+	maintenance: {
+		soon: "O servidor reinicia em {min} min. Partidas online serão interrompidas.",
+		now: "O servidor está reiniciando. O jogo online volta em instantes."
 	}
 });

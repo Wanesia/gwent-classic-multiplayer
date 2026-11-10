@@ -410,5 +410,9 @@ I18N.register("hu", {
 		pickDeck: "Kártya a pakliból",
 		pickGrave: "Kártya a dobópakliból",
 		pickGraveOp: "Kártya az ellenfél dobópaklijából"
+	},
+	maintenance: {
+		soon: "Szerver-újraindítás {min} perc múlva. Az online meccsek megszakadnak.",
+		now: "A szerver újraindul. Az online játék hamarosan visszatér."
 	}
 });

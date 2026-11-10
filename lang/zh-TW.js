@@ -410,5 +410,9 @@ I18N.register("zh-TW", {
 		pickDeck: "來自牌組的卡牌",
 		pickGrave: "來自棄牌堆的卡牌",
 		pickGraveOp: "來自對手棄牌堆的卡牌"
+	},
+	maintenance: {
+		soon: "伺服器將在 {min} 分鐘後重新啟動，線上對局將被中斷。",
+		now: "伺服器正在重新啟動，線上遊戲馬上恢復。"
 	}
 });

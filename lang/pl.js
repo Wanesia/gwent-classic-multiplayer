@@ -410,5 +410,9 @@ I18N.register("pl", {
 		pickDeck: "Karta z talii",
 		pickGrave: "Karta ze stosu odrzuconych",
 		pickGraveOp: "Karta ze stosu odrzuconych przeciwnika"
+	},
+	maintenance: {
+		soon: "Restart serwera za {min} min. Mecze online zostaną przerwane.",
+		now: "Serwer jest restartowany. Gra online wkrótce wróci."
 	}
 });

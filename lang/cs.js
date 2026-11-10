@@ -410,5 +410,9 @@ I18N.register("cs", {
 		pickDeck: "Karta z balíčku",
 		pickGrave: "Karta z odhazovacího balíčku",
 		pickGraveOp: "Karta z odhazovacího balíčku soupeře"
+	},
+	maintenance: {
+		soon: "Restart serveru za {min} min. Online zápasy budou přerušeny.",
+		now: "Server se restartuje. Online hra bude brzy zpět."
 	}
 });
