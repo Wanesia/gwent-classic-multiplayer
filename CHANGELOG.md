@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.1 (2026-11-13)
+
+More reliable music.
+
+### Fixes
+- **Music:** for some players the music didn't play. YouTube asked the hidden music player to "sign in to confirm you're not a bot", so you heard nothing. The music now loads from youtube.com instead of youtube-nocookie.com, which is where that message came from.
+
+### Privacy
+- **Music:** nothing is loaded from YouTube until you turn music on, as before. With music on, YouTube can now recognise you if you're signed in to YouTube in the same browser, as on any site with a YouTube video.
+
 ## 1.4.0 (2026-11-10)
 
 See how many players are around before you look for a match, and get a warning before the server restarts. Also a fix for decks when the game is open in more than one tab.
