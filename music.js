@@ -114,7 +114,6 @@ var Music = {
 		if (this.player)
 			return;
 		this.player = new YT.Player("youtube", {
-			host: "https://www.youtube-nocookie.com",
 			videoId: this.VIDEO,
 			playerVars: { "autoplay": Settings.music.isEnabled() ? 1 : 0, "controls": 0, "loop": 1, "playlist": this.VIDEO, "rel": 0, "version": 3, "modestbranding": 1 },
 			events: { "onReady": () => this.apply(), "onStateChange": () => this.render() }
